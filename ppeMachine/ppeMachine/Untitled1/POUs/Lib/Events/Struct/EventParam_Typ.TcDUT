@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EventParam_Typ" Id="{60d16595-6999-04a4-042b-97729d5de08e}">
+    <Declaration><![CDATA[TYPE EventParam_Typ :
+STRUCT
+	MotorID:eMotorID;
+	SensorID:eSensorID;
+	VendorNameID:eVendorNameID;
+	VendorErrorCode:DINT;
+	IntParam1:DINT;
+	IntParam2:DINT;
+	RealParam1:REAL;	
+	RealParam2:REAL;
+	StringParam:STRING[64];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

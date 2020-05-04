@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CH_ErrorReport_typ" Id="{ebf31a0f-0d86-0ef7-0d43-1c7b9b304bf4}">
+    <Declaration><![CDATA[TYPE CH_ErrorReport_typ :
+	STRUCT
+		MessageID 			: DINT;
+		FailureType 		: DINT;
+		FailureSubType 		: DINT;
+		FailedUnitID 		: DINT;
+		Severity 			: DINT;
+		ErrorCode 			: DINT;
+		AlarmID 			: UINT;
+		SheetID 			: UDINT;
+		RefID 				: UDINT;
+		ActualValue 		: UINT;
+		ViolatedThreshold 	: UINT;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

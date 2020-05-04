@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="fnLogStatusToString" Id="{350ca34a-9584-0096-1d05-259dd62518f4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION fnLogStatusToString : STRING
+VAR_INPUT
+	
+	eStatusType:	E_LogStatusReport_Type;
+	LogData:		INT;
+END_VAR
+VAR		
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF eStatusType = E_LogStatusReport_Type.General THEN
+	CASE LogData OF 
+		E_SubSystemGeneralStatus.CommInit:
+			fnLogStatusToString:=	'General - CommInit = 0';
+		E_SubSystemGeneralStatus.PowerDisabled: 
+			fnLogStatusToString:=	'General - PowerDisabled = 1';	
+		E_SubSystemGeneralStatus.Off_DeEnergized:
+			fnLogStatusToString:=	'General - Off_DeEnergized = 2';		 	
+		E_SubSystemGeneralStatus.MechinitPassed: 
+			fnLogStatusToString:=	'General - MechinitPassed = 3';			
+		E_SubSystemGeneralStatus.Ready: 
+			fnLogStatusToString:=	'General - Ready = 4';	
+		E_SubSystemGeneralStatus.Printing: 
+			fnLogStatusToString:=	'General - Printing = 5';		
+		E_SubSystemGeneralStatus.FaultDisabled: 
+			fnLogStatusToString:=	'General - FaultDisabled = 80';				
+		E_SubSystemGeneralStatus.BusyStateTransition:  
+			fnLogStatusToString:=	'General - BusyStateTransition = 90';
+		E_SubSystemGeneralStatus.NotActive:  
+			fnLogStatusToString:=	'General - BusyStateTransition = 100';
+	END_CASE
+	
+ELSIF eStatusType = E_LogStatusReport_Type.Speed THEN	
+	CASE LogData OF 
+		E_SpeedStatus.IDLER:
+			fnLogStatusToString:=	'Speed - NO_POWER_IDLER = 0';				
+		E_SpeedStatus.STANDSTILL: 
+			fnLogStatusToString:=	'Speed - STANDSTILL_SPEED_STATUS = 1';		
+		E_SpeedStatus.AT_SPEED:	
+			fnLogStatusToString:=	'Speed - AT_SPEED = 2';
+		E_SpeedStatus.SYNCED_TO_MASTER :	
+			fnLogStatusToString:=	'Speed - SYNCED_TO_MASTER = 3';
+	END_CASE
+
+ELSIF eStatusType = E_LogStatusReport_Type.Eng THEN	
+	CASE LogData OF 		
+		E_SubSysEngTarget.NoCMD:
+			fnLogStatusToString:=	'Engage - NoCMD = 0';				
+		E_SubSysEngTarget.DISENGAGE: 
+			fnLogStatusToString:=	'Engage - DISENGAGE = 1';		
+		E_SubSysEngTarget.ENGAGE:
+			fnLogStatusToString:=	'Engage - ENGAGE = 2';
+		E_SubSysEngTarget.SEMI_ENG:
+			fnLogStatusToString:=	'Engage - SEMI_ENG = 3';
+		
+	END_CASE
+ELSIF eStatusType = E_LogStatusReport_Type.EFS THEN	
+	CASE LogData OF 
+		E_Subsystem_EFS_Status.INACTIVE:
+			fnLogStatusToString:=	'EFS - INACTIVE = 0';
+		E_Subsystem_EFS_Status.PRE_CLEAN_ACTIVE:
+			fnLogStatusToString:=	'EFS - PRE_CLEAN_ACTIVE = 1';
+		E_Subsystem_EFS_Status.CLEAN_ACTIVE:
+			fnLogStatusToString:=	'EFS - CLEAN_ACTIVE = 2';
+ 	END_CASE
+				
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="fnLogStatusToString">
+      <LineId Id="147" Count="27" />
+      <LineId Id="181" Count="28" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

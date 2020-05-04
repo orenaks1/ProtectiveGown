@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Tc2_EtherCAT_Error_typ" Id="{90066b92-a65a-0812-06d1-2b16b93a1276}">
+    <Declaration><![CDATA[TYPE Tc2_EtherCAT_Error_typ :
+	STRUCT
+		ErrorID : UDINT ;
+		ErrorText : STRING[2048];
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

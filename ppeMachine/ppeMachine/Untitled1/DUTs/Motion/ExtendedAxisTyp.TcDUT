@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ExtendedAxisTyp" Id="{2a048db5-e06e-06b2-1721-2077e8d43366}">
+    <Declaration><![CDATA[TYPE ExtendedAxisTyp  :
+	STRUCT
+		Basic_axis 	: Basic_axis_typ;
+		MultiAxis 	: MultiAxis_typ;
+		CyclicAxis	: CyclicAxis_typ;
+		ParIDAccess	: ParIDAccess_Typ;
+		VelocityCtrl: VelocityCtrl_typ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="enumFailReportFailureType" Id="{e3f81da4-aa4e-04e5-124b-bb4731bfe37e}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE enumFailReportFailureType :
+(
+	NoFailure 			  :=0,
+	MotorFailure 		  :=1,
+	ControlFailure 		  :=2,
+	CalibrationFailure	  :=3,
+	PowerFailure		  :=4,
+	FunctionalFailureHigh :=5,
+	FunctionalFailureLow  :=6,
+	ModuleFailure 		  :=8,
+	GeneralDriveError	  :=9
+);
+END_TYPE
+
+
+
+
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

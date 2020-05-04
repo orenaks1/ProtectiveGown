@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Status_Typ" Id="{d3f865a8-88db-4823-a365-8f3c93512b7b}">
+    <Declaration><![CDATA[TYPE Status_Typ :
+STRUCT
+	SessionCounter:UINT;
+	UW_1_DancerFull:BOOL;
+	UW_2_DancerFull:BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

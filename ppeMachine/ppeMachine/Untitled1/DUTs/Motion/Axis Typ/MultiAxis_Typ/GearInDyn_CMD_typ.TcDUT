@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearInDyn_CMD_typ" Id="{d37e81d7-8644-0e0c-3b13-b58db0515353}">
+    <Declaration><![CDATA[TYPE GearInDyn_CMD_typ :
+STRUCT
+	StartSlave : BOOL ;
+	DisengageSlave : BOOL ;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

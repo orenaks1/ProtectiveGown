@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Tc2_EtherCAT_Parameter_axis_typ" Id="{7e2af705-fa57-02de-29d5-1d74158ce8cd}">
+    <Declaration><![CDATA[TYPE Tc2_EtherCAT_Parameter_axis_typ : 	
+	STRUCT  (*parameter structure*)
+		EcCoeSdoWrite		: EcCoeSdoWrite_Param_typ ;
+		EcCoeSdoRead		: EcCoeSdoRead_Param_typ ;
+		EcSoeRead			: EcSoeRead_Param_typ ;
+		EcSoeWrite			: EcSoeWrite_Param_typ ;
+	END_STRUCT
+END_TYPE
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

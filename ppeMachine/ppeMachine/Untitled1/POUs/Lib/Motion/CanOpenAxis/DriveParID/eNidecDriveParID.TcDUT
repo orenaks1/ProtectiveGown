@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="eNidecDriveParID" Id="{386de353-0c59-031b-3528-d4f779e2f6ab}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE eNidecDriveParID :
+(
+	Menue03 	:= 16#2003 ,		
+	Menue04 	:= 16#2004 ,	
+	Menue05 	:= 16#2005 ,
+	Menue39 	:= 16#2027 ,
+	PCTRL_Kv := 16#6060 ,
+	SCTRL_Kv := 16#6061 ,
+	SCTRL_Tn := 16#6062 ,		
+	Spare := 10
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

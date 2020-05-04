@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="enumFailReportMotorFailures" Id="{62aaaa3e-9fab-07f9-30e0-b4aa1792b782}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE enumFailReportMotorFailures :
+(
+	PositionError 			:=0,
+	SpeedError				:=1,
+	HomeNotFound	 		:=2,
+	OverCurrent				:=3,
+	OverTemperature			:=4,
+	FeedbackError		 	:=5,
+	GeneralDriveError 		:=6
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

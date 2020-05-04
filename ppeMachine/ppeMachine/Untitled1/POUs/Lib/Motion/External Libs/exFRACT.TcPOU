@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="exFRACT" Id="{ef7862bc-a039-4d09-8464-8d9dfe807535}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION exFRACT : REAL
+VAR_INPUT
+	x: REAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF ABS(x) < 2.0E9 THEN
+	exFRACT := x - DINT_TO_REAL(exD_TRUNC(x));
+ELSE
+	exFRACT := 0.0;
+END_IF;
+
+(* revision history
+hm	4. aug 2006	rev 1.0
+	original version
+
+hm	11. mar 2008	rev 1.1
+	added dint_to_real for compatibility reasons
+	now returns 0 for number > 2e9
+	changed input to x
+
+hm	21. mar. 2008	rev 1.2
+	use D_trunc instead of TRUNC for compatibility reasons
+
+hm	10. mar. 2009	rev 1.3
+	real constants updated to new systax using dot
+
+*)]]></ST>
+    </Implementation>
+    <LineIds Name="exFRACT">
+      <LineId Id="3" Count="20" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="UDPClientHandler_typ" Id="{0babf649-eff2-0f28-37fe-faf0122f8f79}">
+    <Declaration><![CDATA[TYPE UDPClientHandler_typ :
+STRUCT
+		status : UDPClientOutputStatus_typ;
+		no_data_received_count : UINT; (*Counts up if no data are received*)
+		Udp_GetLocalAmsNetId: FB_GetLocalAmsNetId;
+		UdpOpen_0 : FB_SocketUdpCreate; (*TS6310 | TwinCAT PLC Lib: TCP/IP*)
+		UdpSend_0 : FB_SocketUdpSendTo; (*TS6310 | TwinCAT PLC Lib: TCP/IP*)
+		SocketCloseAll_0 : FB_SocketCloseAll; (*TS6310 | TwinCAT PLC Lib: TCP/IP*)
+		seq_number : UINT;
+		clientId : UINT;
+		InitOnCyclic : BOOL := FALSE;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearInDyn_Statuses_typ" Id="{87a45b91-23bd-015d-1cc2-f4f1f18ef0c0}">
+    <Declaration><![CDATA[TYPE GearInDyn_Statuses_typ :
+	STRUCT
+		InGear 			: 		BOOL;
+		Busy 			: 		BOOL; 
+		Active 			: 		BOOL; 
+		CommandAborted 	: 		BOOL;
+
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Enum_INV_Ctrl" Id="{77645063-50da-4dbb-94a9-518ca6e34aec}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE Enum_INV_Ctrl :
+(
+	ENV_Disable := 0,
+	ENV_Run :=4,
+	ENV_GetReady := 6,
+	ENV_Switch_on := 7,
+	ENV_Enable_operation := 15,
+	ENV_Trip := 100,
+	ENV_Reset_Error := 128
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

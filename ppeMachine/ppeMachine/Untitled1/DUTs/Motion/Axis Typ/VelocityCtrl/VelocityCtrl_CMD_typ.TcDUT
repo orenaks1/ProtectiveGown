@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="VelocityCtrl_CMD_typ" Id="{e6964722-b4fa-4007-823a-afa2958c60ff}">
+    <Declaration><![CDATA[TYPE VelocityCtrl_CMD_typ :
+STRUCT
+		
+
+		Enable       : BOOL;		// Enable to exit set enable false		 
+		InitSctrl    : BOOL;		// init pid
+		Stop         : BOOL;		// Stop motor. stay in velocity control	
+		
+		//
+	
+		
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

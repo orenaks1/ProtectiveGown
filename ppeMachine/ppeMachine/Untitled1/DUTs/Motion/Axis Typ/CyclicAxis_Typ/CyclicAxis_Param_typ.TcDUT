@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CyclicAxis_Param_typ" Id="{a28676e0-5f96-021b-10e3-a80229e8d70e}">
+    <Declaration><![CDATA[TYPE CyclicAxis_Param_typ :
+STRUCT
+	
+	ThreadName		: STRING[20];
+	CyclicPos		: CyclicPos_Param_typ;
+    CyclicVel		: CyclicVel_Param_typ;   
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

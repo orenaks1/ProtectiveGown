@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ParIDAccess_Error_typ" Id="{231078ae-bf36-084b-1a2b-4e872f306b22}">
+    <Declaration><![CDATA[TYPE ParIDAccess_Error_typ :
+	STRUCT
+		ErrorID : UDINT ;
+		ErrorText : STRING[2048];(*ARRAY[0..3]OF STRING[79]*) (*Error Text*)
+		ErrorEntry: Eh_ErrorEntry_typ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EcSoeWrite_Status_typ" Id="{36767477-7714-0348-0130-c2576fedfa72}">
+    <Declaration><![CDATA[TYPE EcSoeWrite_Status_typ :
+	STRUCT
+		bBusy           : BOOL;
+        bError          : BOOL;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

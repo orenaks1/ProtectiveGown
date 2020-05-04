@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_PrgmBasic" Id="{4ef2c2df-db85-090b-3820-276f69240426}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PrgmBasic
+VAR_INPUT
+	
+	EventParameters:	EventParam_Typ;	
+	EventHeader:		EventHeader_Typ;	
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	LocalEventQ	: Queue;
+	LocalEventObj :LocalEvent_Typ;
+	GlobalEventObj :LocalEvent_Typ;
+	FlagSendEvent :BOOL;
+	FlagActive	:BOOL;
+	DummyFlowID: DINT := 0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Check if Q has elements
+IF THIS^.LocalEventQ.EntriesCount >0 AND (FlagSendEvent=FALSE)  THEN
+	THIS^.LocalEventQ.Dequeue(ADR(THIS^.GlobalEventObj),SIZEOF(LocalEvent_Typ));
+	FlagSendEvent:=TRUE;
+END_IF
+
+
+IF FlagSendEvent THEN
+	IF TestAndSet(THIS^.GlobalEventObj.rEvent.Busy) THEN // Check if the event FB is free
+		FlagActive:=TRUE;	
+	END_IF
+	IF FlagActive THEN
+//		THIS^.GlobalEventObj.rEvent(pFlowID:=ADR(GlobalEventObj.flowId),pEvPar:=ADR(GlobalEventObj.EventParameters)); //Call the event FB 
+		THIS^.GlobalEventObj.rEvent(pEvHeader:=ADR(GlobalEventObj.EventHeader),pEvPar:=ADR(GlobalEventObj.EventParameters)); //Call the event FB 
+		IF THIS^.GlobalEventObj.rEvent.Done THEN
+			THIS^.GlobalEventObj.rEvent.Done 	:=FALSE;
+			THIS^.GlobalEventObj.rEvent.Busy	:=FALSE;//Free FB
+			FlagActive:=FALSE;
+			FlagSendEvent:=FALSE;
+		END_IF
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <Method Name="mEventThrow" Id="{35a8d1a2-4b72-0540-2950-352ed3318e11}">
+      <Declaration><![CDATA[METHOD mEventThrow : BOOL
+VAR_INPUT
+	rEvent : REFERENCE TO EventHelper;
+//	pFlowID :POINTER TO DINT;
+	pEvHeader: POINTER TO EventHeader_Typ;
+	pEvPar: POINTER TO EventParam_Typ;
+
+
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (pEvHeader^.pFlowID = 0) THEN
+	pEvHeader^.pFlowID := ADR(DummyFlowID);
+END_IF
+//Dereference data
+LocalEventObj.EventParameters := pEvPar^;
+LocalEventObj.rEvent REF= rEvent;
+//LocalEventObj.flowId := pFlowID^;
+LocalEventObj.EventHeader := pEvHeader^;
+	
+LocalEventQ.Enqueue(ADR(THIS^.LocalEventObj),SIZEOF(THIS^.LocalEventObj));
+mEventThrow:=TRUE;
+	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_PrgmBasic">
+      <LineId Id="14" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="34" Count="2" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="23" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PrgmBasic.mEventThrow">
+      <LineId Id="37" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

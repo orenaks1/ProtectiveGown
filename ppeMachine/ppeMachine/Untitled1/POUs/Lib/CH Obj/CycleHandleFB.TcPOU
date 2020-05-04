@@ -1,0 +1,1250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="CycleHandleFB" Id="{7735e37c-79e6-0564-0a01-368493b6cfae}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK  CycleHandleFB 
+VAR_IN_OUT
+
+END_VAR
+
+VAR_INPUT
+	//pFlowID: 			POINTER TO DINT :=ADR(DummyFlowID) ;
+	SetEvent:			BOOL;
+		
+END_VAR
+VAR_OUTPUT
+	//Error 				: Error_Handler_typ;
+END_VAR
+VAR 
+	// ErrorReportStruct 	:  FailureReport_Typ;	
+
+	CMD					: Basic_cycle_CMD_typ ;
+	Monitoring			: Basic_cycle_Mon_typ ;
+	Status				: Basic_cycle_Status_typ ;
+	Parameter			: Basic_cycle_Param_typ ;
+	AtReady				: BOOL;
+	Delay 				: TON ;
+	StepOneShotTrig		: BOOL;
+	LogMsg_0 			: LogMsg ;
+	//fbClearFaultHandler_0 : fbClearFaultHandler;
+	ResetError 			: R_TRIG;
+	rTrigCycleDone 		: R_TRIG;
+	fTrigCycleRunning 	: F_TRIG;
+	rTrigCycleStart		: R_TRIG;	
+	Init_trig 			: R_TRIG;
+	ResetFaultTrig 		: R_TRIG;
+	ResetAllTrig 		: R_TRIG;
+	ResumeAllTrig 		: R_TRIG;
+	LastStepMessage 	: STRING[100];
+	LastStepNo 			: DINT;
+	LastSubStepNo		: DINT ;
+	TimeOutFault		: BOOL;
+	CycleTIME 			: TON;
+	StepTimerTOut 		: TON;
+	SubStepTimerTOut 	: TON;
+	ErrorAcknowledge 	: BOOL;
+	Triger1 			: Trigger ;
+	Triger2 			: Trigger ;
+	Triger3 			: Trigger ;
+	Triger4 			: Trigger ; 
+	Triger5 			: Trigger ; 
+
+	DummyFlowID			: DINT :=0;
+	//fbCHPrgmBasic 		: FB_PrgmBasic;
+
+	//rEvent : 			REFERENCE TO EventHelper;
+	//EventHeader:		EventHeader_Typ;
+	//EventParameters:	EventParam_Typ;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="CH_Logic" Id="{de92f3d3-5eef-08e7-150f-1053c8bfc5d4}">
+      <Declaration><![CDATA[METHOD PROTECTED CH_Logic : BOOL
+VAR_STAT
+	EventSent: 			BOOL;
+END_VAR
+VAR
+	stenNomForLog	: DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+	IF CMD.LogMsgInit THEN      
+		CMD.LogMsgInit := FALSE ;
+		fnLogMsgInit(ADR(LogMsg_0), Parameter.ThreadName, ADR(LogGlobalArray), ADR(Parameter.PosForLog));
+		LogMsg_0.Enable:= 		TRUE;
+		CMD.EnableStateLogging:= TRUE;
+		Parameter.ExternalLogType := LOG_INFO ;
+	END_IF
+
+	// Write state name for every change of Step Message
+	IF (Monitoring.StepMessage) <> (LastStepMessage) THEN
+		LastStepMessage := Monitoring.StepMessage ;
+		// fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName,', State = %d, FlowID = %d '),Monitoring.StepMessage),LastStepNo,pFlowID^,0);	
+		IF CMD.EnableStateLogging THEN
+			IF (Parameter.StepMessageIsForNewState) THEN
+				Parameter.StepMessageIsForNewState	:= FALSE;
+				stenNomForLog	:= StepNo;
+			ELSE
+				stenNomForLog	:= LastStepNo;
+			END_IF
+			fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(CONCAT(Parameter.CHName, ', '),Monitoring.StepMessage),', State = %d.'), stenNomForLog,0,0);	
+		END_IF
+	END_IF
+	
+	
+
+				
+	//Update Step Num for Visu
+	IF Triger1.EDGEPOS(Monitoring.LastStep <> Monitoring.StepNo) THEN 
+		Monitoring.Visu_StepNo := LastStepNo ;
+	ELSIF Status.CycleStuck AND NOT CMD.Pause THEN
+		Monitoring.Visu_StepNo := Monitoring.StepNo ;
+	ELSIF (Monitoring.StepNo = 0)THEN
+		Monitoring.Visu_StepNo := 0 ;
+	END_IF
+	
+	
+	rTrigCycleStart(CLK:= CMD.Start);	
+	IF rTrigCycleStart.Q AND Status.Running AND Monitoring.StepNo > 0 THEN
+		CMD.Start:=	FALSE;		
+		fnLogMsg(ADR(LogMsg_0), LOG_ERROR, CONCAT(Parameter.CHName ,' ,Start Command While Cycle Running was ignored, FlowID = %d'),0,0,0);
+	END_IF
+
+	
+	(*************************** Step By Step *****************************************)
+	// Step By Step Logic: If Step By Step bit set:
+	//							- We stay at the same step 
+	//							- We set the Pause flag
+	//							- We whait for Resume bit to set to continue
+	(********************************************************************)
+	IF CMD.StepByStep AND (CMD.Resume OR ResumeAllTrig.Q) THEN
+		CMD.Resume	:=FALSE;
+		CMD.Pause	:=FALSE;
+	END_IF
+
+	IF (CMD.StepByStep AND LastStepNo <> Monitoring.StepNo)THEN
+		CMD.Pause	:=TRUE;
+	END_IF
+
+	rTrigCycleDone(CLK := Status.Done);
+	IF CMD.StepByStep AND rTrigCycleDone.Q THEN
+		CMD.Pause	:=FALSE;
+	END_IF
+
+	(*************************** Step Time Out *****************************************)
+	// Time Out Logic: If timeout elapsed:
+	//							- We set the FAULT flag
+	//							- We set the Error_Number and Error_Text
+	//							- We set the Pause flag
+	(********************************************************************)
+	
+	//SubStep Stuck
+	Status.SubStepStuck :=  (Monitoring.SubStepNo = LastSubStepNo) AND (Status.Running) AND (Monitoring.SubStepNo <> 0);
+	LastSubStepNo := Monitoring.SubStepNo;
+	
+	SubStepTimerTOut.PT := Parameter.TimeOut ;
+	SubStepTimerTOut.IN := Status.SubStepStuck
+							AND NOT CMD.Pause
+							AND NOT CMD.DeactivateStepTimeOut ;
+					
+	SubStepTimerTOut();
+	Monitoring.SubStep_TimeOut := SubStepTimerTOut.ET ;
+
+	//Step Stuck
+	Status.CycleStuck:= (LastStepNo = Monitoring.StepNo)
+			 AND (Status.Running) 
+			 AND Monitoring.SubStepNo = 0 ;
+			
+	
+	StepTimerTOut.PT := Parameter.TimeOut ;
+	StepTimerTOut.IN := Status.CycleStuck
+							AND NOT CMD.Pause
+							AND NOT CMD.StepByStep
+							AND NOT CMD.DeactivateStepTimeOut ;					
+	StepTimerTOut();
+
+	Monitoring.Step_TimeOut := StepTimerTOut.ET ;
+	
+	
+	IF StepTimerTOut.Q OR SubStepTimerTOut.Q OR SetEvent THEN
+		SetEvent := FALSE ;
+		Status.Fault:=	TRUE;
+		TimeOutFault:=	TRUE;
+	END_IF
+	
+		 
+	IF Status.Fault THEN
+		CMD.Pause := TRUE;
+	END_IF
+
+	// Logging & Event
+	IF Triger2.EDGEPOS(Status.Fault) THEN
+		IF TimeOutFault THEN
+			IF 	Monitoring.Error_Text = Monitoring.StepMessage THEN
+				fnLogMsg(ADR(LogMsg_0),
+				 LOG_ERROR,
+					CONCAT(
+						CONCAT(
+							CONCAT(Parameter.CHName,', State = %d ,SubState = %d, FlowID = %d,'),
+																					Monitoring.Error_Text),
+																					' ,Fault - Time Out Elaspsed'),
+																						Monitoring.StepNo,
+																						Monitoring.SubStepNo,0);
+			ELSE
+				fnLogMsg(ADR(LogMsg_0),
+				 LOG_ERROR,
+					CONCAT(
+						CONCAT(
+							CONCAT(Parameter.CHName,', State = %d ,SubState = %d, FlowID = %d,'),
+																					Monitoring.Error_Text),
+																					' Fault - By Event'),
+																						Monitoring.StepNo,
+																						Monitoring.SubStepNo,0);
+			END_IF	
+
+		//	IF NOT __ISVALIDREF(rEvent) THEN
+		//		//rEvent REF=	ev_PLC_INTERNAL_TIMEOUT;	
+		//		Monitoring.ExternalLogText := 'No Link to Event, send default PLC internal Timeout event';
+		//		CMD.WriteExternalFaultLogCMD := TRUE;
+		//	END_IF
+			//fbCHPrgmBasic.mEventThrow(rEvent,ADR(EventHeader),ADR(EventParameters));
+				
+		ELSE
+			
+			fnLogMsg(ADR(LogMsg_0),
+			 LOG_ERROR,
+				CONCAT(
+					CONCAT(
+						CONCAT(Parameter.CHName,', State = %d ,SubState = %d, FlowID = %d ,'),
+																				Monitoring.Error_Text),
+																				' Fault - By External Event'),
+																					Monitoring.StepNo,
+																					Monitoring.SubStepNo,0);
+		
+			//Event Parames reset
+			//memset(ADR(EventParameters),0,SIZEOF(EventParameters)) ;
+		END_IF
+		
+		
+	END_IF
+	
+	IF CMD.WriteExternalFaultLogCMD THEN
+		CMD.WriteExternalFaultLogCMD := FALSE ;
+		fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName , Monitoring.ExternalLogText), ', ERROR ID = %d, FlowID = %d.'),Monitoring.ExternalLogParam1,0,0);
+	END_IF
+	
+	IF CMD.WriteExternalLogCMD THEN
+		CMD.WriteExternalLogCMD := FALSE ;
+		//fnLogMsg(ADR(LogMsg_0), Parameter.ExternalLogType, CONCAT(CONCAT(Parameter.CHName,', '), Monitoring.ExternalLogText),0,0,0);
+		fnLogMsg(ADR(LogMsg_0), Parameter.ExternalLogType, CONCAT(CONCAT(CONCAT(Parameter.CHName, ', ') , Monitoring.ExternalLogText), ' %d '),Monitoring.ExternalLogParam1,0,0);
+	END_IF
+	
+	
+	//StepOneShotTrig	- After Fault Handling
+	IF (Monitoring.StepNo <> LastStepNo) THEN
+		PrevStepNo := LastStepNo;
+		LastStepNo := Monitoring.StepNo ;
+		Monitoring.LastStep:= LastStepNo;
+		StepOneShotTrig:=	TRUE;
+		Monitoring.SubStepNo:=	0;
+		//rEvent REF=	ev_PLC_INTERNAL_TIMEOUT;	
+	ELSE
+		StepOneShotTrig:=	FALSE;
+	END_IF
+	
+	
+	
+	(*************************** Reset All *****************************************)
+	// Reset All: If ResetCycle^ CMD Executed:
+	//							- We reset the FAULT flag
+	//							- We reset the Error_Number and Error_Text
+	//							- We reset the Pause flag
+	//							- We reset the Cycle^Stuck flag
+	//							- We reset the Running flag
+	//							- We reset the Done flag
+	//							- We reset the StepNo 
+	//							- We reset the StepMessage
+	//							- We reset the StepByStep flag
+	//							- We reset the NoFaultStep flag
+	//							- We reset the ResetCycle^ flag
+	//							- We reset the Delay Timer
+	//							- We reset the Cycle^TimeOut_Fault flag
+	(********************************************************************)	
+	
+
+	IF CMD.ResetCycle THEN
+//		fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName,', State = %d, FlowID = %d '),'Reset Cycle'),Monitoring.StepNo,pFlowID^,0);
+		fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName,', Reset Cycle, '),'State = %d.'),Monitoring.StepNo,0,0);
+		Status.Fault 					:= FALSE;
+		TimeOutFault					:= FALSE;
+		Status.CycleStuck 				:= FALSE;
+		CMD.Start 						:= FALSE;
+		Status.Running 					:= FALSE;
+		Status.Done 					:= FALSE;
+		CMD.Pause 						:= FALSE;
+		Monitoring.StepNo 				:= 0;
+		Monitoring.PrevStepNo 			:= 0;
+		Monitoring.SubStepNo 			:= 0;
+		Monitoring.StepMessage 			:= '';
+		CMD.StepByStep 					:= FALSE;
+		CMD.DeactivateStepTimeOut 		:= FALSE;
+		CMD.ResetCycle 					:= FALSE;
+		Monitoring.Error_Text 			:= '' ;
+		Monitoring.External_Error_Text 	:= '' ;
+		Monitoring.ExternalLogText		:= '' ;
+		Delay.IN 						:= FALSE ;
+		Delay();
+		Status.CycleTimeOut_Fault 		:= FALSE ;
+		LastStepNo 						:= 0 ;
+		LastStepMessage 				:= '';			
+	END_IF
+	
+	
+	(*************************** Resume the Cycle^ from last step ***************************)
+	// Resume Logic: If No Fault and Resume bit set:
+	//							- We reset the Cycle^Stuck flag
+	//							- We reset the Resume
+	//							- We reset the Pause flag
+	(********************************************************************)
+	IF NOT Status.Fault AND CMD.Resume THEN
+		fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName,', Resume, '),'State = %d.'),Monitoring.StepNo,0,0);
+//		fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName,', State = %d, FlowID = %d '),'Resume'),Monitoring.StepNo,pFlowID^,0);
+		CMD.Pause 			:= FALSE;
+		Status.CycleStuck 	:= FALSE;
+		CMD.Resume 			:= FALSE;
+		StepOneShotTrig		:= TRUE;
+	END_IF
+
+	
+	(*************************** Auto Errors Reset ***************************)
+	// Errors Logic: If No Fault and not Cycle^TimeOut_Fault:
+	//							- We reset the Error_Num 
+	//							- We reset the Error_Text
+	(********************************************************************)
+	IF NOT Status.Fault AND NOT Status.CycleTimeOut_Fault THEN
+		Monitoring.Error_Text 			:= '' ;
+		Monitoring.External_Error_Text 	:= '' ;
+	END_IF
+	
+	
+	(*************************** Errors Reset ***************************)
+	// Errors Logic: If ResetErr bit set:
+	//							- We reset the Error_Num 
+	//							- We reset the Error_Text
+	//							- We reset the Pause flag
+	//							- We reset the Fault flag
+	//							- We reset the Cycle^TimeOut_Fault flag
+	(********************************************************************)
+	//ResetFaultTrig.CLK := CMD.ResetErr ;
+	//ResetFaultTrig();
+	IF (*ResetFaultTrig.Q*)CMD.ResetErr THEN
+		CMD.ResetErr := FALSE ;
+		fnLogMsg(ADR(LogMsg_0), LOG_INFO, CONCAT(CONCAT(Parameter.CHName,', Reset Error, '),'State = %d, FlowID = %d.'),Monitoring.StepNo,0,0);
+		Monitoring.Error_Text 			:= '' ;
+		Monitoring.External_Error_Text 	:= '' ;
+		
+		Status.Fault 					:= FALSE ;
+		TimeOutFault					:= FALSE ;
+		Status.CycleTimeOut_Fault 		:= FALSE ;
+	END_IF
+	
+	
+	//Cycle^ TIME
+	IF CMD.Deacivate_Sequence_Time_Out = FALSE THEN
+		(*************************** Monitoring Last Cycle^ Time ***************************)
+		// Last Cycle^ Time Logic: If Running flag bit set:
+		//						  - We set the LastCycle^Time to Cycle^Time.ET
+		(********************************************************************)
+		fTrigCycleRunning.CLK			:= Status.Running ;
+		fTrigCycleRunning();
+		IF fTrigCycleRunning.Q THEN
+			Monitoring.LastCycleTIME 	:= CycleTIME.ET;
+		END_IF
+	
+ 
+		(*************************** Seting the tiem of Cycle^ Time Out ***************************)
+		// Cycle^ Time Out Logic: If Cycle^TimeOut > 0:
+		//						  - We set the Cycle^Time.PT to Cycle^TimeOut
+		(********************************************************************)
+		IF TIME_TO_DINT(Parameter.CycleTimeOut) > 0 THEN
+			CycleTIME.PT := (Parameter.CycleTimeOut) ;
+		ELSE
+			CycleTIME.PT := T#30M ;
+		END_IF
+		
+		(*************************** Cycle^ Time set ***************************)
+		// Cycle^ Time set Logic: If Running and not Cycle^TimeOut_Fault and not Deacivate_Sequence_Time_Out :
+		//						  - We set the Cycle^Time.IN 
+		(********************************************************************)
+		CycleTIME.IN := Status.Running AND NOT Status.CycleTimeOut_Fault (*AND NOT CMD.Deacivate_Sequence_Time_Out *);
+		CycleTIME();
+		
+		
+		(*************************** Cycle^ Time Out ***************************)
+		// Cycle^ Time Out Logic: If Cycle^Time.Q bit set:
+		//							- We set the Error_Text
+		//							- We set the Pause flag
+		//							- We set the Cycle^TimeOut_Fault flag
+		(********************************************************************)
+		IF CycleTIME.Q THEN
+			CMD.Pause 					:= TRUE ;
+			Status.CycleTimeOut_Fault 	:= TRUE ;
+			Monitoring.Error_Text 		:= 'Sequence Time Out' ;
+		END_IF
+		
+		Monitoring.CycleTIME 	:= CycleTIME.ET ;
+	END_IF
+	
+
+	
+
+	
+	//fbCHPrgmBasic();
+
+	//fnLogTransfer FUNCTION call
+	fnLogTransfer(ADR(LogMsg_0));
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="CHName" Id="{b719a3a9-b74c-0611-00c1-938ab447f405}">
+      <Declaration><![CDATA[PROPERTY PUBLIC CHName : STRING]]></Declaration>
+      <Get Name="Get" Id="{c8a0b1a7-83df-0c4b-1b7a-039ce570bce4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CHName := THIS^.Parameter.CHName ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{8e67b140-033d-0515-33d0-83db229bfb63}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Parameter.CHName := CHName ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="CycleTimeOut" Id="{7d0818f7-785b-0dec-13c2-436c3d3645af}">
+      <Declaration><![CDATA[PROPERTY PUBLIC CycleTimeOut : TIME
+
+]]></Declaration>
+      <Get Name="Get" Id="{6022127a-85c7-0a3e-3a10-07376c59ef3e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CycleTimeOut := THIS^.Parameter.CycleTimeOut ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{549b9d83-033d-0411-11ea-d22fe550ca6d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Parameter.CycleTimeOut := CycleTimeOut ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Deacivate_Sequence_Time_Out" Id="{5d479b4e-525f-0c04-035e-90afffcbd973}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Deacivate_Sequence_Time_Out : BOOL]]></Declaration>
+      <Get Name="Get" Id="{e100964d-ce50-0fcf-1494-78ab87dd5eaa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Deacivate_Sequence_Time_Out := THIS^.CMD.Deacivate_Sequence_Time_Out ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a79f8032-492f-0fad-1119-966147d3d705}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.CMD.Deacivate_Sequence_Time_Out := Deacivate_Sequence_Time_Out ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="DeactivateStepTimeOut" Id="{129c3ab4-2e95-08e9-2f57-3712c9787463}">
+      <Declaration><![CDATA[PROPERTY PUBLIC DeactivateStepTimeOut : BOOL]]></Declaration>
+      <Get Name="Get" Id="{40625825-15f6-0f44-0106-3ea73bf4d5c9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DeactivateStepTimeOut := THIS^.CMD.DeactivateStepTimeOut ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{3a102886-0984-053e-38eb-8d6ea88337f0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.CMD.DeactivateStepTimeOut := DeactivateStepTimeOut ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Done" Id="{d1e3a8ce-4706-0eda-234e-9cf57ecb3869}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Done : BOOL]]></Declaration>
+      <Get Name="Get" Id="{5b88c89d-9965-0ffc-3e44-30aa6c81d06c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Done := THIS^.Status.Done ;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Error_Text" Id="{84a8b9c2-522e-0958-01b4-9461a3d3ff96}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Error_Text : STRING]]></Declaration>
+      <Get Name="Get" Id="{b7615acb-012c-001a-0fee-d344c12db797}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Error_Text := THIS^.Monitoring.Error_Text ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{544018e2-1e01-4f7f-b317-cc769c88eccd}">
+        <Declaration><![CDATA[PUBLIC 
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.Error_Text := Error_Text;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ExternalLogParam1" Id="{941372f5-4df1-039c-12d9-48b506e51c1b}">
+      <Declaration><![CDATA[PROPERTY PUBLIC ExternalLogParam1 : DINT
+]]></Declaration>
+      <Get Name="Get" Id="{589b08d3-1c39-00a4-01b5-a9bdee876480}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ExternalLogParam1 := THIS^.Monitoring.ExternalLogParam1;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{808722a1-3bec-0b9b-26d2-a0a03e6dc3e3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.ExternalLogParam1 := ExternalLogParam1;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ExternalLogText" Id="{fc8da912-f436-03c7-052a-f14450f8a0f2}">
+      <Declaration><![CDATA[PROPERTY PUBLIC ExternalLogText : STRING]]></Declaration>
+      <Get Name="Get" Id="{594302de-67b2-0087-00cb-3c10e477cf3e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ExternalLogText := THIS^.Monitoring.ExternalLogText ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{039ad526-1940-0528-1e20-ca1f00114d77}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.ExternalLogText := ExternalLogText ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Fault" Id="{4af4f8c6-56ed-05f4-100e-0be7218b0616}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Fault : BOOL]]></Declaration>
+      <Get Name="Get" Id="{0ab5679e-0626-0a55-1eca-25d7e5f27d10}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Fault := THIS^.Status.Fault ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{8ebc7d74-b6e0-01f6-15e4-f98805c451de}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Status.Fault := Fault ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="LogEnable" Id="{a4e681b8-8b20-0429-3d73-b8e81565a348}">
+      <Declaration><![CDATA[PROPERTY PUBLIC LogEnable : BOOL]]></Declaration>
+      <Set Name="Set" Id="{75f8e8eb-6198-09a5-2e84-43b41e5a8593}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CMD.EnableStateLogging:= LogEnable ;
+
+
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Pause" Id="{2b88fb58-9da8-038f-15e5-45bc113046a7}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Pause : BOOL]]></Declaration>
+      <Get Name="Get" Id="{a89518c4-761b-0f3f-345f-692561305275}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+	Pause := THIS^.CMD.Pause ;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{fd95c578-29b7-0191-0483-43de6af40021}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ 
+	THIS^.CMD.Pause := Pause ;
+	]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="pLogMsg_0" Id="{06b13c61-cf02-002c-0b6f-a8f7305203f4}">
+      <Declaration><![CDATA[PROPERTY PUBLIC pLogMsg_0 : POINTER TO LogMsg
+]]></Declaration>
+      <Get Name="Get" Id="{292facf3-b74e-0762-20ac-b39a05b226af}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[pLogMsg_0:= ADR(THIS^.LogMsg_0); 
+
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PosForLog" Id="{127d07e4-cbef-0d00-1fe2-0ff5f5fa06bc}">
+      <Declaration><![CDATA[PROPERTY PUBLIC PosForLog : USINT
+]]></Declaration>
+      <Set Name="Set" Id="{672f4656-2c56-0f63-3569-5bbabfa2a5c0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Parameter.PosForLog := PosForLog ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="PrevStepNo" Id="{e4f63e9d-7718-034a-2a4a-6f3c98a63f78}">
+      <Declaration><![CDATA[PROPERTY PUBLIC PrevStepNo : DINT]]></Declaration>
+      <Get Name="Get" Id="{1f1dd22e-f678-0725-0924-3e6606439645}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PrevStepNo := THIS^.Monitoring.PrevStepNo ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{73d89c05-5038-08a0-0de8-328b2f6eb23f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.PrevStepNo := PrevStepNo;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ResetCycle" Id="{29fa3b2e-271f-06ef-2071-79685869cf26}">
+      <Declaration><![CDATA[PROPERTY PUBLIC ResetCycle : BOOL]]></Declaration>
+      <Set Name="Set" Id="{03c8adcb-4411-0e78-3a2a-3cc454357c0d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+THIS^.CMD.ResetCycle := ResetCycle ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ResetErr" Id="{e59909a5-de76-0166-3d50-c57abf060429}">
+      <Declaration><![CDATA[PROPERTY PUBLIC ResetErr : BOOL]]></Declaration>
+      <Set Name="Set" Id="{25f2259c-72c2-0507-0cd7-82f31553f111}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.CMD.ResetErr := ResetErr ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Resume" Id="{45bf2488-2a88-0ccd-284b-d3058b659911}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Resume : BOOL]]></Declaration>
+      <Set Name="Set" Id="{136479fc-717f-0cad-3ad0-f015b0a0fa1e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.CMD.Resume := Resume ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Running" Id="{734192bc-411a-022c-309d-0ac43d9307cf}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Running : BOOL]]></Declaration>
+      <Get Name="Get" Id="{ce8f832e-c538-0aae-1b0f-d9aa7983218a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Running := This^.Status.Running ;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="SetStepNoWithName" Id="{f884aca0-9f99-4e2a-ac39-e11e61111c8c}">
+      <Declaration><![CDATA[METHOD SetStepNoWithName
+VAR_INPUT
+	stepNpmber : DINT;
+END_VAR
+VAR_IN_OUT
+	stateNames : ARRAY [*] OF STRING(32); // in only
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[StepNo										:= stepNpmber;
+Parameter.StepMessageIsForNewState	:= TRUE;;
+IF (stepNpmber >= LOWER_BOUND(stateNames,1) AND stepNpmber <= UPPER_BOUND(stateNames,1)) THEN
+	Monitoring.StepMessage			:= stateNames[stepNpmber];
+ELSE
+	Monitoring.StepMessage			:= 'NO_Name_Step';
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Start" Id="{6db37d9c-9cb9-0c3e-09dd-eebcbf691404}">
+      <Declaration><![CDATA[PROPERTY PUBLIC Start : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{7477e5bf-5e80-08c8-03d6-feb13b85c5e2}">
+        <Declaration><![CDATA[
+VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+Start := THIS^.CMD.Start ;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1e795450-f44d-05b4-3e9a-735e20fa9574}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+ THIS^.CMD.Start := Start ;
+ ]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="StepByStep" Id="{5adf3970-e29f-0b79-25d9-cdea137534dd}">
+      <Declaration><![CDATA[PROPERTY PUBLIC StepByStep : BOOL]]></Declaration>
+      <Get Name="Get" Id="{2919a340-049c-0c81-2235-247ec8cf5edb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[
+StepByStep := THIS^.CMD.StepByStep ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{b40835a8-bb94-03bf-37ef-9f35ede9eaa0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.CMD.StepByStep := StepByStep ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="StepMessage" Id="{5b0aec22-e6e0-0c02-31f3-d4b10459704c}">
+      <Declaration><![CDATA[PROPERTY PUBLIC StepMessage : STRING]]></Declaration>
+      <Get Name="Get" Id="{3ed7f2c1-a1ae-0536-0ebd-e2947c4dc3e5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[StepMessage := THIS^.Monitoring.StepMessage ;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{bdbfa284-680a-0851-1ec0-c5745ce9beb9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.StepMessage := StepMessage ;
+ ]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="StepNo" Id="{9a0097f5-4123-0fbd-0e5f-701b97b95848}">
+      <Declaration><![CDATA[PROPERTY PUBLIC StepNo : DINT]]></Declaration>
+      <Get Name="Get" Id="{636d5f47-f4a2-084f-18a6-e56171e7afde}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[StepNo := THIS^.Monitoring.StepNo ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{af18b08e-4470-08f3-3295-d9603a7219cb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.StepNo := StepNo ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="StepStuck" Id="{237b46fb-1e91-0ab5-2a91-f28da83c451d}">
+      <Declaration><![CDATA[PROPERTY PUBLIC StepStuck : BOOL]]></Declaration>
+      <Get Name="Get" Id="{53d6adf3-86b3-08e8-2b3c-042f4993335a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[StepStuck := THIS^.Status.CycleStuck;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="SubStepNo" Id="{9c9f1aa8-d3a9-0d82-38cd-53dfed62153b}">
+      <Declaration><![CDATA[PROPERTY SubStepNo : DINT]]></Declaration>
+      <Get Name="Get" Id="{3a4d00fc-7329-0fc8-0b71-4cff685464d0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SubStepNo := THIS^.Monitoring.SubStepNo ;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{9db73600-b841-00f8-20a2-605dbfa4927c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Monitoring.SubStepNo := SubStepNo ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="SubStepStuck" Id="{c3c6267b-2a5b-0ff0-1f88-dff9850d9a65}">
+      <Declaration><![CDATA[PROPERTY PUBLIC SubStepStuck : BOOL]]></Declaration>
+      <Get Name="Get" Id="{66007776-a817-0c56-28ad-0e3be4506a31}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SubStepStuck := THIS^.Status.SubStepStuck;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ThreadName" Id="{3aff06ef-83d0-0000-38f3-c0ec53c44951}">
+      <Declaration><![CDATA[PROPERTY PUBLIC ThreadName : STRING]]></Declaration>
+      <Get Name="Get" Id="{015c9453-2c49-0f3e-1db8-ddb183617302}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ThreadName := THIS^.Parameter.ThreadName ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{b58a3ae3-305d-098d-3548-d19139750819}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Parameter.ThreadName := ThreadName ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="TimeOut" Id="{0d6ded26-6e47-08b7-29cb-f943c84136c4}">
+      <Declaration><![CDATA[PROPERTY PUBLIC TimeOut : TIME]]></Declaration>
+      <Get Name="Get" Id="{198a6246-3940-0943-01e0-a8dfe98c33ec}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[TimeOut := THIS^.Parameter.TimeOut ;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{c1314f8c-e4f3-061f-0a5b-822e3a456917}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.Parameter.TimeOut := TimeOut ;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="WriteExternalFaultLog" Id="{f55e0386-0396-025c-14db-18a3e3ef98fc}">
+      <Declaration><![CDATA[PROPERTY WriteExternalFaultLog : BOOL]]></Declaration>
+      <Set Name="Set" Id="{f684ac2f-66f0-00e6-0e27-202f6aa28988}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ THIS^.CMD.WriteExternalFaultLogCMD := WriteExternalFaultLog ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="WriteExternalLog" Id="{9b551ea8-4243-02bf-2e7a-5b1e08ac80d7}">
+      <Declaration><![CDATA[PROPERTY WriteExternalLog : BOOL]]></Declaration>
+      <Get Name="Get" Id="{b019b58a-9a0a-06c0-3fc7-687741b8dec4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[WriteExternalLog:= THIS^.CMD.WriteExternalLogCMD;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{5c151df8-0089-0518-0f12-c1c2c88ffa86}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ THIS^.CMD.WriteExternalLogCMD := WriteExternalLog ;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="CycleHandleFB">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.CH_Logic">
+      <LineId Id="392" Count="0" />
+      <LineId Id="394" Count="1" />
+      <LineId Id="548" Count="0" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="553" Count="0" />
+      <LineId Id="526" Count="0" />
+      <LineId Id="528" Count="0" />
+      <LineId Id="3" Count="3" />
+      <LineId Id="716" Count="0" />
+      <LineId Id="809" Count="0" />
+      <LineId Id="860" Count="0" />
+      <LineId Id="874" Count="0" />
+      <LineId Id="863" Count="0" />
+      <LineId Id="862" Count="0" />
+      <LineId Id="867" Count="0" />
+      <LineId Id="866" Count="0" />
+      <LineId Id="717" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="810" Count="0" />
+      <LineId Id="774" Count="0" />
+      <LineId Id="521" Count="0" />
+      <LineId Id="446" Count="0" />
+      <LineId Id="14" Count="7" />
+      <LineId Id="486" Count="0" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="487" Count="2" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="490" Count="0" />
+      <LineId Id="22" Count="27" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="413" Count="6" />
+      <LineId Id="405" Count="0" />
+      <LineId Id="408" Count="0" />
+      <LineId Id="410" Count="1" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="500" Count="0" />
+      <LineId Id="804" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="560" Count="0" />
+      <LineId Id="422" Count="0" />
+      <LineId Id="51" Count="3" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="406" Count="0" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="799" Count="0" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="738" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="448" Count="1" />
+      <LineId Id="69" Count="5" />
+      <LineId Id="459" Count="0" />
+      <LineId Id="698" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="435" Count="0" />
+      <LineId Id="424" Count="2" />
+      <LineId Id="436" Count="0" />
+      <LineId Id="432" Count="1" />
+      <LineId Id="699" Count="0" />
+      <LineId Id="702" Count="7" />
+      <LineId Id="700" Count="1" />
+      <LineId Id="675" Count="0" />
+      <LineId Id="759" Count="4" />
+      <LineId Id="767" Count="0" />
+      <LineId Id="764" Count="0" />
+      <LineId Id="429" Count="0" />
+      <LineId Id="460" Count="0" />
+      <LineId Id="463" Count="7" />
+      <LineId Id="462" Count="0" />
+      <LineId Id="461" Count="0" />
+      <LineId Id="656" Count="1" />
+      <LineId Id="655" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="76" Count="2" />
+      <LineId Id="780" Count="7" />
+      <LineId Id="822" Count="0" />
+      <LineId Id="779" Count="0" />
+      <LineId Id="788" Count="0" />
+      <LineId Id="836" Count="0" />
+      <LineId Id="840" Count="6" />
+      <LineId Id="850" Count="0" />
+      <LineId Id="853" Count="2" />
+      <LineId Id="837" Count="2" />
+      <LineId Id="131" Count="18" />
+      <LineId Id="724" Count="1" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="471" Count="0" />
+      <LineId Id="152" Count="5" />
+      <LineId Id="815" Count="0" />
+      <LineId Id="358" Count="0" />
+      <LineId Id="158" Count="3" />
+      <LineId Id="166" Count="1" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="168" Count="14" />
+      <LineId Id="726" Count="1" />
+      <LineId Id="183" Count="2" />
+      <LineId Id="538" Count="0" />
+      <LineId Id="186" Count="8" />
+      <LineId Id="198" Count="17" />
+      <LineId Id="219" Count="3" />
+      <LineId Id="472" Count="0" />
+      <LineId Id="223" Count="1" />
+      <LineId Id="385" Count="1" />
+      <LineId Id="225" Count="11" />
+      <LineId Id="382" Count="0" />
+      <LineId Id="238" Count="30" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="384" Count="0" />
+      <LineId Id="793" Count="2" />
+      <LineId Id="798" Count="0" />
+      <LineId Id="749" Count="1" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.CHName.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.CHName.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.CycleTimeOut.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.CycleTimeOut.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Deacivate_Sequence_Time_Out.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Deacivate_Sequence_Time_Out.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.DeactivateStepTimeOut.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.DeactivateStepTimeOut.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Done.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Error_Text.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Error_Text.Set">
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ExternalLogParam1.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ExternalLogParam1.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ExternalLogText.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ExternalLogText.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Fault.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Fault.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.LogEnable.Set">
+      <LineId Id="2" Count="0" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Pause.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Pause.Set">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.pLogMsg_0.Get">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.PosForLog.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.PrevStepNo.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.PrevStepNo.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ResetCycle.Set">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ResetErr.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Resume.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Running.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.SetStepNoWithName">
+      <LineId Id="40" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Start.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.Start.Set">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepByStep.Get">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepByStep.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepMessage.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepMessage.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepNo.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepNo.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.StepStuck.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.SubStepNo.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.SubStepNo.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.SubStepStuck.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ThreadName.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.ThreadName.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.TimeOut.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.TimeOut.Set">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.WriteExternalFaultLog.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.WriteExternalLog.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="CycleHandleFB.WriteExternalLog.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Basic_Output_typ" Id="{8c3f936f-8b78-0eb7-1a70-5dd6f03130f4}">
+    <Declaration><![CDATA[TYPE Basic_Output_typ : 	
+	STRUCT 
+		monitor : Basic_Monitor_axis_typ;
+		Status : Basic_Status_axis_typ;
+		Error : Basic_Error_axis_typ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

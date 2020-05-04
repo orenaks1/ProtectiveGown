@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="IO_Typ" Id="{50458ce5-806d-458e-ac25-a91f59162c16}">
+    <Declaration><![CDATA[TYPE IO_Typ :
+STRUCT
+	In:IO_In_Typ;
+	Out:IO_Out_Typ;
+	EncoderRW:Encoder_Typ;
+	//RwInverter:ST_BasicInverter;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

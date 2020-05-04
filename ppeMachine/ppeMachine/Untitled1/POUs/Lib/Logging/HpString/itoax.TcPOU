@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="itoax" Id="{af5bc416-ca77-0263-03f9-24b372ab8064}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION itoax : UINT  (*Create a string with hex digits of value*)
+VAR_INPUT
+		Value : UDINT; (*Number for conversion to string*)
+		pString : POINTER TO STRING; (*Pointer to destination string*)	
+END_VAR
+VAR
+	hexString : ARRAY[0..5] OF USINT;
+	Digit : UDINT;
+	byteDigit : POINTER TO USINT;
+	idx : USINT;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	//byteDigit ACCESS ADR(Digit);
+	byteDigit := ADR(Digit);
+	FOR idx := 0 TO 3 DO
+		Digit := Value AND 16#000F;
+		IF Digit < 10 THEN 						// 0-9
+			hexString[3-idx] := byteDigit^ + 48; // digit+'0'  
+		ELSE									// A-F
+			hexString[3-idx] := byteDigit^ + 55; // digit+'A'-10
+		END_IF
+		Value := SHR(Value,4);
+	END_FOR
+	hexString[4] := 72; 						// 'H' suffix
+	hexString[5] := 0;							// Null terminator
+	memcpy(pString,ADR(hexString[0]),SIZEOF(hexString));
+	itoax := SIZEOF(hexString);]]></ST>
+    </Implementation>
+    <LineIds Name="itoax">
+      <LineId Id="27" Count="0" />
+      <LineId Id="14" Count="12" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

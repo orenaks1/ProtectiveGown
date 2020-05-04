@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="AMSNETID_TO_STRING" Id="{6fd44617-37fe-46df-a191-d0e661a56201}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION AMSNETID_TO_STRING : STRING
+VAR_INPUT
+	AoeNetId 	: AMSNETID;
+END_VAR
+VAR
+	Index		: INT := 0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[AMSNETID_TO_STRING := TO_STRING(AoeNetId[Index]);
+FOR Index := 1 TO 5 DO
+	AMSNETID_TO_STRING := CONCAT(AMSNETID_TO_STRING, '.');
+	AMSNETID_TO_STRING := CONCAT(AMSNETID_TO_STRING, TO_STRING(AoeNetId[Index]));
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="AMSNETID_TO_STRING">
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

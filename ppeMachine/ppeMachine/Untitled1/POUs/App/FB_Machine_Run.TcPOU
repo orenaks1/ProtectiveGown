@@ -1,0 +1,843 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_Machine_Run" Id="{a35008fa-9a47-43bf-8bba-12b194395176}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Machine_Run EXTENDS CycleHandleFB
+VAR_INPUT
+	Ctrl_ref:					REFERENCE TO Ctrl_Typ;
+	 FB_RW_Ctrl_ref:			REFERENCE TO FB_RW_Ctrl;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	MethInitDone:		BOOL;
+	FB_HeaterProtection:FB_HeaterProtection;
+END_VAR
+VAR CONSTANT
+
+// States are global
+(*		
+	MACHINE_RUN_INIT:						INT:=0;
+	MACHINE_COLD_CUT_VALVE_OPEN:			INT:=10;
+	MACHINE_WELD_VALVE_OPEN:				INT:=20;	
+	MACHINE_HEATER_ON:						INT:=30;	
+	MACHINE_HEATER_OFF:						INT:=40;
+	MACHINE_VALVE_CLOSE:					INT:=50;	
+	MACHINE_DONE:							INT:=100;	
+
+*)
+
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	IF NOT MethInitDone THEN
+		MethInitDone	:= Meth_Init();
+	END_IF
+	
+	
+	IF  THIS^.CMD.Pause = FALSE THEN
+		
+		//-----------------------------
+		//State Machine
+		//-----------------------------
+		CASE THIS^.StepNo OF
+			MACHINE_RUN_INIT:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Init: Start.';
+					THIS^.Delay(IN:=FALSE);
+					Meth_Rest_IO();
+				ELSIF Meth_Enable(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_WAIT_DANCER_FULL;
+				//	THIS^.StepNo	:= 	MACHINE_GRIPPER_END_POSITION;
+				END_IF								
+			
+				
+			MACHINE_WAIT_DANCER_FULL:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Wait Dancer full';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_WaitDancerFull(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_END_POSITION;
+				END_IF					
+								
+										
+			MACHINE_GRIPPER_END_POSITION:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Machine WAIT position';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_gripperEndPosition(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_COLD_CUT_VALVE_OPEN;
+				END_IF					
+				
+			MACHINE_COLD_CUT_VALVE_OPEN:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Cold cut valve open';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_ColdCutValveOpen(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_WELD_VALVE_OPEN;
+				END_IF	
+
+			MACHINE_WELD_VALVE_OPEN://and gripper open
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Hot weld valve open press Down';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HotWeldValveOpen(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_HEATER_ON;
+				END_IF					
+				
+			MACHINE_HEATER_ON://
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Heater ON';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HeaterON(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_OPEN;
+				END_IF					
+				
+				
+			MACHINE_GRIPPER_OPEN:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Gripper Open';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_gripperOpen(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_RETRACT;
+				END_IF					
+				
+			MACHINE_GRIPPER_RETRACT:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Gripper retract';
+					THIS^.Delay(IN:=FALSE);
+					
+				ELSIF Meth_gripperRetract(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_START_POSITION;
+				END_IF					
+				
+				
+			MACHINE_GRIPPER_START_POSITION:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Machine start position';
+					THIS^.Delay(IN:=FALSE);
+					
+				ELSIF Meth_gripperStartPosition(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_HEATER_OFF;
+				END_IF					
+				
+				
+			MACHINE_HEATER_OFF://gripper retract
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Heater Off';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HeaterOff(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_EXCTRACT;
+				END_IF					
+				
+			MACHINE_GRIPPER_EXCTRACT:
+			IF THIS^.StepOneShotTrig THEN
+				THIS^.Monitoring.StepMessage	:= 'Gripper Extract';
+				THIS^.Delay(IN:=FALSE);
+			ELSIF Meth_gripperExtract(TRUE) THEN
+				THIS^.StepNo	:= 	MACHINE_GRIPPER_CLOSE;
+			END_IF				
+				
+			MACHINE_GRIPPER_CLOSE:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Gripper Close';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_gripperClose(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_VALVE_CLOSE;
+				END_IF					
+					
+			MACHINE_VALVE_CLOSE:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Close valves';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HeaterValvesClose(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_DONE;
+				END_IF					
+				
+								
+				
+			MACHINE_DONE:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Machine cycle Done';
+				ELSIF Meth_Done(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_RUN_INIT;
+				END_IF			
+			
+				
+			//UnUsed	
+			MACHINE_GRIPPER_RETRACT_WEB:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Gripper retract With web';
+					THIS^.Delay(IN:=FALSE);
+					
+				ELSIF Meth_gripperRetract(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_END_POSITION;
+				END_IF				
+				
+			MACHINE_MOTOR_ON:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Start RW';
+					FB_RW_Ctrl_ref.Start			:= TRUE;
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_MororON(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_DONE;
+				END_IF					
+		END_CASE
+	
+	ELSE
+		THIS^.Monitoring.StepMessage:= 'Pause';
+		
+		IF THIS^.Status.Fault = TRUE THEN
+		//IF Meth_EmStop(TRUE) THEN
+				THIS^.CMD.ResetCycle	:= TRUE;		// Reset the all state machine to start point
+		//END_IF
+			
+		END_IF
+		
+	END_IF
+	
+	//============================================================================================
+	// Reset Internal Function Blocks
+	IF THIS^.CMD.ResetCycle = TRUE THEN
+		IF FB_RW_Ctrl_ref.Running OR FB_RW_Ctrl_ref.Pause OR FB_RW_Ctrl_ref.Fault THEN
+			FB_RW_Ctrl_ref.ResetCycle	:= TRUE;
+		END_IF
+	END_IF	
+	
+	THIS^.FB_HeaterProtection();
+	THIS^.Delay();
+	THIS^.CH_Logic();
+	
+	// Reset Meth_EmStop when at Init State
+	IF THIS^.Pause = FALSE THEN
+		//Meth_EmStop(FALSE);
+	END_IF
+	
+	
+]]></ST>
+    </Implementation>
+    <Method Name="Meth_ColdCutValveOpen" Id="{38048cc7-a9cb-4ee7-b874-5ec149a94069}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_ColdCutValveOpen : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Cold Cut Valve Open';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeColdCutPressDown);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_ColdCutValveOpen	:= TRUE;
+		gMachineCtrl.IO.Out.GripperOpen:=TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Done" Id="{dc153501-6cca-42a0-82d9-0d52ed4c6e43}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_Done : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Press 1 engage';
+	//THIS^.Monitoring.Error_Text				:= 'Press 1 engage Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	//THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	//THIS^.Parameter.TimeOut					:= T#5S;
+
+	//gMachineCtrl.Parameters.UW_1_Param.EnableDancer :=FALSE;
+	//gMachineCtrl.Parameters.UW_2_Param.EnableDancer:=FALSE;	
+	
+	THIS^.Status.Done		:= TRUE;
+	THIS^.Status.Running	:= FALSE;									
+	Meth_Done	:= TRUE;	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Enable" Id="{b5be41ac-744e-4679-94f1-8dfb217df25b}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_Enable : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+IF THIS^.CMD.Start THEN
+	
+	THIS^.Monitoring.StepMessage			:= 'Start';
+	THIS^.Monitoring.Error_Text				:= 'Start Fail';
+	THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#0.5S;
+
+	THIS^.CMD.Start			:= FALSE;
+	THIS^.Status.Done		:= FALSE;
+	THIS^.Status.Running	:= TRUE;
+	
+	// Reset Commands and Statuses												
+	
+	Meth_Enable	:= TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_gripperClose" Id="{37507847-a2b3-49e7-ba5f-b366e3c22d51}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_gripperClose : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Gripper Close';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.GripperOpen:=TRUE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperOpen);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_gripperClose	:= TRUE;
+		
+		//gMachineCtrl.Parameters.UW_1_Param.EnableTension:=TRUE;
+		//gMachineCtrl.Parameters.UW_2_Param.EnableTension:=TRUE;
+		
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_gripperEndPosition" Id="{a8b7c3d8-74eb-4445-8e48-dcabaa2a591a}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_gripperEndPosition : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'GripperStartPosition';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.GripperPistonPosition:=TRUE;
+		
+	//gMachineCtrl.Parameters.UW_1_Param.kp := gMachineCtrl.Parameters.UW_1_Param.kpMove;
+	////gMachineCtrl.Parameters.UW_1_Param.TN := gMachineCtrl.Parameters.UW_1_Param.TNMove;
+	//.Parameters.UW_2_Param.kp := gMachineCtrl.Parameters.UW_2_Param.kpMove;
+	//gMachineCtrl.Parameters.UW_2_Param.TN := gMachineCtrl.Parameters.UW_2_Param.TNMove;
+
+
+
+							
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperStartPosition);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_gripperEndPosition	:= TRUE;
+		
+	//.Parameters.UW_1_Param.kp := 0.1;
+	//gMachineCtrl.Parameters.UW_1_Param.TN := T#0MS;
+	//gMachineCtrl.Parameters.UW_2_Param.kp := 0.1;
+	//gMachineCtrl.Parameters.UW_2_Param.TN := T#0MS;			
+	
+	
+		
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_gripperExtract" Id="{88b82776-2d79-439b-b194-70d1d3083bef}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_gripperExtract : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Gripper Retract';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.GripperRetract:=TRUE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperRetract);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_gripperExtract	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_gripperOpen" Id="{f6a1064a-5131-430d-8367-ccb407406c03}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_gripperOpen : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Gripper Open';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.GripperOpen:=FALSE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperOpen);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_gripperOpen	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_gripperRetract" Id="{d06a811c-5b63-42cb-b4a6-dd444d5db989}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_gripperRetract : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Gripper Retract';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.GripperRetract:=FALSE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperRetract);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_gripperRetract	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_gripperStartPosition" Id="{5480c9df-d06a-4df1-b021-6968e1c8639e}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_gripperStartPosition : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'GripperStartPosition';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.GripperPistonPosition:=FALSE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperHomePosition);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_gripperStartPosition	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_HeaterOff" Id="{8e306fcf-d1b3-486d-b339-3b5cb7d038c0}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_HeaterOff : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Heater Off';
+	THIS^.Monitoring.Error_Text				:= ' Heater Off Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimerHotWeldingOff);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q AND THIS^.FB_HeaterProtection.Done THEN
+		Meth_HeaterOff	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_HeaterON" Id="{7ec11b00-92d9-4b61-981f-289b0ad43042}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_HeaterON : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Heater ON';
+	THIS^.Monitoring.Error_Text				:= ' Heater ON Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	//Ctrl_ref.IO.Out.HeaterOn := TRUE;
+	FB_HeaterProtection.Excute:=TRUE;
+			
+							
+//	THIS^.Delay.IN:=TRUE;
+//	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimerHotWeldingOn);// Ctrl_ref.Parameters.TimerPressDown1);
+//	IF THIS^.Delay.Q THEN
+		Meth_HeaterON	:= TRUE;;
+//	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_HeaterValvesClose" Id="{82a40b60-a497-49ed-a5e1-19b1d9212e56}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_HeaterValvesClose : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Valves close';
+	THIS^.Monitoring.Error_Text				:= ' Valves close Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.PressDown:=FALSE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimerPressUp);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_HeaterValvesClose	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_HotWeldValveOpen" Id="{ba5ea5f4-56c3-4cce-87ed-53b8215badee}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_HotWeldValveOpen : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Hot Weld Valve Open';
+	THIS^.Monitoring.Error_Text				:= ' Hot Weld Valve Open Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.PressDown :=TRUE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeHotWeldPressDown);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_HotWeldValveOpen	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Init" Id="{5c76d4f9-85c8-4033-af06-e822798f3ddf}">
+      <Declaration><![CDATA[METHOD Meth_Init :BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Meth_Init:=TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_MororON" Id="{16058515-1409-40f5-860f-8187b9ce333e}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_MororON : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Motor ON';
+	THIS^.Monitoring.Error_Text				:= ' Motor ON Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimerMotorOn);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q  AND FB_RW_Ctrl_ref.Done THEN
+		Meth_MororON	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Rest_IO" Id="{959d1cc9-2dae-4247-ae06-4d56dd20472c}">
+      <Declaration><![CDATA[METHOD Meth_Rest_IO 
+VAR_INPUT
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+Ctrl_ref.IO.Out.HeaterOn := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_WaitDancerFull" Id="{3881fe4d-5207-496a-98cf-763cf23fb35a}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_WaitDancerFull : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Gripper Retract';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.Parameters.UW_1_Param.EnableDancer :=TRUE;
+	gMachineCtrl.Parameters.UW_2_Param.EnableDancer:=TRUE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperRetract);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF  gMachineCtrl.Status.UW_1_DancerFull 
+	AND gMachineCtrl.Status.UW_2_DancerFull   THEN
+		Meth_WaitDancerFull	:= TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Machine_Run">
+      <LineId Id="169" Count="14" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="519" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="394" Count="0" />
+      <LineId Id="349" Count="0" />
+      <LineId Id="436" Count="5" />
+      <LineId Id="433" Count="1" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="373" Count="3" />
+      <LineId Id="378" Count="1" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="361" Count="0" />
+      <LineId Id="188" Count="6" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="228" Count="5" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="236" Count="5" />
+      <LineId Id="234" Count="1" />
+      <LineId Id="455" Count="0" />
+      <LineId Id="459" Count="3" />
+      <LineId Id="464" Count="10" />
+      <LineId Id="456" Count="2" />
+      <LineId Id="478" Count="6" />
+      <LineId Id="475" Count="2" />
+      <LineId Id="244" Count="5" />
+      <LineId Id="242" Count="1" />
+      <LineId Id="505" Count="13" />
+      <LineId Id="504" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="498" Count="5" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="250" Count="1" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="196" Count="6" />
+      <LineId Id="442" Count="1" />
+      <LineId Id="447" Count="6" />
+      <LineId Id="444" Count="1" />
+      <LineId Id="491" Count="6" />
+      <LineId Id="446" Count="0" />
+      <LineId Id="203" Count="13" />
+      <LineId Id="272" Count="5" />
+      <LineId Id="269" Count="2" />
+      <LineId Id="217" Count="8" />
+      <LineId Id="82" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_ColdCutValveOpen">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_Done">
+      <LineId Id="34" Count="6" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_Enable">
+      <LineId Id="24" Count="1" />
+      <LineId Id="6" Count="12" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_gripperClose">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="66" Count="3" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_gripperEndPosition">
+      <LineId Id="34" Count="9" />
+      <LineId Id="62" Count="1" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="70" Count="2" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_gripperExtract">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_gripperOpen">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_gripperRetract">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_gripperStartPosition">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_HeaterOff">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_HeaterON">
+      <LineId Id="34" Count="8" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_HeaterValvesClose">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_HotWeldValveOpen">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_Init">
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_MororON">
+      <LineId Id="34" Count="10" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_Rest_IO">
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_WaitDancerFull">
+      <LineId Id="34" Count="6" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

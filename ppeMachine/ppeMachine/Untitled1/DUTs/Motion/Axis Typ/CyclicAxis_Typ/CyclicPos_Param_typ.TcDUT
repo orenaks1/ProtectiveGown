@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CyclicPos_Param_typ" Id="{10bba6ff-e0f6-078d-3af1-5518567c3978}">
+    <Declaration><![CDATA[TYPE CyclicPos_Param_typ :
+STRUCT
+	
+    SetPos			: LREAL;
+	Velocity		: LREAL;
+	MaxAcc			: LREAL;
+	MaxDcc			: LREAL;
+		
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

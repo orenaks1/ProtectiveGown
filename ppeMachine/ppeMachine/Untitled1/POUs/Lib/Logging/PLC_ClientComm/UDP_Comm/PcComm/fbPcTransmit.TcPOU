@@ -1,0 +1,434 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="fbPcTransmit" Id="{acbe536c-4cce-0821-211e-1c08913f63dd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK fbPcTransmit
+VAR_INPUT
+
+END_VAR
+VAR_OUTPUT
+	RTC_amsid:T_AmsNetID;
+END_VAR
+VAR
+	
+	pGlobalArrayMsg : POINTER TO LogArrayStruct; (*Pointer to global array message, which will be written to the file*)	
+
+	Client : UDPClientHandler_typ ; (*Data for Client Task*)	
+	PcSendData : ARRAY[0..UDP_MESSAGE_MAX_LENGTH] OF USINT;
+	IgnorePrintDebugMsgsThreshold : UINT;
+	ResumePrintDebugMsgsThreshold : UINT;
+	IgnorePrintInfoMsgsThreshold : UINT;
+	ResumePrintInfoMsgsThreshold : UINT;
+
+	IgnorePrintDebugMsgsFlag : BOOL := FALSE;
+	IgnorePrintInfoMsgsFlag : BOOL := FALSE;	
+	NumOfRemovedMessages : UINT := 0;	
+	logMessagesCount : UINT := 0;
+	tempLogMsgCounter : USINT := 0;	
+	PcSendDataPtr	: POINTER TO USINT;
+	PcSendPackageLenght : UINT;
+
+	intPosition : INT := 0;
+	uintPosition : INT := 0;
+	hexPosition : INT := 0;	
+	pTheFotnat : POINTER TO STRING;
+	
+	textString : STRING[LOG_MSG_TEXT_LENGTH] := '';	
+	paramsCounter : USINT := 0;
+	strConverted : STRING[12] := '';
+	
+	FB_FormatString_0 : FB_FormatString;
+	textStringLength : UINT := 0;	
+	PcSendDataLenght : USINT := 0;	
+	
+	LogMsgTime : UDINT := 0;
+	SemTakeStatus : UINT;	
+	
+	//Ftrig1 : F_TRIG;
+	//Ftrig2 : F_TRIG;
+	Trig1 : Trigger;
+	Trig2 : Trigger;
+	Trig3 : Trigger;
+	Trig4 : Trigger;
+	TimerDelayStart : TON ;
+	First_Cycle:BOOL;
+	
+	FaultState:INT;
+	FaultTimer:TON;	
+	InitDone:BOOL;
+END_VAR
+
+VAR CONSTANT
+	UDP_PLC_CLIENT_ID : USINT := 91;
+	UDP_SERVER_PORT_NUMBER : UINT := 14999;
+	UDP_SERVER_ADDRESS : STRING[20] := '192.168.101.15';//'15.17.216.69';//'127.0.0.1';//'192.168.101.15';	
+	UDP_SIM_SERVER_ADDRESS: STRING[20] := '127.0.0.1';
+	UDP_CLIENT_MAGIC_WORD : UINT := 16#5A5A;
+	UDP_MESSAGE_MAX_LENGTH : UDINT := 1400;
+	UDP_MAX_NUM_OF_CONT_MSGS : UINT := 5;	
+	IGNORED_MSGS_THRESHOLD : UINT := 30;	
+	INT_MASK : STRING[2] := '%d';
+	UINT_MASK : STRING[2] := '%u';
+	HEX_MASK : STRING[2] := '%x';	
+	UDP_MESSAGE_HEADER_LENGTH : USINT := 26; (*UDP message header*)	
+END_VAR
+
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT InitDone THEN
+	InitDone:=	Meth_PLC_Init();
+ELSE
+		FaultRecover();
+		IF Client.UdpSend_0.bBusy  (*OR Client.UdpSend_0.bExecute = TRUE *) THEN
+			 Client.UdpSend_0();
+		END_IF	
+		IF Trig2.EDGENEG(Client.UdpSend_0.bBusy) OR(NOT(Client.UdpSend_0.bBusy) AND Client.UdpSend_0.bExecute) THEN  
+			 Client.UdpSend_0(bExecute := FALSE );
+		END_IF			
+		IF LogGlobalArray.pointers.numOfMembers > 0 AND Client.UdpSend_0.bBusy = FALSE THEN
+			//Client.UdpSend_0(bExecute := FALSE );	(* Call the Function*)
+			(* Check if ignore sending INFO and/or DEBUG messages *)
+			IF LogGlobalArray.pointers.numOfMembers > IgnorePrintDebugMsgsThreshold THEN
+				IgnorePrintDebugMsgsFlag := TRUE;
+			ELSIF LogGlobalArray.pointers.numOfMembers < ResumePrintDebugMsgsThreshold THEN
+				IgnorePrintDebugMsgsFlag := FALSE;
+			END_IF
+			
+			IF LogGlobalArray.pointers.numOfMembers > IgnorePrintInfoMsgsThreshold THEN
+				IgnorePrintInfoMsgsFlag := TRUE;
+			ELSIF LogGlobalArray.pointers.numOfMembers < ResumePrintInfoMsgsThreshold THEN
+				IgnorePrintInfoMsgsFlag := FALSE;
+			END_IF
+			
+			NumOfRemovedMessages := 0;
+			logMessagesCount := MIN(UDP_MAX_NUM_OF_CONT_MSGS, LogGlobalArray.pointers.numOfMembers);
+			tempLogMsgCounter := UINT_TO_USINT(logMessagesCount);
+			(* Pointers to the start of data structure *)
+			PcSendDataPtr := ADR(PcSendData);
+			(* Clears send data array *)
+			memset(PcSendDataPtr,0,UDP_MESSAGE_MAX_LENGTH);
+			(* Putting magic word and number of continuous messages *)
+			putUint(UDP_CLIENT_MAGIC_WORD, PcSendDataPtr);
+			putUsint(tempLogMsgCounter, PcSendDataPtr);
+			PcSendPackageLenght	 := 4;
+			WHILE tempLogMsgCounter > 0 AND LogGlobalArray.pointers.numOfMembers > 0 DO
+	
+				(* Takes message from global array *)
+				//pGlobalArrayMsg ACCESS ADR(LogGlobalArray.array[LogGlobalArray.pointers.readPointer]);
+				
+				pGlobalArrayMsg := ADR(LogGlobalArray.ARRAY_TC[LogGlobalArray.pointers.readPointer]);
+				IF ((IgnorePrintDebugMsgsFlag AND pGlobalArrayMsg^.data.levelSeverity = LOG_DEBUG) OR
+					(IgnorePrintInfoMsgsFlag AND pGlobalArrayMsg^.data.levelSeverity = LOG_INFO)) AND (NumOfRemovedMessages < IGNORED_MSGS_THRESHOLD) THEN
+					(* Need to ignore message *)
+					NumOfRemovedMessages := NumOfRemovedMessages +1;
+				ELSE
+					(* Converts message to string format, the result will be in textString variable *)
+					ActionPrintf();
+					(* Calculating and adding message length into data *)
+					textStringLength := strlen(ADR(textString));
+					PcSendDataLenght := UDP_MESSAGE_HEADER_LENGTH + UINT_TO_USINT(textStringLength);
+					(* Put message data length*)
+					putUsint(PcSendDataLenght, PcSendDataPtr);	
+					PcSendPackageLenght := PcSendPackageLenght + PcSendDataLenght;
+					(* Adding sequential number internal *)
+					putUint(Client.seq_number, PcSendDataPtr);
+					Client.seq_number := Client.seq_number + 1;
+					(* Adding client ID - constant *)
+					putUint(Client.clientId, PcSendDataPtr);
+					(* Adding timeStamp (from midnight) from received structure *)
+					LogMsgTime := ((pGlobalArrayMsg^.TIME_TC.wHour * 60 + pGlobalArrayMsg^.TIME_TC.wMinute) *60 + pGlobalArrayMsg^.TIME_TC.wSecond)*1000 + pGlobalArrayMsg^.TIME_TC.wMilliseconds;
+					putUdint(LogMsgTime,PcSendDataPtr);
+					(* Adding encoder angle from received structure*)
+					putUint(pGlobalArrayMsg^.Angle,PcSendDataPtr);
+					(*Adding sthread name (10 characters) from received structure *)
+					putString(ADR(pGlobalArrayMsg^.data.category), LOG_MSG_CATEGORY_LENGTH, PcSendDataPtr);
+					(* Adding levelID from received structure *)
+					putUsint( DINT_TO_USINT(pGlobalArrayMsg^.data.levelSeverity), PcSendDataPtr);
+					(* Addding categoryID - currently not in use *)
+					putUdint(0,PcSendDataPtr);
+					(* Additng string from textString *)
+					putString(ADR(textString), textStringLength, PcSendDataPtr);
+					tempLogMsgCounter := tempLogMsgCounter - 1;
+				END_IF
+				
+				LogGlobalArray.pointers.readPointer := (LogGlobalArray.pointers.readPointer + 1) MOD GLOBAL_ARRAY_LENGTH;
+				LogGlobalArray.pointers.numOfMembers := LogGlobalArray.pointers.numOfMembers - 1;
+			END_WHILE;
+
+			Client.UdpSend_0.cbLen := PcSendPackageLenght;	(* Lenght of data to send *)
+			Client.UdpSend_0(bExecute := TRUE );	(* Call the Function*)
+
+			(* For possibility to more effective copies in global array *)
+			IF LogGlobalArray.pointers.numOfMembers = 0 AND (LogGlobalArray.pointers.readPointer <> 0 OR LogGlobalArray.pointers.writePointer <> 0) THEN
+			    SemTakeStatus := LogGlobalArray.SemData.SemaStat;//  SemAcquire(globalArray.SemData.SemID);
+				//SemTakeStatus := SemAcquire(LogGlobalArray.SemData.SemID);
+				IF SemTakeStatus = 0 THEN (*Allocation succesfull *)
+					LogGlobalArray.SemData.SemaStat :=1;
+					IF LogGlobalArray.pointers.numOfMembers = 0 THEN
+						LogGlobalArray.pointers.readPointer := 0;
+						LogGlobalArray.pointers.writePointer := 0;
+					END_IF
+					 LogGlobalArray.SemData.SemaStat :=0;
+					//SemRelease(LogGlobalArray.SemData.SemID);
+				END_IF
+			END_IF
+		END_IF		
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="ActionPrintf" Id="{c5c493e2-91ca-0a7e-2283-dae1241d2f42}">
+      <Implementation>
+        <ST><![CDATA[	//textString:='';
+	FB_FormatString_0(sFormat := pGlobalArrayMsg^.data.text,
+						arg1 := F_DINT( pGlobalArrayMsg^.data.params_tc[0]),
+						arg2 := F_DINT( pGlobalArrayMsg^.data.params_tc[1]),
+						arg3 := F_DINT( pGlobalArrayMsg^.data.params_tc[2]),
+						arg4 := F_DINT( pGlobalArrayMsg^.data.params_tc[3]),
+						arg5 := F_DINT( pGlobalArrayMsg^.data.params_tc[4]),
+						arg6 := F_DINT( pGlobalArrayMsg^.data.params_tc[5]),
+						sOut => textString);
+	RETURN;
+
+	strcpy(ADR(textString), ADR(pGlobalArrayMsg^.data.text));
+	intPosition := FIND(textString, INT_MASK);
+	uintPosition := FIND(textString, UINT_MASK);
+	hexPosition := FIND(textString, HEX_MASK);
+	paramsCounter := 0;
+	WHILE ((intPosition + uintPosition + hexPosition) > 0) AND (paramsCounter <= MAX_COUNT_LOG_PARAM) DO
+		IF (intPosition > 0 AND intPosition < uintPosition) THEN
+			pTheFotnat := ADR(INT_MASK);
+		ELSE	
+			pTheFotnat := ADR(UINT_MASK);
+			intPosition := uintPosition;
+		END_IF
+		IF ((hexPosition > 0) AND (intPosition = 0 OR hexPosition < intPosition)) THEN
+			textString := DELETE(textString, LEN(HEX_MASK), hexPosition);
+			itoax(TO_UDINT(pGlobalArrayMsg^.data.params_tc[paramsCounter]), ADR(strConverted));
+			textString := INSERT(textString, strConverted, (hexPosition-1));
+		ELSE	
+			textString := DELETE(textString, LEN(pTheFotnat^), intPosition);
+			FB_FormatString_0(sFormat := pTheFotnat^,arg1 := F_DINT( pGlobalArrayMsg^.data.params_tc[paramsCounter]), sOut => strConverted  );
+			//itoa(pGlobalArrayMsg^.data.params_tc[paramsCounter], ADR(strConverted));
+			textString := INSERT(textString, strConverted, (intPosition-1));
+		END_IF
+		paramsCounter := paramsCounter + 1;
+		intPosition := FIND(textString, INT_MASK);
+		uintPosition := FIND(textString, UINT_MASK);
+		hexPosition := FIND(textString, HEX_MASK);
+	END_WHILE;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="FaultRecover" Id="{f67f1fca-0fd6-0fde-0e6f-9b9900b3ab0e}">
+      <Implementation>
+        <ST><![CDATA[
+IF Trig4.EDGEPOS(Client.UdpSend_0.bError) THEN
+	FaultState := 10;
+END_IF
+
+CASE FaultState OF
+ 
+	
+	10: 
+		client.SocketCloseAll_0.bExecute:=TRUE;
+		Client.status.opened := FALSE; 
+		FaultTimer(in:=TRUE,PT:=T#1S);
+		IF FaultTimer.Q THEN
+			FaultTimer(in:=FALSE,PT:=T#1S);
+			FaultState:=20;
+		END_IF	
+		
+	20:
+		client.SocketCloseAll_0.bExecute:=FALSE;
+		FaultTimer(in:=TRUE,PT:=T#1S);
+		IF FaultTimer.Q THEN
+			FaultTimer(in:=FALSE,PT:=T#1S);
+			FaultState:=30;
+		END_IF			
+		
+	30:
+		Client.UdpOpen_0.bExecute 		:= TRUE;
+		FaultState:=0;
+			
+END_CASE
+
+client.SocketCloseAll_0();]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Meth_PLC_Init" Id="{7b04f4e2-d8bd-00cd-39c5-097da89e2ad7}">
+      <Declaration><![CDATA[METHOD Meth_PLC_Init : BOOL
+VAR_INPUT
+END_VAR
+VAR_INST
+	
+	State:	INT;	
+
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE State OF  
+	0:
+		Meth_PLC_Init:=	FALSE;	
+		Client.clientId := UDP_PLC_CLIENT_ID; 
+		
+		Client.UdpOpen_0.nLocalPort 	:= 0;//0;//UDP_SERVER_PORT_NUMBER;	(* Port to listen*)
+		Client.UdpOpen_0.tTimeout	    := T#3S;
+
+		Client.Udp_GetLocalAmsNetId(bExecute := TRUE);
+		IF Client.Udp_GetLocalAmsNetId.AddrBytes[0] <> 0 THEN
+			Client.UdpOpen_0.sSrvNetId 		:= Client.Udp_GetLocalAmsNetId.AddrString;	(* If empty string=>server runs on local system*)
+			IF strcmp(ADR(Client.Udp_GetLocalAmsNetId.AddrString), ADR('192.168.101.10.1.1')) = 0 THEN
+			//	Client.UdpOpen_0.sSrvNetId 		:= '192.168.101.10.1.1';//'';	(* If empty string=>server runs on local system*)
+				Client.UdpOpen_0.sLocalHost 	:= '192.168.101.10';//'';	(* Local address*)
+			ELSIF strcmp(ADR(Client.Udp_GetLocalAmsNetId.AddrString), ADR('192.168.102.10.1.1')) = 0 THEN
+			//	Client.UdpOpen_0.sSrvNetId 		:= '192.168.102.10.1.1';//'';	(* If empty string=>server runs on local system*)
+				Client.UdpOpen_0.sLocalHost 	:= '192.168.102.10';//'';	(* Local address*)
+			ELSE
+				Client.UdpOpen_0.sSrvNetId 		:= '';	(* If empty string=>server runs on local system*)
+				Client.UdpOpen_0.sLocalHost 	:= '';	(* Local address*)			
+			END_IF
+			TimerDelayStart(in:=TRUE,pt:=T#5S);
+		END_IF
+		IF Client.status.opened = FALSE THEN
+			IF Trig3.EDGEPOS(TimerDelayStart.Q)THEN
+				TimerDelayStart(in:=FALSE,pt:=T#5S);
+				Client.UdpOpen_0(bExecute := TRUE);	(* Call the Function*)
+//			IF (NOT Client.UdpOpen_0.bError) THEN
+				IF Trig1.EDGENEG(Client.UdpOpen_0.bBusy) THEN  (* UdpOpen successful*)
+					Client.status.opened := TRUE;
+					Client.UdpSend_0.hSocket := Client.UdpOpen_0.hSocket;
+					IF Client.Udp_GetLocalAmsNetId.AddrBytes[0] <> 0 THEN
+						IF strcmp(ADR(Client.Udp_GetLocalAmsNetId.AddrString), ADR('192.168.101.10.1.1')) = 0 THEN
+							Client.UdpSend_0.sRemoteHost := '192.168.101.2';//UDP_SERVER_ADDRESS;			
+							RTC_amsid := 	'192.168.101.2.1.1';
+						ELSIF strcmp(ADR(Client.Udp_GetLocalAmsNetId.AddrString), ADR('192.168.102.10.1.1')) = 0 THEN
+							Client.UdpSend_0.sRemoteHost := '192.168.102.2';//UDP_SERVER_ADDRESS;			
+							RTC_amsid := 	'192.168.102.2.1.1';
+						ELSE
+							Client.UdpSend_0.sRemoteHost := Client.UdpOpen_0.hSocket.localAddr.sAddr;
+						END_IF
+					END_IF
+					Client.UdpSend_0.sSrvNetId	 := '';	//If empty string=>server runs on local system
+					Client.UdpSend_0.nRemotePort := UDP_SERVER_PORT_NUMBER;		
+					Client.UdpSend_0.pSrc		 := ADR(PcSendData);	(* Which data to send *)
+					//Client.UdpSend_0.tTimeout := ;
+					
+					// Thresholds for ignore/resume printing messages
+					IgnorePrintDebugMsgsThreshold		:= REAL_TO_UINT(GLOBAL_ARRAY_LENGTH * 0.8);
+					ResumePrintDebugMsgsThreshold		:= REAL_TO_UINT(GLOBAL_ARRAY_LENGTH * 0.7);
+					IgnorePrintInfoMsgsThreshold		:= REAL_TO_UINT(GLOBAL_ARRAY_LENGTH * 0.6);
+					ResumePrintInfoMsgsThreshold		:= REAL_TO_UINT(GLOBAL_ARRAY_LENGTH * 0.5);
+					State:=	State + 1;
+				//	Client.UdpSend_0.bExecute := TRUE;
+				END_IF
+			END_IF	
+//			END_IF
+		END_IF
+
+	1:
+		Meth_PLC_Init:=	TRUE;
+END_CASE
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="fbPcTransmit">
+      <LineId Id="290" Count="0" />
+      <LineId Id="358" Count="0" />
+      <LineId Id="360" Count="0" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="226" Count="2" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="48" Count="27" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="76" Count="43" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="122" Count="3" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="126" Count="3" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="709" Count="0" />
+    </LineIds>
+    <LineIds Name="fbPcTransmit.ActionPrintf">
+      <LineId Id="20" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="48" Count="3" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="4" Count="2" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="7" Count="4" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="12" Count="5" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="fbPcTransmit.FaultRecover">
+      <LineId Id="2" Count="2" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="29" Count="3" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="fbPcTransmit.Meth_PLC_Init">
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="62" Count="2" />
+      <LineId Id="124" Count="2" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="65" Count="4" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="70" Count="3" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="120" Count="3" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="98" Count="10" />
+      <LineId Id="83" Count="3" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="37" Count="2" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,525 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="BeckHoffBasicAxis_FB" Id="{7401c67a-b93f-0ec7-0435-169f31fe6b3a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC BeckHoffBasicAxis_FB EXTENDS CoE_BasicAxis_FB  
+VAR_INPUT		
+	
+END_VAR
+VAR_IN_OUT	
+END_VAR
+VAR_OUTPUT	
+END_VAR
+
+VAR
+	DebugError					: UINT;
+	ErrorMSgSize                : UDINT :=28;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+SUPER^(AxisRef:=AxisRef);
+	
+]]></ST>
+    </Implementation>
+    <Method Name="CreateDriveErrMsgDetails" Id="{04054832-0dfd-028a-17bc-83f23c3e708c}">
+      <Declaration><![CDATA[METHOD CreateDriveErrMsgDetails : enumMotorEvents
+VAR_INPUT
+	ErrorId			: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE ErrorId OF
+	
+	16#1:
+		CreateDriveErrMsgDetails := enumMotorEvents.NoEvents;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d  ,No error',UDINT_TO_DINT(ErrorId),0,0);
+	16#4101: 
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverTemp ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Terminal-Overtemperature',UDINT_TO_DINT(ErrorId),0,0);
+	16#4300:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Subincrements deactivated',UDINT_TO_DINT(ErrorId),0,0);
+	16#4301:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorFeedBackErr ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Encoder-Warning',UDINT_TO_DINT(ErrorId),0,0);
+	16#4400:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;	
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Drive is not calibrated',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#4401:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Starttype not supported',UDINT_TO_DINT(ErrorId),0,0);
+	16#4402:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Command rejected',UDINT_TO_DINT(ErrorId),0,0);
+	16#4405:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Invalid modulo subtype',UDINT_TO_DINT(ErrorId),0,0);
+	16#4410:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Target overrun',UDINT_TO_DINT(ErrorId),0,0);
+	16#4411:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d DC-Link undervoltage',UDINT_TO_DINT(ErrorId),0,0);
+	16#4412:
+ 		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d 2 DC-Link overvoltage',UDINT_TO_DINT(ErrorId),0,0);
+	16#4413: 
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d I2T Amplifier overload',UDINT_TO_DINT(ErrorId),0,0);
+	16#4414:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d I2T Motor overload',UDINT_TO_DINT(ErrorId),0,0);
+	16#4415:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSpeedError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Speed limitation active',UDINT_TO_DINT(ErrorId),0,0);
+	16#4416:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Step lost detected',UDINT_TO_DINT(ErrorId),0,0);
+	16#8001:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8002:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Communication aborted',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#8003:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Configuration error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8100:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Status word set',UDINT_TO_DINT(ErrorId),0,0);
+	16#8101:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Operation mode incompatible to PDO',UDINT_TO_DINT(ErrorId),0,0);
+	16#8102:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Invalid combination of Inputs and Outputs PDOs',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#8104:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverTemp ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Terminal-Overtemperature',UDINT_TO_DINT(ErrorId),0,0);
+	
+	16#8105:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d PD-Watchdog',UDINT_TO_DINT(ErrorId),0,0);
+	16#8135:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Large cycle time',UDINT_TO_DINT(ErrorId),0,0);
+	16#8200:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCillegalMsg ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Write access error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8201:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d No com to field-side (Auxiliary voltage missing)',UDINT_TO_DINT(ErrorId),0,0);
+	16#82FF:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Bootmode not activated',UDINT_TO_DINT(ErrorId),0,0);
+	16#8300:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Set position error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8301:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Encoder increments not configured',UDINT_TO_DINT(ErrorId),0,0);
+	16#8302:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorFeedBackErr ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Encoder-Error',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#8400:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Incorrect drive configuration',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#8401:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSpeedError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Limiting of calibration velocity',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#8402:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveNotEnabled;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Emergency stop activated',UDINT_TO_DINT(ErrorId),0,0);
+	16#8403:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d ADC Error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8404:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Overcurrent',UDINT_TO_DINT(ErrorId),0,0);
+	16#8405:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Invalid modulo position',UDINT_TO_DINT(ErrorId),0,0);
+	16#8406:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Undervoltage DC-Link',UDINT_TO_DINT(ErrorId),0,0);
+	16#8407:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Overvoltage DC-Link',UDINT_TO_DINT(ErrorId),0,0);
+	16#8408:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d I2T-Model Amplifier overload',UDINT_TO_DINT(ErrorId),0,0);
+	16#8409:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d I2T-Model motor overload',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#8415:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Invalid modulo factor',UDINT_TO_DINT(ErrorId),0,0);
+	16#8440:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'BeckHoff Drive ErrorId %d Motor cable not connected',UDINT_TO_DINT(ErrorId),0,0);
+
+	ELSE
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'unknown BeckHoff Drive ErrorId %d ',UDINT_TO_DINT(ErrorId),0,0);
+		CreateDriveErrMsgDetails := enumMotorEvents.NoEvents;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="DriveErrorHandling" Id="{8d130df1-fd42-0df4-344b-347a8a456f68}">
+      <Declaration><![CDATA[METHOD DriveErrorHandling : BOOL
+VAR_INST
+	
+	ErrHandleState	: INT;
+
+	SoEReset_FB	: FB_SoEReset;
+	EcSoERead_DriveError_FB		: FB_EcSoERead;
+	tmpDriveErrId				: UINT;
+	NewMsgID					: BYTE;
+	PrevMsgID					: BYTE;
+	DiagMsg                     : STRING[100];
+	EcCoeSdoRead_DriveErrorFB	: FB_EcCoeSdoRead;
+	MC_Reset_FB					: MC_Reset;
+	tempErrorEntry			    : Eh_ErrorEntry_typ;
+	ErrorByte1                  : UINT;
+	ErrorByte2                  : UINT;
+	BeckHoffLastError       	: UDINT; 
+	BeckHoffLastErrorCounter    : UDINT := 0; 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE ErrHandleState OF
+	0: // logic init
+		GetErrCanAdr();	
+		ErrHandleState	:= 200;
+		
+		
+	//************************* CAN Logic **********************************************
+	200: // wait errors
+		{warning disable C0371}
+		IF AxisRef.Status.DriveDeviceError OR AxisRef.NcToPlc.ErrorCode = 18000 THEN
+			SoEReset_FB.Execute				:= FALSE;
+			EcSoERead_DriveError_FB.bExecute	:= FALSE;
+			ErrHandleState	:= 210;
+		ELSIF AxisRef.NcToPlc.ErrorCode <> 0 
+			AND AxisRef.NcToPlc.ErrorCode <> 18000 THEN
+			// ETZ Axis.NcToPlc.ErrorCode
+			ErrHandleState	:= 300;
+		ELSIF AxisCtrlPtr^.Output.Error.fbErrorHandler.EntriesCount > 0 THEN
+			// do nothing
+		END_IF
+		
+		IF AxisRef.Status.DriveDeviceError = FALSE THEN
+			BeckHoffLastError := 0;
+			BeckHoffLastErrorCounter := 0;
+		END_IF
+		{warning restore C0371}
+	210: // wait speed decrease
+		IF AxisCtrlPtr^.Output.monitor.ActVelocity < 500 THEN
+			ErrHandleState	:= 211;	// read can error
+		END_IF
+		
+	211:// MSG ID read new 
+		PrevMsgID := NewMsgID;
+		EcCoeSdoRead_DriveErrorFB.sNetId		:= strEcNetId;
+		EcCoeSdoRead_DriveErrorFB.nSlaveAddr	:= AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+		CoeErrIdSubIndex					    := 16#02 ; 			// MSG ID read new 
+		EcCoeSdoRead_DriveErrorFB.nIndex		:= CoeErrIdIndex; 
+		EcCoeSdoRead_DriveErrorFB.nSubIndex	    := CoeErrIdSubIndex; 
+		EcCoeSdoRead_DriveErrorFB.pDstBuf		:= ADR(NewMsgID);
+		EcCoeSdoRead_DriveErrorFB.cbBufLen		:= SIZEOF(NewMsgID);
+		EcCoeSdoRead_DriveErrorFB.tTimeout		:= T#10S;
+		IF NOT EcCoeSdoRead_DriveErrorFB.bBusy THEN
+			EcCoeSdoRead_DriveErrorFB.bExecute		:= TRUE;
+			
+			ErrHandleState	:= 212;
+		END_IF	
+	212:
+		IF NOT EcCoeSdoRead_DriveErrorFB.bBusy THEN
+			EcCoeSdoRead_DriveErrorFB.bExecute		:= FALSE;
+			IF NOT EcCoeSdoRead_DriveErrorFB.bError THEN				
+				
+				IF PrevMsgID <> NewMsgID THEN
+					// Read Msg
+					ErrHandleState	:= 213;
+				ELSE
+					ErrHandleState	:= 200;	
+				END_IF
+			ELSE
+				fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'NO LINKS FOR DRIVE or Wrong Obj  obj index=%d subindex=%d ErrID %d ',CoeErrIdIndex,CoeErrIdSubIndex,UDINT_TO_DINT(EcCoeSdoRead_DriveErrorFB.nErrId ));
+				ErrHandleState	:= 221;	
+				DebugError := 1;
+			END_IF
+		END_IF
+	213:
+		EcCoeSdoRead_DriveErrorFB.sNetId		:= strEcNetId;
+		EcCoeSdoRead_DriveErrorFB.nSlaveAddr	:= AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+		
+		CoeErrIdSubIndex					    := NewMsgID ; 	
+		
+		EcCoeSdoRead_DriveErrorFB.nIndex		:= CoeErrIdIndex; 
+		EcCoeSdoRead_DriveErrorFB.nSubIndex	    := CoeErrIdSubIndex; 
+		EcCoeSdoRead_DriveErrorFB.pDstBuf		:= ADR(DiagMsg);
+		EcCoeSdoRead_DriveErrorFB.cbBufLen		:= ErrorMSgSize;
+		EcCoeSdoRead_DriveErrorFB.tTimeout		:= T#20S;
+		IF NOT EcCoeSdoRead_DriveErrorFB.bBusy THEN
+			EcCoeSdoRead_DriveErrorFB.bExecute		:= TRUE;
+			ErrHandleState	:= 214;	// MC_Reset
+		END_IF	
+	214:
+		IF NOT EcCoeSdoRead_DriveErrorFB.bBusy THEN
+			EcCoeSdoRead_DriveErrorFB.bExecute		:= FALSE;
+			IF NOT EcCoeSdoRead_DriveErrorFB.bError THEN
+				
+				ErrHandleState	:= 220;	// Parse error ID
+				ErrorByte1 := DiagMsg[6];
+				ErrorByte2 := DiagMsg[7]; 
+								
+				tmpDriveErrId := ErrorByte1 OR SHL(ErrorByte2,8) ;				
+				
+			ELSE
+				fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'St 214 Error read obj index=%d subindex=%d ErrID %d ',CoeErrIdIndex,CoeErrIdSubIndex,TO_DINT(EcCoeSdoRead_DriveErrorFB.nErrId) );
+				ErrHandleState	:= 221;	
+				
+				DebugError := 2;
+			END_IF
+		END_IF	
+	//Parse error ID
+	220:
+				IF tmpDriveErrId <> 1 THEN
+					// Add Drive Error to ErrorHandler
+					tmp_ErrorEntry.ErrorId		:= tmpDriveErrId;
+		//			IF BeckHoffLastError <>  tmp_ErrorEntry.ErrorId OR BeckHoffLastErrorCounter > 10  THEN
+					
+						
+						tmp_ErrorEntry.ErrorText	:= AxisCtrlPtr^.Input.Parameter.ThreadName;
+						tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText,'Beckhoff Drive ErrorID: ');
+						tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+						tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, ', Or 0x');
+						tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_HEX_STRING(tmp_ErrorEntry.ErrorId));
+						
+						tmp_ErrorEntry.MotorEvents  := CreateDriveErrMsgDetails(tmp_ErrorEntry.ErrorId);
+						fnLogMsg(ADR(LogMsg_0),LOG_ERROR,tmp_ErrorEntry.ErrorText,0,0,0);
+						//ETZ to Add method for Log			
+						AxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+						BeckHoffLastError := tmp_ErrorEntry.ErrorId;
+						BeckHoffLastErrorCounter := 0;
+			(*		ELSE
+						BeckHoffLastErrorCounter := BeckHoffLastErrorCounter + 1;	
+					END_IF	*)
+				END_IF				
+				ErrHandleState	:= 300;	// MC_Reset
+		
+ 	221:
+				
+					// Add Drive Error to ErrorHandler
+					tmp_ErrorEntry.ErrorId		:= 16#8002;
+					tmp_ErrorEntry.ErrorText	:= AxisCtrlPtr^.Input.Parameter.ThreadName;
+					tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText,' Drive ErrorID: ');
+					tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+					tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, ', Or 0x');
+					tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_HEX_STRING(tmp_ErrorEntry.ErrorId));
+					
+					tmp_ErrorEntry.MotorEvents  := CreateDriveErrMsgDetails(tmp_ErrorEntry.ErrorId);
+					fnLogMsg(ADR(LogMsg_0),LOG_ERROR,tmp_ErrorEntry.ErrorText,0,0,0);
+					//ETZ to Add method for Log			
+					AxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+								
+				ErrHandleState	:= 300;	// MC_Reset
+	300: // Run MC_Reset
+		MC_Reset_FB.Execute	:= TRUE;
+		ErrHandleState		:= 301;
+	301:
+		{warning disable C0371}
+		IF MC_Reset_FB.Done 
+			AND AxisRef.NcToPlc.ErrorCode = 0
+			(*AND Axis.Status.DriveDeviceError = FALSE*) THEN
+			MC_Reset_FB.Execute	:= FALSE;
+	
+			ErrHandleState	:= 0;
+		ELSIF (MC_Reset_FB.Done AND AxisRef.NcToPlc.ErrorCode <> 0) THEN
+			
+			MC_Reset_FB.Execute	:= FALSE;	
+			ErrHandleState		:= 300;	
+	
+		ELSIF MC_Reset_FB.Error THEN
+			MC_Reset_FB.Execute	:= FALSE;
+			// Add FB Error to ErrorHandler
+			tmp_ErrorEntry.ErrorId		:= MC_Reset_FB.ErrorID;
+			tmp_ErrorEntry.ErrorText	:= 'FB MC_Reset_FB ErrorID: ';
+			tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+			AxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+			
+			ErrHandleState	:= 0;
+		END_IF
+		{warning restore C0371}
+		IF (AxisCtrlPtr^.Output.Status.CommunicationError = TRUE) THEN
+			MC_Reset_FB.Execute	:= FALSE;
+			ErrHandleState		:= 400;	
+		END_IF
+	400:
+		IF (AxisCtrlPtr^.Output.Status.CommunicationError = FALSE) THEN
+			ErrHandleState	:= 300;	
+		END_IF
+			
+
+END_CASE
+
+EcSoERead_DriveError_FB();
+EcCoeSdoRead_DriveErrorFB();
+{warning disable C0371}
+SoEReset_FB(Axis:= AxisRef);
+MC_Reset_FB(Axis:= AxisRef);
+	
+{warning restore C0371}
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetErrCanAdr" Id="{74a77b4b-1e39-01b3-313b-5abf7dcf7699}">
+      <Declaration><![CDATA[METHOD GetErrCanAdr : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CoeErrIdIndex		:= 16#10F3;
+
+		
+//CoeErrIdIndex	:= 16#603F;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="BeckHoffBasicAxis_FB">
+      <LineId Id="2092" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="2115" Count="0" />
+      <LineId Id="2112" Count="0" />
+    </LineIds>
+    <LineIds Name="BeckHoffBasicAxis_FB.CreateDriveErrMsgDetails">
+      <LineId Id="13" Count="26" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="41" Count="38" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="83" Count="2" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="115" Count="17" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="133" Count="2" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="136" Count="2" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="139" Count="23" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="163" Count="2" />
+      <LineId Id="86" Count="2" />
+      <LineId Id="91" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="BeckHoffBasicAxis_FB.DriveErrorHandling">
+      <LineId Id="3" Count="3" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="83" Count="3" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="87" Count="5" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="93" Count="3" />
+      <LineId Id="467" Count="0" />
+      <LineId Id="469" Count="2" />
+      <LineId Id="468" Count="0" />
+      <LineId Id="97" Count="7" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="106" Count="8" />
+      <LineId Id="371" Count="0" />
+      <LineId Id="115" Count="3" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="317" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="320" Count="1" />
+      <LineId Id="316" Count="0" />
+      <LineId Id="374" Count="0" />
+      <LineId Id="378" Count="1" />
+      <LineId Id="130" Count="3" />
+      <LineId Id="256" Count="1" />
+      <LineId Id="318" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="259" Count="5" />
+      <LineId Id="253" Count="1" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="290" Count="3" />
+      <LineId Id="306" Count="2" />
+      <LineId Id="324" Count="1" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="349" Count="0" />
+      <LineId Id="309" Count="0" />
+      <LineId Id="377" Count="0" />
+      <LineId Id="375" Count="1" />
+      <LineId Id="310" Count="1" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="314" Count="0" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="271" Count="2" />
+      <LineId Id="436" Count="2" />
+      <LineId Id="274" Count="9" />
+      <LineId Id="442" Count="0" />
+      <LineId Id="444" Count="0" />
+      <LineId Id="439" Count="0" />
+      <LineId Id="441" Count="0" />
+      <LineId Id="440" Count="0" />
+      <LineId Id="284" Count="2" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="401" Count="13" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="134" Count="3" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="138" Count="5" />
+      <LineId Id="546" Count="0" />
+      <LineId Id="549" Count="0" />
+      <LineId Id="547" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="550" Count="0" />
+      <LineId Id="145" Count="9" />
+      <LineId Id="495" Count="0" />
+      <LineId Id="520" Count="0" />
+      <LineId Id="526" Count="0" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="518" Count="0" />
+      <LineId Id="524" Count="1" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="519" Count="0" />
+      <LineId Id="493" Count="0" />
+      <LineId Id="155" Count="3" />
+      <LineId Id="498" Count="0" />
+      <LineId Id="159" Count="1" />
+      <LineId Id="496" Count="1" />
+      <LineId Id="164" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="BeckHoffBasicAxis_FB.GetErrCanAdr">
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

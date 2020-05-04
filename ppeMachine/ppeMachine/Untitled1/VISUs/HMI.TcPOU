@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="HMI" Id="{55836121-589d-4766-b191-c8681c6bfc5d}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM HMI
+VAR
+	StartButtonColor:BOOL;
+	SwitchOnButtonColor:BOOL;
+	StopButtonColor:BOOL;
+	LogoRotation:INT;
+	ManualLogoRotation:INT;
+	EnableManualButton:BOOL;
+	
+	//Timers color
+	TimerColdCutColor:BOOL;
+	TimerHotWeldColor:BOOL;
+	TimerHeaterOnColor:BOOL;
+	TimerHeaterOffColor:BOOL;
+	TimerValveCloseColor:BOOL;	
+	StateMotorOnColor:BOOL;		
+	
+	//Estop Dialog
+	bOpen 						: BOOL;
+	fbOpenTrigger 				: R_TRIG;
+	bClose 						: BOOL;
+	fbCloseTrigger 				: R_TRIG;
+	EstopDialogBackgroundColor	: BOOL;
+	timerDialogsBackground		:TON;
+	
+	
+	
+	//Scaling 
+	onOffScaling : INT := 1000;
+	WinderScaling : INT := 1000;
+	IOScaling : INT := 1000;
+	EstopScalling	: INT := 1000;
+	
+	//INIT
+	init:BOOL;
+	timerInit:TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+ACT_init();
+
+IF init THEN
+	ACT_Timers();
+	ACT_Dialogs();
+	
+	IF gMachineCtrl.Cmd.SwitchOn THEN
+		SwitchOnButtonColor := gMachineCtrl.Cmd.SwitchOn ;
+	END_IF	
+	
+	IF gMachineCtrl.Cmd.EmStop THEN
+		SwitchOnButtonColor := FALSE ;
+	END_IF	
+	
+	IF FB_Machine_Ctrl.StepNo = 20 THEN
+		LogoRotation:= (LogoRotation+5) MOD 360;
+	ELSE
+		//LogoRotation:=0;
+	END_IF
+	
+	
+	IF gMachineCtrl.Cmd.Manual THEN
+		ManualLogoRotation:= (ManualLogoRotation+5) MOD 360;
+	ELSE
+		//LogoRotation:=0;
+	END_IF
+	
+	//EnableManual Button
+	IF FB_Machine_Ctrl.StepNo = 10 THEN
+		EnableManualButton:=FALSE;
+	ELSE
+		EnableManualButton:=TRUE;
+	END_IF
+
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="ACT_Dialogs" Id="{494fad89-e0ef-4d56-a0db-15a871147a1a}">
+      <Implementation>
+        <ST><![CDATA[bOpen:= (gMachineCtrl.IO.In.E_StopPressed=TRUE);
+bClose:= (gMachineCtrl.IO.In.E_StopPressed=FALSE);
+//Dialog_1
+//Open
+fbOpenTrigger(CLK := bOpen);
+IF fbOpenTrigger.Q THEN
+	OpenDialog('Dialog_Estop',300,200);
+END_IF
+//Close
+fbCloseTrigger(CLK := bClose);
+IF fbCloseTrigger.Q THEN
+	CloseDialog('Dialog_Estop');
+END_IF
+
+timerDialogsBackground(IN:=NOT(timerDialogsBackground.Q),PT:=T#2S);
+EstopDialogBackgroundColor:= timerDialogsBackground.ET>T#1S;
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ACT_init" Id="{6df27257-b097-423d-833f-e4b61fa64bed}">
+      <Implementation>
+        <ST><![CDATA[timerInit(IN:=TRUE,PT:=T#30S);
+init:=timerInit.Q;
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ACT_Timers" Id="{82e87a87-292b-4e30-a3e8-d3ae9cf93ce1}">
+      <Implementation>
+        <ST><![CDATA[
+
+IF FB_Machine_Run.StepNo = MACHINE_COLD_CUT_VALVE_OPEN THEN
+	TimerColdCutColor:=TRUE;
+ELSE
+	TimerColdCutColor:=FALSE;
+END_IF
+
+IF FB_Machine_Run.StepNo = MACHINE_WELD_VALVE_OPEN THEN
+	TimerHotWeldColor:=TRUE;
+ELSE
+	TimerHotWeldColor:=FALSE;
+END_IF
+
+IF FB_Machine_Run.StepNo = MACHINE_HEATER_ON THEN
+	TimerHeaterOnColor:=TRUE;
+ELSE
+	TimerHeaterOnColor:=FALSE;
+END_IF
+
+IF FB_Machine_Run.StepNo = MACHINE_HEATER_OFF THEN
+	TimerHeaterOffColor:=TRUE;
+ELSE
+	TimerHeaterOffColor:=FALSE;
+END_IF
+
+IF FB_Machine_Run.StepNo = MACHINE_VALVE_CLOSE THEN
+	TimerValveCloseColor:=TRUE;
+ELSE
+	TimerValveCloseColor:=FALSE;
+END_IF
+
+IF FB_Machine_Run.StepNo = MACHINE_MOTOR_ON THEN
+	StateMotorOnColor:=TRUE;
+ELSE
+	StateMotorOnColor:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="HMI">
+      <LineId Id="154" Count="1" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="144" Count="2" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="33" Count="3" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="39" Count="4" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="68" Count="0" />
+    </LineIds>
+    <LineIds Name="HMI.ACT_Dialogs">
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="1" />
+    </LineIds>
+    <LineIds Name="HMI.ACT_init">
+      <LineId Id="1" Count="2" />
+    </LineIds>
+    <LineIds Name="HMI.ACT_Timers">
+      <LineId Id="2" Count="5" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="9" Count="4" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="15" Count="4" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="4" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="27" Count="4" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="33" Count="4" />
+      <LineId Id="32" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

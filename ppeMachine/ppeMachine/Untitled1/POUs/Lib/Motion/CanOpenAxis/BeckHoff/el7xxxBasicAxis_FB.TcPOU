@@ -1,0 +1,873 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="el7xxxBasicAxis_FB" Id="{52d37af2-3990-0d87-268e-7fa97aeb215b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK el7xxxBasicAxis_FB EXTENDS BeckHoffBasicAxis_FB
+VAR_INPUT
+	pDigIn: 	POINTER TO INT;	
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+AxisCtrlPtr^.Input.Parameter.Drive.eDriveType := enumDriveType.eEL70xx;
+AxisCtrlPtr^.Input.Parameter.Drive.VendorNameID := eVendorNameID.Beckhoff;
+
+
+SUPER^(AxisRef:=AxisRef);
+
+IF (pDigIn <> 0) THEN
+	AxisCtrlPtr^.Output.Status.DriveEnable	:= pDigIn^.7;
+ELSE
+	AxisCtrlPtr^.Output.Status.DriveEnable	:= TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <Method Name="HomeLagErrExternFeedBack" Id="{824ad3ba-f315-00e8-3811-14e406adc2b4}">
+      <Declaration><![CDATA[METHOD HomeLagErrExternFeedBack : BOOL
+VAR_INPUT
+	Execute: BOOL;
+END_VAR
+
+VAR_INST
+	fbEcCoeSdoWriteMaxCurrent	: FB_EcCoeSdoWrite;
+	State:INT;	
+	ExtLagErrPrevState : INT;
+	HomeTrig: Trigger;
+	Reset:BOOL;	
+	Delay:	TON;	
+	LastActExternEncodPos:		UDINT;
+	DiffExternEncodPos:			DINT;
+	LatchSetPos:				LREAL;			
+	CalckedLagError:			LREAL;
+	EncdSampleTimer:			TON;
+	StartPosMonitor:			BOOL;
+		
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Reset:= Execute;
+IF HomeTrig.EDGEPOS(Reset) THEN
+	Reset:=	FALSE;
+	State:=1;
+	
+	HomeLagErrExternFeedBack:= FALSE ;
+	HomingActive:= 	TRUE ;
+	AxisCtrlPtr^.Output.Status.MC_Home.Done:= FALSE ;
+	fbMC_MoveVel.Execute:= FALSE ;
+	fbMC_MoveRel.Execute:= FALSE ;
+END_IF
+
+IF Execute THEN
+	CASE State OF
+		
+		1:									
+			fbEcCoeSdoWriteMaxCurrent.sNetId:= 		strEcNetId;
+			fbEcCoeSdoWriteMaxCurrent.nSlaveAddr:= 	AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+			fbEcCoeSdoWriteMaxCurrent.nSubIndex:=	1;
+			fbEcCoeSdoWriteMaxCurrent.nIndex:= 		16#8010;  			
+			fbEcCoeSdoWriteMaxCurrent.pSrcBuf:=		 ADR(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockSearchMaxCurrent); 
+			fbEcCoeSdoWriteMaxCurrent.cbBufLen:= 	SIZEOF(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockSearchMaxCurrent); 
+			fbEcCoeSdoWriteMaxCurrent.bExecute:= 	TRUE; 
+			fbEcCoeSdoWriteMaxCurrent.tTimeout:= 	T#2S;					
+			State:= State +1;							
+			 
+		2:		
+			IF NOT fbEcCoeSdoWriteMaxCurrent.bBusy THEN
+				fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;
+				IF NOT fbEcCoeSdoWriteMaxCurrent.bError THEN																									
+					State:= State +1;
+				ELSE
+					fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;
+					fnLogMsg(ADR(LogMsg_0),LOG_ERROR,Concat('ADS Error Code %d: ',F_ADStoStr(fbEcCoeSdoWriteMaxCurrent.nErrId)),UDINT_TO_DINT(fbEcCoeSdoWriteMaxCurrent.nErrId),0,0);
+					State:= 0;				
+				END_IF				
+			END_IF 		 
+		3:	
+			IF WriteNC_AxisBoolParam(MC_AxisParameter:=MC_AxisParameter.EnablePosLagMonitoring,ParamValue:=FALSE) THEN
+				State:= State +1;	
+			END_IF
+						
+										
+		4: 										
+			IF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.eNEGATIVE THEN								
+				fbMC_MoveVel.Direction:= 	MC_Negative_Direction; 					
+			ELSIF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.ePOSITIVE THEN								
+				fbMC_MoveVel.Direction:= 	MC_Positive_Direction;										
+			END_IF
+			
+			fbMC_MoveVel.Velocity:= AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.SwitchVelo;			
+			fbMC_MoveVel.Execute:= 	TRUE ;
+			LastActExternEncodPos:=	AxisCtrlPtr^.Output.monitor.ActExternEncodPos;						
+			State:= State + 1;
+			
+		5:	IF AxisCtrlPtr^.Output.Status.AxisStatus.ContinuousMotion THEN
+				EncdSampleTimer(IN:= NOT(EncdSampleTimer.Q),PT:=T#0.2S);
+				IF EncdSampleTimer.Q THEN	
+					State:= State + 1;
+				END_IF	
+			END_IF
+		6: 							
+			DiffExternEncodPos:=ABS(UDINT_TO_DINT(AxisCtrlPtr^.Output.monitor.ActExternEncodPos) - UDINT_TO_DINT(LastActExternEncodPos));
+			IF DiffExternEncodPos <= 4 THEN
+				LatchSetPos:=	AxisCtrlPtr^.Output.monitor.ActPosition;			
+				State:= State + 1;
+			ELSE
+				LastActExternEncodPos:=	AxisCtrlPtr^.Output.monitor.ActExternEncodPos;	
+				State:= 5;
+			END_IF			
+					
+		7:									
+			CalckedLagError:=	ABS(AxisCtrlPtr^.Output.monitor.ActPosition - LatchSetPos);										
+			IF (CalckedLagError > AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.LagErr) THEN
+				State:= State + 1;	
+			END_IF
+			
+		
+		8:	
+			IF Stop() THEN
+				State:= State + 1;				
+			END_IF
+					
+		9:	InternalPowerHandle:=	TRUE;
+			AxisCtrlPtr^.Input.Command.Power:= FALSE;
+			IF AxisCtrlPtr^.Output.Status.AxisStatus.Disabled THEN
+				State:= State + 1;	
+			END_IF
+			
+		10:	Delay(IN:=	TRUE,PT:=T#0.5S);		
+			IF Delay.Q THEN
+				Delay(IN:=FALSE);	
+				State:= State +1;
+			END_IF
+			
+		11:	InternalPowerHandle:=	FALSE;
+			AxisCtrlPtr^.Input.Command.Power:= TRUE;
+			State:= State +1;
+		
+		12:	
+	
+			IF (AxisCtrlPtr^.Output.Status.MC_Power.Status = TRUE) THEN
+				State:= State + 1;	
+			END_IF
+			
+			
+		13:	Delay(IN:=	TRUE,PT:=T#0.5S);		
+			IF Delay.Q THEN
+				Delay(IN:=FALSE);
+					
+				State:= State +1;
+			END_IF
+			
+		14:		
+		
+
+			IF fbEcCoeSdoWriteMaxCurrent.bBusy = FALSE THEN
+				fbEcCoeSdoWriteMaxCurrent.sNetId:= 		strEcNetId;
+				fbEcCoeSdoWriteMaxCurrent.nSlaveAddr:= 	AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+				fbEcCoeSdoWriteMaxCurrent.nSubIndex:=	1;
+				fbEcCoeSdoWriteMaxCurrent.nIndex:= 		16#8010;  				
+				fbEcCoeSdoWriteMaxCurrent.pSrcBuf:=		 ADR(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockExitMaxCurrent); 				
+				fbEcCoeSdoWriteMaxCurrent.cbBufLen:= 	SIZEOF(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockExitMaxCurrent); 
+				fbEcCoeSdoWriteMaxCurrent.bExecute:= 	TRUE; 
+				fbEcCoeSdoWriteMaxCurrent.tTimeout:= 	T#2S;	
+								
+				
+				State:= State +1;				
+			END_IF
+			
+			
+			
+							
+		15:		
+			State:= State +1;
+		16:	
+			IF NOT fbEcCoeSdoWriteMaxCurrent.bBusy THEN
+				fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;
+				IF NOT fbEcCoeSdoWriteMaxCurrent.bError THEN																									
+					State:= State +1;
+				ELSE
+					fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;
+					fnLogMsg(ADR(LogMsg_0),LOG_ERROR,Concat('ADS Error Code %d: ',F_ADStoStr(fbEcCoeSdoWriteMaxCurrent.nErrId)),UDINT_TO_DINT(fbEcCoeSdoWriteMaxCurrent.nErrId),0,0);
+					State:= 0;				
+				END_IF				
+			END_IF 		 
+				
+		17:	
+			IF WriteNC_AxisBoolParam(MC_AxisParameter:=MC_AxisParameter.EnablePosLagMonitoring,ParamValue:=FALSE) THEN			
+				State:= State +1;	
+			END_IF	
+			
+														
+		18:		
+			fbMC_Home.HomingMode:= 	MC_Direct ;
+			fbMC_Home.Position:= 	0;
+			fbMC_Home.Execute:= 	TRUE;	
+			State:= State + 1;
+							
+		19:	
+			IF fbMC_Home.Done THEN
+				fbMC_Home.Execute := FALSE;		
+				IF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.eNEGATIVE THEN													
+					fbMC_MoveRel.Distance:=		AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.TriggerOffsetPos ;					
+				ELSIF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.ePOSITIVE THEN								
+					fbMC_MoveRel.Distance:=		AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.TriggerOffsetPos*(-1) ;											
+				END_IF
+				fbMC_MoveRel.Velocity:= AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.TriggerVelo;
+				
+				fbMC_MoveRel.Execute:= 	TRUE ;
+				State:= State + 1;	
+			END_IF
+			
+		20:	IF fbMC_MoveRel.Done THEN
+				fbMC_MoveRel.Execute := FALSE;
+				fbMC_Home.HomingMode:= 	MC_Direct ;
+				//fbMC_Home.Options:= 	AxisCtrlPtr^.Input.Parameter.HomeOptions.NcHomeOption;
+				fbMC_Home.Position:= 	(AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.HomeSetPos) * (-1); 
+				fbMC_Home.Execute:= 	TRUE;	
+				State := 100 ;
+			END_IF
+																											
+		100:
+			IF fbMC_Home.Done THEN
+				AxisCtrlPtr^.Input.Command.Home:= FALSE ;
+				HomingActive:= 							FALSE;
+				HomeLagErrExternFeedBack:= 		TRUE;
+				fbMC_Home.Execute:= 					FALSE;
+				AxisCtrlPtr^.Output.Status.MC_Home.Done:= TRUE ;
+				State:= 0;
+			END_IF
+	END_CASE
+	IF ExtLagErrPrevState <> State THEN
+		fnLogMsg(ADR(LogMsg_0),LOG_INFO,'Drive Lag Err step %d',State,0,0);
+		ExtLagErrPrevState := State;
+	END_IF	
+	
+END_IF
+ 
+
+fbMC_MoveVel.Acceleration  	:= AxisCtrlPtr^.Input.Parameter.Acceleration;
+fbMC_MoveVel.Deceleration  	:= AxisCtrlPtr^.Input.Parameter.Deceleration;
+fbMC_MoveVel.Jerk			:= AxisCtrlPtr^.Input.Parameter.Jerk;
+fbMC_MoveVel.Options		:= AxisCtrlPtr^.Input.Parameter.Options;
+fbMC_MoveVel.BufferMode		:= AxisCtrlPtr^.Input.Parameter.BufferMode;
+
+fbMC_MoveRel.Acceleration  	:= AxisCtrlPtr^.Input.Parameter.Acceleration;
+fbMC_MoveRel.Deceleration  	:= AxisCtrlPtr^.Input.Parameter.Deceleration;
+fbMC_MoveRel.Jerk			:= AxisCtrlPtr^.Input.Parameter.Jerk;
+fbMC_MoveRel.Options		:= AxisCtrlPtr^.Input.Parameter.Options;
+fbMC_MoveRel.BufferMode		:= AxisCtrlPtr^.Input.Parameter.BufferMode;
+
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_Home(Axis:= AxisRef);	
+fbMC_MoveVel(Axis:= AxisRef);
+fbMC_MoveRel(Axis:= AxisRef);
+
+
+fbMC_Stop.Deceleration:= 	AxisCtrlPtr^.Input.Parameter.Deceleration;
+fbMC_Stop.Jerk:=			AxisCtrlPtr^.Input.Parameter.Jerk;
+fbMC_Stop.Options:= 		AxisCtrlPtr^.Input.Parameter.Options;
+fbMC_Stop(Axis := AxisRef) ;
+{warning restore C0371}
+
+fbEcCoeSdoWriteMaxCurrent();
+
+THIS^.HomingGlobalHandle();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="HomeLagErrInternalEnc" Id="{8bb3a084-d0f0-0f9a-366c-33d85a1e4478}">
+      <Declaration><![CDATA[METHOD HomeLagErrInternalEnc : BOOL
+VAR_INPUT
+	Execute: BOOL;
+END_VAR
+
+VAR_INST
+	fbEcCoeSdoWriteMaxCurrent	: FB_EcCoeSdoWrite;
+//	State:INT;	
+//	HomeTrig: Trigger;
+//	Reset:BOOL;	
+//	Delay:	TON;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Reset:= Execute;
+IF HomeTrig.EDGEPOS(Reset) THEN
+	Reset:=	FALSE;
+	State:=1;
+	HomeLagErrInternalEnc:= FALSE ;
+	HomingActive:= 	TRUE ;
+	AxisCtrlPtr^.Output.Status.MC_Home.Done:= FALSE ;
+	fbMC_MoveVel.Execute:= FALSE ;
+	fbMC_MoveRel.Execute:= FALSE ;
+END_IF
+
+IF Execute THEN
+	CASE State OF
+		
+		1:									
+			fbEcCoeSdoWriteMaxCurrent.sNetId:= 		strEcNetId;
+			fbEcCoeSdoWriteMaxCurrent.nSlaveAddr:= 	AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+			fbEcCoeSdoWriteMaxCurrent.nSubIndex:=	1;
+			fbEcCoeSdoWriteMaxCurrent.nIndex:= 		16#8010;  
+			fbEcCoeSdoWriteMaxCurrent.pSrcBuf:=		 ADR(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockSearchMaxCurrent); 
+			fbEcCoeSdoWriteMaxCurrent.cbBufLen:= 	SIZEOF(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockSearchMaxCurrent); 
+			fbEcCoeSdoWriteMaxCurrent.bExecute:= 	TRUE; 
+			fbEcCoeSdoWriteMaxCurrent.tTimeout:= 	T#2S;					
+			State:= State +1;
+				
+			//IF (NOT SDOrw.Output.Status.EcCoeSdoWrite.bError) THEN
+			//	SDOrw.Input.Command.EcCoeSdoWrite.Enable:= TRUE;
+			//END_IF
+			//SDOrw.Input.Parameter.EcCoeSdoWrite.sNetId 		:= strEcNetId;
+		    //SDOrw.Input.Parameter.EcCoeSdoWrite.nSlaveAddr	:= AxisCtrlPtr^.Input.Parameter.nSlaveAddr;
+			//SDOrw.Input.Parameter.EcCoeSdoWrite.nIndex		:= 	16#8010;	
+		    //SDOrw.Input.Parameter.EcCoeSdoWrite.nSubIndex	:= 	1; 			
+			//SDOrw.Input.Parameter.EcCoeSdoWrite.pSrcBuf		:=  ADR(AxisCtrlPtr^.Input.Parameter.HomeOptions.BlockSearchMaxCurrent); 
+			//SDOrw.Input.Parameter.EcCoeSdoWrite.cbBufLen	:=  SIZEOF(AxisCtrlPtr^.Input.Parameter.HomeOptions.BlockSearchMaxCurrent);		
+			//State:= State +1;
+			 
+		2:
+			//IF THIS^.EcCoeSdoWrite() THEN 
+			//	 State:= State +1;
+			// END_IF	
+			IF NOT fbEcCoeSdoWriteMaxCurrent.bBusy THEN
+				fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;
+				IF NOT fbEcCoeSdoWriteMaxCurrent.bError THEN																									
+					State:= State +1;
+				ELSE
+					fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;
+					fnLogMsg(ADR(LogMsg_0),LOG_ERROR,Concat('int ADS Error Code %d index-0x8010: ',F_ADStoStr(fbEcCoeSdoWriteMaxCurrent.nErrId)),UDINT_TO_DINT(fbEcCoeSdoWriteMaxCurrent.nErrId),0,0);
+					State:= 0;				
+				END_IF				
+			END_IF 		 
+		3:	
+			IF WriteNC_AxisBoolParam(MC_AxisParameter:=MC_AxisParameter.EnablePosLagMonitoring,ParamValue:=FALSE) THEN
+				State:= State +1;	
+			END_IF
+						
+										
+		4: 										
+			IF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.eNEGATIVE THEN								
+				fbMC_MoveVel.Direction:= 	MC_Negative_Direction; 					
+			ELSIF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.ePOSITIVE THEN								
+				fbMC_MoveVel.Direction:= 	MC_Positive_Direction;										
+			END_IF
+			
+			fbMC_MoveVel.Velocity:= AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.SwitchVelo;
+	
+			fbMC_MoveVel.Execute:= 	TRUE ;
+			
+			State:= State + 1;
+			
+		5: 	
+			IF (ABS(AxisCtrlPtr^.Output.monitor.ActLagError) > AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.LagErr) THEN
+				State:= State + 1;	
+			END_IF
+		
+		6:	
+			IF Stop() THEN
+				State:= State + 1;				
+			END_IF
+					
+		7:	InternalPowerHandle:=	TRUE;
+			AxisCtrlPtr^.Input.Command.Power:= FALSE;
+			IF AxisCtrlPtr^.Output.Status.AxisStatus.Disabled THEN
+				State:= State + 1;	
+			END_IF
+			
+		8:	Delay(IN:=	TRUE,PT:=T#1S);		
+			IF Delay.Q THEN
+				Delay(IN:=FALSE);	
+				State:= State +1;
+			END_IF
+			
+		9:	InternalPowerHandle:=	FALSE;
+			AxisCtrlPtr^.Input.Command.Power:= TRUE;
+			IF (AxisCtrlPtr^.Output.Status.AxisStatus.Disabled = FALSE) THEN
+				State:= State + 1;	
+			END_IF
+			
+			
+		10:	
+		(*
+			IF (NOT SDOrw.Output.Status.EcCoeSdoWrite.bError) THEN
+				SDOrw.Input.Command.EcCoeSdoWrite.Enable 		:= TRUE;
+			END_IF
+			SDOrw.Input.Parameter.EcCoeSdoWrite.sNetId 		:= strEcNetId;
+		    SDOrw.Input.Parameter.EcCoeSdoWrite.nSlaveAddr	:= LREAL_TO_UINT(AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr.Value);
+			SDOrw.Input.Parameter.EcCoeSdoWrite.nIndex		:= 	16#8010;	
+		    SDOrw.Input.Parameter.EcCoeSdoWrite.nSubIndex	:= 	1; 			
+			SDOrw.Input.Parameter.EcCoeSdoWrite.pSrcBuf		:=  ADR(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockExitMaxCurrent); 
+			SDOrw.Input.Parameter.EcCoeSdoWrite.cbBufLen	:=  SIZEOF(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockExitMaxCurrent);	
+		*)
+			
+			fbEcCoeSdoWriteMaxCurrent.sNetId:= 		strEcNetId;
+			fbEcCoeSdoWriteMaxCurrent.nSlaveAddr:= AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+			fbEcCoeSdoWriteMaxCurrent.nSubIndex:= 1;
+			fbEcCoeSdoWriteMaxCurrent.nIndex:= 		16#8010;
+			fbEcCoeSdoWriteMaxCurrent.pSrcBuf:=		ADR(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockExitMaxCurrent); 
+			fbEcCoeSdoWriteMaxCurrent.cbBufLen:= SIZEOF(AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.BlockExitMaxCurrent);
+			fbEcCoeSdoWriteMaxCurrent.bExecute:=  TRUE;
+			fbEcCoeSdoWriteMaxCurrent.tTimeout:= T#2S;
+			
+			State:= State +1; 
+
+		11:	
+			IF NOT fbEcCoeSdoWriteMaxCurrent.bBusy THEN
+				fbEcCoeSdoWriteMaxCurrent.bExecute:= FALSE;		
+				 State:= State +1;
+			END_IF		
+				
+		12:	
+			IF WriteNC_AxisBoolParam(MC_AxisParameter:=MC_AxisParameter.EnablePosLagMonitoring,ParamValue:=TRUE) THEN			
+				State:= State +1;	
+			END_IF	
+			
+														
+		13:		
+			fbMC_Home.HomingMode:= 	MC_Direct ;
+			//fbMC_Home.Options:= 	AxisCtrlPtr^.Input.Parameter.HomeOptions.NcHomeOption ;
+			fbMC_Home.Position:= 	0;
+			fbMC_Home.Execute:= 	TRUE;	
+			State:= State + 1;
+							
+		14:	
+			IF fbMC_Home.Done THEN
+				fbMC_Home.Execute := FALSE;		
+				IF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.eNEGATIVE THEN													
+					fbMC_MoveRel.Distance:=		AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.TriggerOffsetPos ;					
+				ELSIF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.StartDirection = eHomeModeOption.ePOSITIVE THEN								
+					fbMC_MoveRel.Distance:=		AxisCtrlPtr^.Input.Parameter.HomeOptions.stLagErr.TriggerOffsetPos*(-1) ;											
+				END_IF
+				fbMC_MoveRel.Velocity:= AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.TriggerVelo;
+				
+				fbMC_MoveRel.Execute:= 	TRUE ;
+				State:= State + 1;	
+			END_IF
+			
+		15:	IF fbMC_MoveRel.Done THEN
+				fbMC_Home.HomingMode:= 	MC_Direct ;
+				//fbMC_Home.Options:= 	AxisCtrlPtr^.Input.Parameter.HomeOptions.NcHomeOption;
+				fbMC_Home.Position:= 	(AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.HomeSetPos) * (-1); 
+				fbMC_Home.Execute:= 	TRUE;	
+				State := 100 ;
+			END_IF
+																											
+		100:
+			IF fbMC_Home.Done THEN
+				AxisCtrlPtr^.Input.Command.Home:= FALSE ;
+				HomingActive:= 				FALSE;
+				HomeLagErrInternalEnc:= 		TRUE;
+				fbMC_Home.Execute:= 		FALSE;
+				AxisCtrlPtr^.Output.Status.MC_Home.Done:= TRUE ;
+				State:= 0;
+			END_IF
+	END_CASE
+
+END_IF
+ 
+
+fbMC_MoveVel.Acceleration  	:= AxisCtrlPtr^.Input.Parameter.Acceleration;
+fbMC_MoveVel.Deceleration  	:= AxisCtrlPtr^.Input.Parameter.Deceleration;
+fbMC_MoveVel.Jerk			:= AxisCtrlPtr^.Input.Parameter.Jerk;
+fbMC_MoveVel.Options		:= AxisCtrlPtr^.Input.Parameter.Options;
+fbMC_MoveVel.BufferMode		:= AxisCtrlPtr^.Input.Parameter.BufferMode;
+
+fbMC_MoveRel.Acceleration  	:= AxisCtrlPtr^.Input.Parameter.Acceleration;
+fbMC_MoveRel.Deceleration  	:= AxisCtrlPtr^.Input.Parameter.Deceleration;
+fbMC_MoveRel.Jerk			:= AxisCtrlPtr^.Input.Parameter.Jerk;
+fbMC_MoveRel.Options		:= AxisCtrlPtr^.Input.Parameter.Options;
+fbMC_MoveRel.BufferMode		:= AxisCtrlPtr^.Input.Parameter.BufferMode;
+
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+
+fbMC_Home(Axis:= AxisRef);	
+fbMC_MoveVel(Axis:= AxisRef);
+fbMC_MoveRel(Axis:= AxisRef);
+
+fbMC_Stop.Deceleration:= 	AxisCtrlPtr^.Input.Parameter.Deceleration;
+fbMC_Stop.Jerk:=			AxisCtrlPtr^.Input.Parameter.Jerk;
+fbMC_Stop.Options:= 		AxisCtrlPtr^.Input.Parameter.Options;
+fbMC_Stop(Axis := AxisRef) ;
+{warning restore C0371}
+fbEcCoeSdoWriteMaxCurrent();
+
+THIS^.HomingGlobalHandle();
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="HomeLagError" Id="{588999a9-d6ce-0c30-23fa-0be6e6e13184}">
+      <Declaration><![CDATA[METHOD HomeLagError : BOOL
+VAR_INPUT
+	Execute: BOOL;
+END_VAR
+
+VAR_INST
+	LagErrorState : INT;
+	HomingLagErrorTrig: Trigger;
+END_VAR
+VAR
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+IF HomingLagErrorTrig.EDGEPOS(Execute) THEN
+	LagErrorState := 1;
+	HomeLagError := FALSE;
+END_IF
+
+
+IF HomingLagErrorTrig.EDGENEG(Execute) THEN
+	
+	LagErrorState := 0;
+	
+END_IF
+
+CASE LagErrorState OF
+	 
+	
+	1:
+		HomeLagErrExternFeedBack(FALSE);
+		HomeLagErrInternalEnc(FALSE);
+		LagErrorState := LagErrorState +1;
+	2:
+		IF AxisCtrlPtr^.Input.Parameter.HomeOptions.stBasic.ExternalEncoder THEN
+			IF HomeLagErrExternFeedBack(TRUE) THEN
+				LagErrorState := LagErrorState +1;				
+			END_IF
+		ELSE
+			IF HomeLagErrInternalEnc(TRUE) THEN
+				LagErrorState := LagErrorState +1;				
+			END_IF
+	
+		END_IF		
+	3:
+		HomeLagError := TRUE;
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="el7xxxBasicAxis_FB">
+      <LineId Id="25" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="47" Count="4" />
+      <LineId Id="46" Count="0" />
+    </LineIds>
+    <LineIds Name="el7xxxBasicAxis_FB.HomeLagErrExternFeedBack">
+      <LineId Id="6" Count="1" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="842" Count="0" />
+      <LineId Id="288" Count="2" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="444" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="404" Count="1" />
+      <LineId Id="607" Count="7" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="598" Count="0" />
+      <LineId Id="597" Count="0" />
+      <LineId Id="643" Count="2" />
+      <LineId Id="661" Count="0" />
+      <LineId Id="664" Count="1" />
+      <LineId Id="668" Count="0" />
+      <LineId Id="667" Count="0" />
+      <LineId Id="662" Count="0" />
+      <LineId Id="622" Count="0" />
+      <LineId Id="447" Count="0" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="494" Count="0" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="743" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="744" Count="0" />
+      <LineId Id="749" Count="0" />
+      <LineId Id="746" Count="0" />
+      <LineId Id="748" Count="0" />
+      <LineId Id="747" Count="0" />
+      <LineId Id="745" Count="0" />
+      <LineId Id="683" Count="0" />
+      <LineId Id="725" Count="2" />
+      <LineId Id="697" Count="0" />
+      <LineId Id="750" Count="0" />
+      <LineId Id="752" Count="0" />
+      <LineId Id="751" Count="0" />
+      <LineId Id="728" Count="0" />
+      <LineId Id="695" Count="0" />
+      <LineId Id="694" Count="0" />
+      <LineId Id="700" Count="0" />
+      <LineId Id="699" Count="0" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="866" Count="0" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="340" Count="0" />
+      <LineId Id="578" Count="0" />
+      <LineId Id="572" Count="1" />
+      <LineId Id="395" Count="0" />
+      <LineId Id="557" Count="0" />
+      <LineId Id="579" Count="0" />
+      <LineId Id="575" Count="2" />
+      <LineId Id="580" Count="0" />
+      <LineId Id="582" Count="3" />
+      <LineId Id="581" Count="0" />
+      <LineId Id="586" Count="0" />
+      <LineId Id="588" Count="1" />
+      <LineId Id="909" Count="0" />
+      <LineId Id="911" Count="1" />
+      <LineId Id="910" Count="0" />
+      <LineId Id="590" Count="1" />
+      <LineId Id="587" Count="0" />
+      <LineId Id="558" Count="0" />
+      <LineId Id="869" Count="0" />
+      <LineId Id="871" Count="2" />
+      <LineId Id="918" Count="0" />
+      <LineId Id="874" Count="0" />
+      <LineId Id="870" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="419" Count="0" />
+      <LineId Id="868" Count="0" />
+      <LineId Id="760" Count="0" />
+      <LineId Id="879" Count="4" />
+      <LineId Id="916" Count="0" />
+      <LineId Id="885" Count="2" />
+      <LineId Id="919" Count="0" />
+      <LineId Id="921" Count="0" />
+      <LineId Id="917" Count="0" />
+      <LineId Id="877" Count="0" />
+      <LineId Id="876" Count="0" />
+      <LineId Id="878" Count="0" />
+      <LineId Id="875" Count="0" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="600" Count="0" />
+      <LineId Id="908" Count="0" />
+      <LineId Id="761" Count="0" />
+      <LineId Id="770" Count="0" />
+      <LineId Id="762" Count="7" />
+      <LineId Id="417" Count="1" />
+      <LineId Id="545" Count="1" />
+      <LineId Id="548" Count="0" />
+      <LineId Id="543" Count="1" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="343" Count="2" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="402" Count="0" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="255" Count="1" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="259" Count="1" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="791" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="792" Count="0" />
+      <LineId Id="284" Count="2" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="211" Count="6" />
+      <LineId Id="219" Count="2" />
+      <LineId Id="841" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="845" Count="0" />
+      <LineId Id="844" Count="0" />
+      <LineId Id="840" Count="0" />
+      <LineId Id="223" Count="7" />
+      <LineId Id="273" Count="4" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="812" Count="2" />
+      <LineId Id="818" Count="1" />
+      <LineId Id="817" Count="0" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="552" Count="2" />
+      <LineId Id="443" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="592" Count="0" />
+      <LineId Id="820" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="551" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="el7xxxBasicAxis_FB.HomeLagErrInternalEnc">
+      <LineId Id="6" Count="1" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="288" Count="2" />
+      <LineId Id="287" Count="0" />
+      <LineId Id="292" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="444" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="404" Count="1" />
+      <LineId Id="607" Count="7" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="621" Count="0" />
+      <LineId Id="619" Count="1" />
+      <LineId Id="604" Count="0" />
+      <LineId Id="408" Count="6" />
+      <LineId Id="598" Count="0" />
+      <LineId Id="597" Count="0" />
+      <LineId Id="596" Count="0" />
+      <LineId Id="415" Count="0" />
+      <LineId Id="406" Count="0" />
+      <LineId Id="643" Count="2" />
+      <LineId Id="661" Count="0" />
+      <LineId Id="664" Count="1" />
+      <LineId Id="668" Count="0" />
+      <LineId Id="667" Count="0" />
+      <LineId Id="662" Count="0" />
+      <LineId Id="622" Count="0" />
+      <LineId Id="447" Count="0" />
+      <LineId Id="491" Count="0" />
+      <LineId Id="502" Count="0" />
+      <LineId Id="494" Count="0" />
+      <LineId Id="492" Count="0" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="49" Count="2" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="683" Count="0" />
+      <LineId Id="257" Count="0" />
+      <LineId Id="268" Count="2" />
+      <LineId Id="340" Count="0" />
+      <LineId Id="578" Count="0" />
+      <LineId Id="572" Count="1" />
+      <LineId Id="395" Count="0" />
+      <LineId Id="557" Count="0" />
+      <LineId Id="579" Count="0" />
+      <LineId Id="575" Count="2" />
+      <LineId Id="580" Count="0" />
+      <LineId Id="582" Count="3" />
+      <LineId Id="581" Count="0" />
+      <LineId Id="586" Count="0" />
+      <LineId Id="588" Count="3" />
+      <LineId Id="587" Count="0" />
+      <LineId Id="558" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="419" Count="0" />
+      <LineId Id="754" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="595" Count="0" />
+      <LineId Id="421" Count="5" />
+      <LineId Id="742" Count="0" />
+      <LineId Id="738" Count="0" />
+      <LineId Id="751" Count="1" />
+      <LineId Id="743" Count="0" />
+      <LineId Id="749" Count="1" />
+      <LineId Id="744" Count="3" />
+      <LineId Id="427" Count="0" />
+      <LineId Id="600" Count="0" />
+      <LineId Id="599" Count="0" />
+      <LineId Id="724" Count="0" />
+      <LineId Id="753" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="417" Count="1" />
+      <LineId Id="545" Count="1" />
+      <LineId Id="548" Count="0" />
+      <LineId Id="543" Count="1" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="401" Count="0" />
+      <LineId Id="342" Count="3" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="402" Count="0" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="255" Count="1" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="259" Count="1" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="284" Count="2" />
+      <LineId Id="282" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="211" Count="3" />
+      <LineId Id="711" Count="0" />
+      <LineId Id="216" Count="1" />
+      <LineId Id="219" Count="11" />
+      <LineId Id="273" Count="4" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="696" Count="2" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="320" Count="0" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="552" Count="2" />
+      <LineId Id="443" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="592" Count="1" />
+      <LineId Id="551" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="el7xxxBasicAxis_FB.HomeLagError">
+      <LineId Id="19" Count="0" />
+      <LineId Id="33" Count="9" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="67" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="23" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

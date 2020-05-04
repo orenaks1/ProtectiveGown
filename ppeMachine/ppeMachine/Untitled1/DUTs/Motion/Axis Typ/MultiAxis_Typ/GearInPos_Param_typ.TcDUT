@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearInPos_Param_typ" Id="{46b4a206-d9e0-0a49-315c-616ab00043ff}">
+    <Declaration><![CDATA[TYPE GearInPos_Param_typ :
+	STRUCT
+		RatioNumerator   	: LREAL  := 1;
+        RatioDenominator   	: UINT   := 1;
+        MasterSyncPosition 	: LREAL;     (* absolute master synchronous position *)
+        SlaveSyncPosition  	: LREAL;     (* absolute slave synchronous position *)
+        SyncMode           	: ST_SyncMode;//The boundary conditions for the synchronisation are specified in the SyncMode variables
+		MasterStartDistance	: LREAL;
+        Velocity           	: LREAL := 0; //Maximum slave velocity in the synchronisation phase. If a velocity is not specified, the maximum velocity of the axis from the system manager data is used.
+        Acceleration       	: LREAL; //Maximum slave acceleration in the synchronisation phase   (* 0 : use default value *)
+        Deceleration       	: LREAL; //Maximum slave deceleration in the synchronisation phase    (* 0 : use default value *)
+        Jerk               	: LREAL; //Maximum slave jerk in the synchronisation phase    (* 0 : use default value *)
+		BufferMode   		:MC_BufferMode;   //Currently not implemented
+		Options      		:ST_GearInDynOptions;//Currently not implemented	
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="STRUCT_AxisExtendedCompound" Id="{2422cd1b-d22b-0b97-04d2-73ccf3c439a0}">
+    <Declaration><![CDATA[TYPE STRUCT_AxisExtendedCompound :
+STRUCT
+	
+	Ref:		AXIS_REF;
+	Crtl:		ExtendedAxisTyp;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

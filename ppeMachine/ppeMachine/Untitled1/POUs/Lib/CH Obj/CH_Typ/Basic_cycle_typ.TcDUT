@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Basic_cycle_typ" Id="{aad2ffd4-dfd5-0b1e-1f27-ae99ee83463d}">
+    <Declaration><![CDATA[TYPE Basic_cycle_typ :
+	STRUCT
+		Input 	: Basic_cycle_Input;
+		Output 	: Basic_cycle_Output;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

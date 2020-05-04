@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="Trigger" Id="{c67d9166-d540-0202-2a88-8baffae3daa6}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FINAL Trigger
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	rTrig : R_TRIG ;
+	ftrig : F_TRIG ;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="EDGENEG" Id="{8b9bf463-f22b-095e-1db4-d63fc4c7cc31}">
+      <Declaration><![CDATA[METHOD PUBLIC EDGENEG : BOOL
+VAR_INPUT
+	input : BOOL ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+fTrig.CLK := input ;
+fTrig();
+
+EDGENEG := fTrig.Q ;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="EDGEPOS" Id="{1b4843c4-926f-0a87-1a67-26986fba09a2}">
+      <Declaration><![CDATA[METHOD PUBLIC EDGEPOS : BOOL
+VAR_INPUT
+	input : BOOL ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+rTrig.CLK := input ;
+rTrig();
+
+EDGEPOS := rTrig.Q ;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ONE_SHOT" Id="{fa5bf7b6-b5ec-0068-3543-831b1fbdbce5}">
+      <Declaration><![CDATA[METHOD ONE_SHOT : BOOL
+VAR_INPUT
+	input : BOOL ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[rTrig.CLK := input ;
+rTrig();
+
+fTrig.CLK := input ;
+fTrig();
+
+ONE_SHOT := rTrig.Q OR fTrig.Q;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="Trigger">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Trigger.EDGENEG">
+      <LineId Id="3" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Trigger.EDGEPOS">
+      <LineId Id="4" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="Trigger.ONE_SHOT">
+      <LineId Id="6" Count="1" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="strcpy" Id="{97a10faa-b44c-0dc2-0a81-046bed0613f2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION strcpy : UDINT
+VAR_INPUT
+	pDst : POINTER TO STRING;
+	pSrc : POINTER TO STRING;
+END_VAR
+VAR
+	pArr		: POINTER TO BYTE;
+	pArrDst		: POINTER TO BYTE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[pArr		:= pSrc;
+pArrDst		:= pDst;
+WHILE (pArr^ <> 0)  DO
+	pArrDst^ := pArr^;
+
+	pArr := pArr+1;
+	pArrDst := pArrDst+1;
+
+END_WHILE
+pArrDst^ := pArr^;
+]]></ST>
+    </Implementation>
+    <LineIds Name="strcpy">
+      <LineId Id="17" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

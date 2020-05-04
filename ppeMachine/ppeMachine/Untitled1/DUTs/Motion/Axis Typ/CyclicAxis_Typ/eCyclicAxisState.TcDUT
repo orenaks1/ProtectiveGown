@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="eCyclicAxisState" Id="{86bec7b6-af82-0e58-1122-0703b0b99f64}">
+    <Declaration><![CDATA[TYPE eCyclicAxisState :
+	(
+		CyclicAxis_STATE_WAIT := 0,
+		CyclicAxis_STATE_READY,
+		CyclicAxis_STATE_START,
+		CyclicAxis_STATE_DISABLE,		
+		CyclicAxis_STATE_POS_ACTIVE,
+		CyclicAxis_STATE_VEL_ACTIVE,
+		CyclicAxis_STATE_ERROR
+	);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="eTorqueMode" Id="{15cb4b3d-132b-4a8d-87df-1e7f84838f37}">
+    <Declaration><![CDATA[TYPE eTorqueMode :
+	(		
+		mcFF :=0 ,
+		mcLimit 
+		
+	);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

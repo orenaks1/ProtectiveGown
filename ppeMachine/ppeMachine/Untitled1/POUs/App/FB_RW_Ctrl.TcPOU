@@ -1,0 +1,291 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_RW_Ctrl" Id="{a5ecec96-6bdd-4c97-bccd-89ec0d51e6b5}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_RW_Ctrl EXTENDS CycleHandleFB
+VAR_INPUT
+	Ctrl_ref:			REFERENCE TO Ctrl_Typ;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	MethInitDone:		BOOL;
+END_VAR
+
+VAR CONSTANT
+// States are global
+		
+	RW_INIT:						INT:=0;
+	RW_RUN:						INT:=10;
+	RW_DONE:			INT:=100;
+END_VAR	
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	IF NOT MethInitDone THEN
+		MethInitDone	:= Meth_Init();
+	END_IF
+	
+	IF  THIS^.CMD.Pause = FALSE THEN
+		
+		//-----------------------------
+		//State Machine
+		//-----------------------------
+		CASE THIS^.StepNo OF
+			RW_INIT:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Init: Start.';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_Enable(TRUE) THEN
+					THIS^.StepNo	:= 	RW_RUN;
+				END_IF	
+			
+			RW_RUN:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'RW Run.';
+					THIS^.Delay(IN:=FALSE);
+					Meth_Run_OpenLoop(FALSE);
+				ELSIF Meth_Run_OpenLoop(TRUE) THEN
+					THIS^.StepNo	:= 	RW_DONE;
+				END_IF					
+				
+
+			RW_DONE:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'RW cycle Done';
+				ELSIF Meth_Done(TRUE) THEN
+					THIS^.StepNo	:= 	RW_INIT;
+				END_IF		
+	
+		END_CASE
+	
+	ELSE
+		THIS^.Monitoring.StepMessage:= 'Pause';
+		
+		IF THIS^.Status.Fault = TRUE THEN
+		//IF Meth_EmStop(TRUE) THEN
+				THIS^.CMD.ResetCycle	:= TRUE;		// Reset the all state machine to start point
+		//END_IF
+			
+		END_IF
+		
+	END_IF
+	
+	THIS^.Delay();
+	THIS^.CH_Logic();
+	
+	// Reset Meth_EmStop when at Init State
+	IF THIS^.Pause = FALSE THEN
+		//Meth_EmStop(FALSE);
+	END_IF				]]></ST>
+    </Implementation>
+    <Method Name="Meth_Done" Id="{7552bebf-683f-4f61-b274-0af869d06b79}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_Done : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Press 1 engage';
+	//THIS^.Monitoring.Error_Text				:= 'Press 1 engage Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	//THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	//THIS^.Parameter.TimeOut					:= T#5S;
+
+	THIS^.Status.Done		:= TRUE;
+	THIS^.Status.Running	:= FALSE;									
+	Meth_Done	:= TRUE;	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Enable" Id="{0457fb81-f436-44fd-81cd-fbfa794f7765}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_Enable : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+IF THIS^.CMD.Start THEN
+	
+	THIS^.Monitoring.StepMessage			:= 'Start';
+	THIS^.Monitoring.Error_Text				:= 'Start Fail';
+	THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#0.5S;
+
+	THIS^.CMD.Start			:= FALSE;
+	THIS^.Status.Done		:= FALSE;
+	THIS^.Status.Running	:= TRUE;
+	
+	// Reset Commands and Statuses												
+	
+	Meth_Enable	:= TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Init" Id="{21c830c1-0a80-405c-991d-f492e5dbb841}">
+      <Declaration><![CDATA[METHOD Meth_Init :BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//resets
+Ctrl_ref.IO.EncoderRW.Ctrl.SetCounterCmd:=FALSE;
+RwInverter.ctrl.Start:=FALSE;
+RwInverter.ctrl.SetVelocity:=0;
+
+Meth_Init:=TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Rest_IO" Id="{d257e215-ad84-45d5-9ddc-cfb2dba58a81}">
+      <Declaration><![CDATA[METHOD Meth_Rest_IO 
+VAR_INPUT
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+RwInverter.ctrl.Start := FALSE;
+RwInverter.ctrl.SetVelocity := 0;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Run_OpenLoop" Id="{c85cef2f-fa52-415e-80f2-bed9ee0a6aee}">
+      <Declaration><![CDATA[METHOD Meth_Run_OpenLoop : BOOL
+VAR_INPUT
+	Excute:BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF Excute = FALSE THEN
+	THIS^.SubStepNo :=0;
+ELSIF Excute AND_THEN THIS^.SubStepNo = 0 THEN
+	THIS^.SubStepNo :=10;
+END_IF
+
+
+CASE THIS^.SubStepNo OF
+	
+	0://Wait
+		THIS^.Monitoring.SubStepMessage	:= 'Wait';
+		Ctrl_ref.IO.EncoderRW.Ctrl.SetCounterCmd:=FALSE;
+		
+	
+	10://Set counter	
+		THIS^.Monitoring.SubStepMessage	:= 'Set counter';
+		Ctrl_ref.IO.EncoderRW.Ctrl.SetCounterValue:=0;	
+		Ctrl_ref.IO.EncoderRW.Ctrl.SetCounterCmd:=TRUE;	
+		IF Ctrl_ref.IO.EncoderRW.Status.SetCounterDone
+		OR Ctrl_ref.Simulation 	 THEN
+			Ctrl_ref.IO.EncoderRW.Ctrl.SetCounterCmd:=FALSE;
+			THIS^.SubStepNo				:=20;
+		END_IF	
+	
+	20: //Start motor
+		THIS^.Monitoring.SubStepMessage	:= 'Start Motor';
+		RwInverter.ctrl.Start:=TRUE;
+		RwInverter.ctrl.SetVelocity:= Ctrl_ref.Parameters.MotorVelocity;	
+		THIS^.SubStepNo				:=30;
+		
+	30://Wait position
+		THIS^.Monitoring.SubStepMessage	:= 'Wait position';
+		IF Ctrl_ref.IO.EncoderRW.Status.CounterValue >= Ctrl_ref.Parameters.DistanceToMove
+		OR Ctrl_ref.Simulation THEN
+			RwInverter.ctrl.Start:=FALSE;
+			RwInverter.ctrl.SetVelocity:= 0;
+			Meth_Run_OpenLoop:=TRUE;
+		END_IF
+END_CASE		
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_RW_Ctrl">
+      <LineId Id="11" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="11" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="88" Count="3" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="80" Count="4" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="57" Count="19" />
+      <LineId Id="56" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RW_Ctrl.Meth_Done">
+      <LineId Id="34" Count="7" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RW_Ctrl.Meth_Enable">
+      <LineId Id="24" Count="1" />
+      <LineId Id="6" Count="12" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RW_Ctrl.Meth_Init">
+      <LineId Id="14" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_RW_Ctrl.Meth_Rest_IO">
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RW_Ctrl.Meth_Run_OpenLoop">
+      <LineId Id="17" Count="0" />
+      <LineId Id="21" Count="3" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="2" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

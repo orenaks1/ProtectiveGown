@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="DancerTyp" Id="{ae44e905-a784-4844-a707-277d9b59a969}">
+    <Declaration><![CDATA[TYPE DancerTyp :
+STRUCT
+	stLutDataParam				:ST_LookUpTableParam;
+	DancerPosition_Unfiltred	:LREAL;
+	DancerLPF					:FB_LPF;
+	DancerPosition_filtred		:LREAL;	
+	fb_DancerCtrl				:FB_DancerCtrl;
+	
+	DancerGear:LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

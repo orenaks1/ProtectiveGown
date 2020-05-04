@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="exCONSTANTS_PHYS" Id="{20711d60-8bbe-4efa-b815-385ca8809618}">
+    <Declaration><![CDATA[TYPE exCONSTANTS_PHYS :
+STRUCT
+	/// Lichtgeschwindigkeit in m/s 
+	C: REAL := 299792458.0;
+	/// elementarladung in Colomb = A * s 
+	E: REAL := 1.60217653E-19;
+	/// Erdbeschleunigung in m / s² 
+	G: REAL := 9.80665;
+	/// absoluter Nullpunkt in °C 
+	T0: REAL := -273.15;
+	/// Universelle Gaskonstante in J / (mol · K) 
+	RU: REAL := 8.314472;
+	/// NormalDruck in Pa 
+	PN: REAL := 101325.0;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

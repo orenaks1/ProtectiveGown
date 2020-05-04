@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_DancerCtrl" Id="{33976128-a633-4b6c-8520-3f52b4a5b0f8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_DancerCtrl
+VAR_INPUT
+	Enable	: BOOL;
+	DancerFull:BOOL;
+	DancerPosition	:REAL;
+	Ctrl_Type	: E_DancerCtrlTyp;
+	//Ctrl_ref:				REFERENCE TO Ctrl_Typ;
+END_VAR
+VAR_OUTPUT
+	Jog:BOOL;
+	dancerFullStatus:BOOL;
+END_VAR
+VAR
+	FilterOn:TON:=(PT:=T#50MS);
+	FilterOff:TON:=(PT:=T#50MS);
+	
+	PositionMax	: REAL := 200;//mm
+	PositionMin	: REAL := 100;//mm
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF Enable THEN
+	
+	IF Ctrl_Type = E_DancerCtrlTyp.DIGITAL THEN
+		ACT_Digital();
+	ELSIF Ctrl_Type = E_DancerCtrlTyp.ANALOG	THEN
+		ACT_Analog();
+	END_IF
+
+ELSE
+	Jog := FALSE;
+	dancerFullStatus := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="ACT_Analog" Id="{0b6be42d-08fe-483f-9b32-d82c11e3b756}">
+      <Implementation>
+        <ST><![CDATA[
+
+IF DancerPosition > PositionMax THEN
+	Jog := TRUE;
+ELSIF
+	DancerPosition < PositionMin THEN
+	 Jog := FALSE;	
+END_IF
+
+ dancerFullStatus := (DancerPosition < PositionMax);
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ACT_Digital" Id="{589b2d82-991e-44fb-83dd-c60e7de41b5d}">
+      <Implementation>
+        <ST><![CDATA[
+
+	FilterOn(IN:=DancerFull);
+	FilterOff(IN:=NOT(DancerFull));
+
+	IF (DancerFull  = TRUE) AND FilterOn.Q  THEN
+		Jog:=FALSE;
+	ELSIF FilterOff.Q THEN
+		Jog:=TRUE;
+	END_IF
+	
+dancerFullStatus := FilterOn.Q;	]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="FB_DancerCtrl">
+      <LineId Id="12" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DancerCtrl.ACT_Analog">
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_DancerCtrl.ACT_Digital">
+      <LineId Id="2" Count="8" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="11" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

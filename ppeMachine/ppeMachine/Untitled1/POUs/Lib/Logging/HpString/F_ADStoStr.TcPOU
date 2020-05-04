@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="F_ADStoStr" Id="{e6650332-cc3d-0210-2ada-9d0f1e186e9f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION F_ADStoStr :  STRING
+VAR_INPUT
+	ErrCode:    DWORD;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE ErrCode OF
+	
+	  0:    F_ADStoStr:=	'NoError ';		
+      1:    F_ADStoStr:='InternalError ';
+      2:    F_ADStoStr:='NoRTime ';
+      3:    F_ADStoStr:='LockedMemoryError';
+      4:    F_ADStoStr:='MailBoxError ';
+      5:    F_ADStoStr:='WrongHMsg ';
+      6:    F_ADStoStr:='TargetPortNotFound ';
+      7:    F_ADStoStr:='TargetMachineNotFound ';
+      8:    F_ADStoStr:='UnknownCommandID ';
+      9:    F_ADStoStr:='BadTaskID ';
+      10:   F_ADStoStr:= 'NoIO ';
+      11:   F_ADStoStr:= 'UnknwonAmsCommand ';
+      12:   F_ADStoStr:= 'Win32Error ';
+      13:   F_ADStoStr:= 'PortNotConnected ';
+      14:   F_ADStoStr:='InvalidAmsLength ';
+      15:   F_ADStoStr:= 'InvalidAmsNetID ';
+      16:   F_ADStoStr:= 'LowInstallLevel ';
+      17:   F_ADStoStr:= 'NoDebug ';
+      18:   F_ADStoStr:= 'PortDisabled ';
+      19:   F_ADStoStr:= 'PortConnected ';
+      20:   F_ADStoStr:= 'AmsSyncWin32Error ';
+      21:   F_ADStoStr:= 'SyncTimeOut ';
+      22:   F_ADStoStr:= 'AmsSyncAmsError ';
+      23:   F_ADStoStr:= 'AmsSyncNoIndexMap ';
+      24:   F_ADStoStr:= 'InvalidAmsPort ';
+      25:   F_ADStoStr:= 'NoMemory ';
+      26:    F_ADStoStr:= 'TCPSendError ';
+      27:    F_ADStoStr:= 'HostUnreachable ';
+      1280:  F_ADStoStr:=   'NoLockedMemory ';
+      1282:  F_ADStoStr:=  'MailboxFull ';
+      1792:  F_ADStoStr:=  'DeviceError ';
+      1793:  F_ADStoStr:=  'DeviceServiceNotSupported ';
+      1794:  F_ADStoStr:=  'DeviceInvalidGroup ';
+      1795:  F_ADStoStr:=  'DeviceInvalidOffset ';
+      1796:  F_ADStoStr:=  'DeviceInvalidAccess ';
+      1797:  F_ADStoStr:=  'DeviceInvalidSize ';
+      1798:  F_ADStoStr:=  'DeviceInvalidData ';
+      1799:  F_ADStoStr:=  'DeviceNotReady ';
+      1800:  F_ADStoStr:=  'DeviceBusy ';
+      1801:  F_ADStoStr:=  'DeviceInvalidContext';
+      1802:  F_ADStoStr:=  'DeviceNoMemory ';
+      1803:  F_ADStoStr:=  'DeviceInavlidParam ';
+      1804:  F_ADStoStr:=  'DeviceNotFound ';
+      1805:  F_ADStoStr:=  'DeviceSyntaxError ';
+      1806:  F_ADStoStr:= 'DeviceIncompatible ';
+      1808:  F_ADStoStr:= 'DeviceSymbolNotFound ';
+      1809:  F_ADStoStr:= 'DeviceSymbolVersionInvalid ';
+      1810:  F_ADStoStr:=  'DeviceInvalidState ';
+      1811:  F_ADStoStr:= 'DeviceTransModeNotSupported ';
+      1812:  F_ADStoStr:= 'DeviceNotifyHandleInvalid ';
+      1813:  F_ADStoStr:=  'DeviceClientUnknown ';
+      1814:  F_ADStoStr:=  'DeviceNoMoreHandles ';
+      1815:  F_ADStoStr:=  'DeviceInvalidWatchsize ';
+      1816:  F_ADStoStr:=  'DeviceNotInitialized ';
+      1817:  F_ADStoStr:=  'DeviceTimeOut ';
+      1818:  F_ADStoStr:=  'DeviceNoInterface ';
+      1819:  F_ADStoStr:= 'DeviceInvalidInterface ';
+      1820:  F_ADStoStr:=  'DeviceInvalidCLSID ';
+      1821:  F_ADStoStr:=  'DeviceInvalidObjectID ';
+      1856:  F_ADStoStr:=  'ClientError ';
+      1857:  F_ADStoStr:=  'ClientInvalidParameter ';
+      1858:  F_ADStoStr:=  'ClientListEmpty ';
+      1859:  F_ADStoStr:=  'ClientVaraiableInUse ';
+      1860:  F_ADStoStr:=  'ClientDuplicateInvokeID ';
+      1861:  F_ADStoStr:=  'ClientSyncTimeOut ';
+      1862:  F_ADStoStr:=  'ClientW32OR ';
+      1863:  F_ADStoStr:=  'ClientTimeoutInvalid ';
+      1864:  F_ADStoStr:=  'ClientPortNotOpen ';
+      1865:  F_ADStoStr:=  'ClientNoAmsAddr ';
+      1872:  F_ADStoStr:=  'ClientSyncInternal ';
+      1873:  F_ADStoStr:=  'ClientAddHash ';
+      1874:  F_ADStoStr:=  'ClientRemoveHash ';
+      1875:  F_ADStoStr:= 'ClientNoMoreSymbols ';
+      1876:  F_ADStoStr:=  'ClientSyncResInvalid ';    
+      1877:  F_ADStoStr:=  'ClientSyncPortLocked ';    
+      32768: F_ADStoStr:=   'ClientQueueFull ';   
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="F_ADStoStr">
+      <LineId Id="7" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="17" Count="75" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

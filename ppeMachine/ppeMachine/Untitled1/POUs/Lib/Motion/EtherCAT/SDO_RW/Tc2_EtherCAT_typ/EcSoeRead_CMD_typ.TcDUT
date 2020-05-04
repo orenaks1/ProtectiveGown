@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EcSoeRead_CMD_typ" Id="{aead690c-a497-0654-0149-f4f5b41c3e49}">
+    <Declaration><![CDATA[TYPE EcSoeRead_CMD_typ :
+	STRUCT
+		Enable	: BOOL ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

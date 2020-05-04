@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="CloseDialog" Id="{cd96c216-23e9-465d-9a6b-22a12a4d88eb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION CloseDialog : bool
+VAR_INPUT
+	//pClientData : POINTER TO VisuElems.VisuStructClientData;
+	sDialogName:STRING;
+END_VAR
+VAR
+	iDialogManager2 : VisuElems.IDialogManager2 := 0;
+	
+	pClientData : POINTER TO VisuElems.VisuStructClientData;
+	nIteratorSave : INT;
+	iDialogManager : VisuElems.IDialogManager;
+	iMessageDialog : VisuElems.IVisualisationDialog;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+(*dialogMan := VisuElems.g_VisuManager.GetDialogManager();     // the DialogManager is provided via the implicitly available VisuManager
+
+IF dialogMan <> 0 AND pClientData <> 0 THEN
+	messageDialog := dialogMan.GetDialog('MessageDialog'); // dialog to be handled is specified
+	IF messageDialog <> 0 THEN
+		IF (itfDialogManager2 = 0) THEN
+			__QUERYINTERFACE(VisuElems.g_VisuManager.GetDialogManager(), itfDialogManager2);
+		END_IF
+		IF (itfDialogManager2 <> 0) THEN
+			itfDialogManager2.CloseDialog2(messageDialog, pClientData, VisuElems.Visu_InputFlags.GlobalOpenCloseDialog);
+		ELSE
+			dialogMan.CloseDialog(messageDialog, pClientData);	// Closes The Dialog on all "pClientData" 
+		END_IF
+	END_IF
+END_IF*)
+
+nIteratorSave := VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.SaveIteration(); 
+VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.BeginIteration();
+
+iDialogManager := VisuElems.VisuElemBase.g_VisuManager.GetDialogManager();
+
+pClientData := VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.GetNextClient();
+
+// Cloase Dialog on all Clients
+IF pClientData <> 0 THEN
+	iMessageDialog := iDialogManager.GetDialog(sDialogName); // dialog to be handled is specified
+	IF iMessageDialog <> 0 THEN
+		IF (iDialogManager2 = 0) THEN
+			__QUERYINTERFACE(VisuElems.g_VisuManager.GetDialogManager(), iDialogManager2);
+		END_IF
+		IF (iDialogManager2 <> 0) THEN
+			iDialogManager2.CloseDialog2(iMessageDialog, pClientData, VisuElems.Visu_InputFlags.GlobalOpenCloseDialog);
+		ELSE
+			iDialogManager.CloseDialog(iMessageDialog, pClientData);	// Closes The Dialog on all "pClientData"	
+		END_IF
+	END_IF
+END_IF
+
+VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.RestoreIteration(nIteratorSave);]]></ST>
+    </Implementation>
+    <LineIds Name="CloseDialog">
+      <LineId Id="13" Count="38" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

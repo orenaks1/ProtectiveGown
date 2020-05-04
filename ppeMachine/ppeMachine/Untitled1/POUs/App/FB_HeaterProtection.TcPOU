@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_HeaterProtection" Id="{fd0095b0-37d0-4488-85cb-9454a8330829}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HeaterProtection
+VAR_INPUT
+	Excute:BOOL;
+END_VAR
+VAR_OUTPUT
+	Done:BOOL;
+END_VAR
+VAR
+	Timer:TON;
+	Step:INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF Excute THEN
+	Step:= 10;
+	Done:=FALSE;
+	Excute:=FALSE;
+	
+END_IF
+
+CASE Step OF
+
+	0://wait
+	
+	10:
+		Timer.PT := DINT_TO_TIME( Persist.PersistentStruct.TimerHotWeldingOn);
+		Timer.IN:=TRUE;
+		gMachineCtrl.IO.Out.HeaterOn:=TRUE;
+		IF Timer.Q THEN
+			gMachineCtrl.IO.Out.HeaterOn:=FALSE;
+			Step:=20;
+		END_IF
+	
+	20:
+		Done:=TRUE;
+		Timer.IN:=FALSE;
+	
+END_CASE
+
+Timer();
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_HeaterProtection">
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="21" Count="3" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="29" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

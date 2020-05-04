@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="fnLogMsgInit" Id="{808e14e6-a536-0bd1-0008-2051819acd95}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION fnLogMsgInit : BOOL
+VAR_INPUT
+		//logMsgPtr : REFERENCE TO LogMsg;
+		logMsgPtr 		 : POINTER TO LogMsg;
+		category  		 : STRING[LOG_MSG_CATEGORY_LENGTH];
+		globalArrayAddr  : POINTER TO LogGlobalArrayObj;
+		encoderAngleAddr : POINTER TO REAL;	
+END_VAR
+VAR
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	fnLogMsgInit := logMsgPtr^.InitLogger(category, globalArrayAddr, encoderAngleAddr);
+]]></ST>
+    </Implementation>
+    <LineIds Name="fnLogMsgInit">
+      <LineId Id="16" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

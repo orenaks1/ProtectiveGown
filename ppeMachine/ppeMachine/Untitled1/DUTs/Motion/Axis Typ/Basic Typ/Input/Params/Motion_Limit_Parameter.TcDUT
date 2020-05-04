@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Motion_Limit_Parameter" Id="{ba4fcc6c-a322-44ce-98fc-d1853f13b001}">
+    <Declaration><![CDATA[TYPE Motion_Limit_Parameter :
+STRUCT	
+	MaxTemperature: 	LREAL; 
+	MinDC         : 	UDINT;
+	MaxDC         : 	UDINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Terminal_Parameter_typ" Id="{5f53599c-6656-0b5f-3aa8-1856c46cec53}">
+    <Declaration><![CDATA[TYPE Terminal_Parameter_typ : 	
+	STRUCT  (*parameter structure*)
+		Name				: STRING[30] :=  'Empty';
+		ModuleID			: UINT;		
+		PosForLog			: USINT;
+	END_STRUCT
+END_TYPE
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

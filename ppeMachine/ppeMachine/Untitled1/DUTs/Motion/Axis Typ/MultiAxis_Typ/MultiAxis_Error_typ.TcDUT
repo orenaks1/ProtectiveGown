@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="MultiAxis_Error_typ" Id="{faf5afab-a4bb-0417-2f26-448de3664068}">
+    <Declaration><![CDATA[TYPE MultiAxis_Error_typ :
+	STRUCT
+		ErrorID : UDINT ;
+		ErrorText : STRING[2048];(*ARRAY[0..3]OF STRING[79]*) (*Error Text*)
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

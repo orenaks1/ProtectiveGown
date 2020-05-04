@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="OpenDialog" Id="{091f8618-a6c2-430d-8998-745fc9aeb510}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION OpenDialog : bool
+VAR_INPUT
+	sDialogName:STRING;
+	iXpos:INT:=0;
+	iYpos:INT:=0;
+END_VAR
+VAR
+	stMyRect : VisuElems.VisuStructSimpleRectangle;
+	nIteratorSave : INT;
+	nCounter : INT;
+	pTempClientData : POINTER TO VisuElems.VisuStructClientData;
+	pLastClientData : POINTER TO VisuElems.VisuStructClientData;
+//general
+	iDialogManager : VisuElems.IDialogManager;
+	iMessageDialog : VisuElems.IVisualisationDialog;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[nIteratorSave := VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.SaveIteration(); 
+VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.BeginIteration();
+
+iDialogManager := VisuElems.VisuElemBase.g_VisuManager.GetDialogManager();
+
+// Assign the argument in all currently active clients
+pTempClientData := VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.GetNextClient();
+
+WHILE pTempClientData <> 0 DO
+	iMessageDialog := iDialogManager.GetDialog(sDialogName); // dialog to be handled is specified
+	pLastClientData := pTempClientData;
+	pTempClientData := VisuElems.VisuElemBase.g_ClientManager.GetNextClient();
+	nCounter := nCounter + 1;
+END_WHILE
+
+// Open Dialog on all Clients
+iMessageDialog := iDialogManager.GetDialog(sDialogName); // dialog to be handled is specified
+IF iMessageDialog <> 0 THEN
+	stMyRect.ptTopLeft.iX := iXpos;
+	stMyRect.ptTopLeft.iY := iYpos;
+	stMyRect.ptBottomRight.iX := 100;
+	stMyRect.ptBottomRight.iY := 100;
+	iDialogManager.OpenDialog3(iMessageDialog, pLastClientData, TRUE, ADR(stMyRect), 0, VisuElems.Visu_InputFlags.GlobalOpenCloseDialog);
+END_IF
+
+VisuElems.VisuElemBase.Visu_Globals.g_ClientManager.RestoreIteration(nIteratorSave);]]></ST>
+    </Implementation>
+    <LineIds Name="OpenDialog">
+      <LineId Id="30" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="39" Count="4" />
+      <LineId Id="51" Count="2" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="18" Count="10" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

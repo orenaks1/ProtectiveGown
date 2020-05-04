@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="LogGlobalArraySemStruct" Id="{c66fb797-dd6e-0ab0-0e4c-d25b908e65b4}">
+    <Declaration><![CDATA[TYPE LogGlobalArraySemStruct :
+STRUCT
+	//SemID : UDINT;
+	//SemCreate_0 : SemCreate;
+	//SemGetInfo_0 : SemGetInfo;
+	SemaStat : UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

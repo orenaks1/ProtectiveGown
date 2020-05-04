@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CyclicAxis_Output_typ" Id="{0b1666db-ab26-0683-13b9-e5d86107ff2c}">
+    <Declaration><![CDATA[TYPE CyclicAxis_Output_typ :
+	STRUCT
+		monitor 	: CyclicAxis_monitor_typ ;
+		Status		: CyclicAxis_Status_typ ;
+		Error		: CyclicAxis_Error_typ ;
+		
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

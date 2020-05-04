@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="eDS402DriveParID" Id="{5a7c8287-3574-0af5-0261-3da7bef4081f}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE eDS402DriveParID :
+(
+	ModeOfOperation 	:= 16#6060 ,
+	MotorRatedCurrent 	:= 16#6075 ,
+	MotorRatedTorque 	:= 16#6076 ,
+	Spare := 1
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

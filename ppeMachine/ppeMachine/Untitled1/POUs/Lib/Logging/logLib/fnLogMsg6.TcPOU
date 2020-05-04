@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="fnLogMsg6" Id="{904159c8-ea82-0bc9-3d4f-3f9ed50590b8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION fnLogMsg6 : BOOL
+VAR_INPUT
+		logMsgPtr : POINTER TO LogMsg;
+		messageLevel : enumLogMessageLevelSeverity;
+		textMessage : STRING[LOG_MSG_TEXT_LENGTH];
+		param1 : DINT;
+		param2 : DINT;
+		param3 : DINT;
+		param4 : DINT;
+		param5 : DINT;
+		param6 : DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fnLogMsg6 := logMsgPtr^.LogMsg(messageLevel, textMessage, param1, param2, param3, param4, param5, param6);
+]]></ST>
+    </Implementation>
+    <LineIds Name="fnLogMsg6">
+      <LineId Id="16" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

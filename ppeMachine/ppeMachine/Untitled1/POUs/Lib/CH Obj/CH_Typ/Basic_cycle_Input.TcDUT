@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Basic_cycle_Input" Id="{b1a19994-b5ed-03d6-1ad6-fa8cda7009e4}">
+    <Declaration><![CDATA[TYPE Basic_cycle_Input :
+	STRUCT
+		CMD 		: Basic_cycle_CMD_typ;
+		Parameter 	: Basic_cycle_Param_typ;
+		Delay 		: TON;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

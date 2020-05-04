@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CoE_Obj_typ" Id="{6e088ad0-f329-0add-05fd-c76160fb18ce}">
+    <Declaration><![CDATA[TYPE CoE_Obj_typ :
+STRUCT
+	Index  	 : WORD;
+	SunIndex : BYTE;
+	Size	 : UDINT;   
+	IsReal 	 : BOOL;  
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

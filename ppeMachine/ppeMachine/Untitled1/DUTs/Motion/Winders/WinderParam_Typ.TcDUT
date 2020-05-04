@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="WinderParam_Typ" Id="{417761dc-7b5c-4499-a4a4-411ac08562f8}">
+    <Declaration><![CDATA[TYPE WinderParam_Typ :
+STRUCT
+	
+	CalculatedRotSpeed:LREAL;
+	CalculatedGear:LREAL;
+	Tension:Tension_Typ;
+	Dancer:DancerTyp;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

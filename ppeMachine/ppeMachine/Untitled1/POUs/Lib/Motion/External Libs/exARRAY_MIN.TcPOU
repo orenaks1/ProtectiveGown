@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="exARRAY_MIN" Id="{937a4f52-bc8c-470b-9a43-ab5f9b3f5e0d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION exARRAY_MIN : REAL
+VAR_INPUT
+	pt: POINTER TO ARRAY[0..32000] OF REAL;
+	size: UINT;
+END_VAR
+VAR
+	i: UINT;
+	stop: UINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[stop := (size - SIZEOF(pt)) / SIZEOF(pt);
+exARRAY_MIN := pt^[0];
+FOR i := 1 TO stop DO
+	IF pt^[i] < exARRAY_MIN THEN exARRAY_MIN := pt^[i]; END_IF;
+END_FOR;
+
+
+(* revision history
+hm		2. oct. 2006
+	original version
+
+hm		16. mar. 2008
+	changed type of input size to uint
+
+*)]]></ST>
+    </Implementation>
+    <LineIds Name="exARRAY_MIN">
+      <LineId Id="3" Count="13" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="getUsint" Id="{2dcf5877-62b1-0fdb-3782-feefb6918a0b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION getUsint : BOOL
+VAR_INPUT
+END_VAR
+VAR
+END_VAR
+VAR_IN_OUT
+	usintRef : USINT;
+	bufferRef : UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	memcpy(ADR(usintRef), bufferRef, SIZEOF(USINT));
+	bufferRef := bufferRef + SIZEOF(USINT);
+	getUsint := TRUE;
+	]]></ST>
+    </Implementation>
+    <LineIds Name="getUsint">
+      <LineId Id="12" Count="2" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

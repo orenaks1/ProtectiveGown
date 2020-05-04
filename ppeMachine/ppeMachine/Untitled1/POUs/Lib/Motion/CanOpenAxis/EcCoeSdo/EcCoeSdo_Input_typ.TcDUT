@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EcCoeSdo_Input_typ" Id="{c45d2690-6888-06aa-1ba1-8a26e8e85ab2}">
+    <Declaration><![CDATA[TYPE EcCoeSdo_Input_typ :
+	STRUCT
+		Read	: EcCoeSdo_Par_Read_typ;
+		Write	: EcCoeSdo_Par_Write_typ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

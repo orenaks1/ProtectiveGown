@@ -1,0 +1,422 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="ElmoVelocityCtrlAxis_FB" Id="{32652808-323a-4d40-8e6e-e6eb3fbe0c89}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC ElmoVelocityCtrlAxis_FB EXTENDS VelocityCtrlAxis_FB  
+VAR_INPUT
+	
+
+END_VAR
+
+VAR_OUTPUT
+END_VAR
+	
+VAR
+
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SUPER^();]]></ST>
+    </Implementation>
+    <Method Name="METH_ChangeToVelMode" Id="{c9646577-c354-412a-b857-49145aeed4a6}">
+      <Declaration><![CDATA[METHOD METH_ChangeToVelMode : BOOL
+VAR_INPUT
+	Execute : BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF InitSctrlTrigger.EDGEPOS( Execute) THEN
+	CngToVelocityState := 1;
+	METH_ChangeToVelMode := FALSE;
+	rAxisBasicFB.AxisCtrlPtr^.Input.Command.Power := FALSE;
+	
+	OldCyclicTorque := 0;		
+	OldSctrlKp 		:= 0;
+	OldSctrlKi 		:= 0;			
+	rAxisBasicFB.Meth_WriteObj (FALSE, enumMotionobject.OPERATION_MODE, TO_LREAL(eDriveModeOfOperation.CyclicSyncVelocity));
+
+END_IF
+
+IF InitSctrlTrigger.EDGENEG( Execute) THEN
+	CngToVelocityState := 0;
+END_IF
+
+
+CASE CngToVelocityState OF
+	0:
+		METH_ChangeToVelMode := FALSE;
+	1:
+		IF ReadPosCtrlParamDone = FALSE THEN
+			 Meth_ReadPosCtrlValues(FALSE);
+			 CngToVelocityState := CngToVelocityState +1;	
+		ELSE
+			CngToVelocityState := CngToVelocityState +2;
+		END_IF		
+	2:
+		IF Meth_ReadPosCtrlValues(TRUE) THEN
+			
+			rAxisBasicFB.Meth_WriteObj (FALSE, enumMotionobject.OPERATION_MODE,eDriveModeOfOperation.CyclicSyncVelocity);
+			
+			CngToVelocityState := CngToVelocityState +1;
+			
+		END_IF
+	3:	//Change mode to velocity control
+		IF rAxisBasicFB.Meth_WriteObj (TRUE, enumMotionobject.OPERATION_MODE,eDriveModeOfOperation.CyclicSyncVelocity) THEN			
+			rAxisBasicFB.Meth_WriteObj (FALSE, enumMotionobject.OPERATION_MODE,eDriveModeOfOperation.CyclicSyncVelocity);
+			CngToVelocityState := CngToVelocityState +1;
+		END_IF
+		
+	4://Disable Gain Control
+		IF NOT rAxisBasicFB.AxisCtrlPtr^.Output.Status.MC_Power.Status THEN
+			IF rAxisBasicFB.Meth_WriteObj (TRUE, enumMotionobject.GAIN_SCHEDULE,0) THEN			
+				rAxisBasicFB.Meth_WriteObj (FALSE, enumMotionobject.OPERATION_MODE,eDriveModeOfOperation.CyclicSyncVelocity);			
+				CngToVelocityState := CngToVelocityState +1;
+			END_IF
+		END_IF	
+	
+	5:	
+		rAxisBasicFB.AxisCtrlPtr^.Input.Command.Power := TRUE;
+		IF rAxisBasicFB.AxisCtrlPtr^.Output.Status.AxisStatus.StandStill THEN
+			CngToVelocityState := CngToVelocityState +1;
+		END_IF
+	6:
+		IF  rAxisBasicFB.Meth_WriteObj(TRUE, enumMotionObject.ACC_CLOSE_POS_ERR ,   rVelocityCtrl.Input.Parameter.CyclicVelocity    , Error =>Error ) THEN
+			rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.ACC_CLOSE_POS_ERR ,0 );
+			CngToVelocityState := CngToVelocityState +1;
+		END_IF	
+	
+	7:	
+		METH_ChangeToVelMode := TRUE;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_InitSctrl" Id="{48a91f68-467f-4b94-9de6-7ca1cc0c4e6b}">
+      <Declaration><![CDATA[METHOD Meth_InitSctrl : BOOL
+VAR_INPUT
+	Execute : BOOL;
+END_VAR
+
+
+VAR_OUTPUT
+	Error : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF InitSctrlTrigger.EDGEPOS(Execute) THEN
+	InitSctrlState  := 1;
+	Meth_InitSctrl := FALSE;
+	rAxisBasicFB.Meth_InitVelKP (FALSE,0);
+	rAxisBasicFB.Meth_InitVelKI(FALSE,0);
+	Error := FALSE;
+END_IF
+
+
+IF InitSctrlTrigger.EDGENEG(Execute) THEN
+	
+	 InitSctrlState:= 0;
+END_IF
+
+
+CASE InitSctrlState OF
+ 
+		
+	1:
+		 			
+	 
+	 	IF rAxisBasicFB.Meth_InitVelKP (TRUE,(rVelocityCtrl.Input.Parameter.SctrlKp), Error=>Error) THEN
+	 		OldSctrlKp := rVelocityCtrl.Input.Parameter.SctrlKp;
+	 		InitSctrlState := InitSctrlState +1;
+	 		rAxisBasicFB.Meth_InitVelKP (FALSE,rVelocityCtrl.Input.Parameter.SctrlKp);
+	 	END_IF	
+ 	  
+			
+
+	2:
+	
+			IF rAxisBasicFB.Meth_InitVelKI(TRUE,(rVelocityCtrl.Input.Parameter.SctrlKi), Error=>Error) THEN
+				rAxisBasicFB.Meth_InitVelKP (FALSE,rVelocityCtrl.Input.Parameter.SctrlKi);
+				OldSctrlKi := rVelocityCtrl.Input.Parameter.SctrlKi ;
+				InitSctrlState := InitSctrlState +1;
+			END_IF	
+
+		IF Error THEN
+		//	
+		END_IF
+		
+	3:		
+		rVelocityCtrl.Output.Status.SctrlInitialized := TRUE;
+		Meth_InitSctrl := TRUE; 
+	END_CASE	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_ReadPosCtrlValues" Id="{8ed33566-9eb0-445e-b8b4-88f1340b1182}">
+      <Declaration><![CDATA[METHOD Meth_ReadPosCtrlValues : BOOL
+VAR_INPUT
+	Execute : BOOL;
+END_VAR
+
+
+VAR_INST
+	// Service Functions Variablea
+	ReadPosCtrlTrigger : Trigger ;
+	ReadPosCtrlState   : SINT;
+END_VAR	
+
+VAR_OUTPUT
+	Error : BOOL;	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ReadPosCtrlTrigger.EDGEPOS(Execute) THEN
+	ReadPosCtrlState  := 1;
+	Meth_ReadPosCtrlValues := FALSE;
+	Error := FALSE;
+	rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.MAX_TORQUE, Value =>rVelocityCtrl.Output.monitor.OrgMaxTorque, Error =>Error );
+END_IF
+
+
+IF ReadPosCtrlTrigger.EDGENEG(Execute) THEN
+	 rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.MAX_TORQUE, Value =>rVelocityCtrl.Output.monitor.OrgMaxTorque, Error =>Error );
+	 ReadPosCtrlState:= 0;
+END_IF
+
+
+CASE ReadPosCtrlState OF
+ 
+	1:
+		IF  rAxisBasicFB.Meth_ReadObj(TRUE, enumMotionObject.TORQUE_OFFSET, Value =>rVelocityCtrl.Output.monitor.OrgCyclicTorque, Error =>Error ) THEN
+			rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.TORQUE_OFFSET  );
+ 			ReadPosCtrlState := ReadPosCtrlState +1;
+			Error := FALSE;						
+		END_IF
+		IF Error THEN
+			ReadPosCtrlState := 33;
+		END_IF
+			
+	2:
+		IF  rAxisBasicFB.Meth_ReadObj(TRUE, enumMotionObject.VEL_KP, Value =>rVelocityCtrl.Output.monitor.OrgSctrlKp, Error =>Error ) THEN
+			rVelocityCtrl.Output.monitor.OrgVelKp := rVelocityCtrl.Output.monitor.OrgSctrlKp;
+			rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.TORQUE_OFFSET  );
+ 			ReadPosCtrlState := ReadPosCtrlState +1;
+		END_IF
+	3:
+		IF  rAxisBasicFB.Meth_ReadObj(TRUE, enumMotionObject.VEL_KI, Value =>rVelocityCtrl.Output.monitor.OrgSctrlKi, Error =>Error ) THEN
+			rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.TORQUE_OFFSET  );
+ 			ReadPosCtrlState := ReadPosCtrlState +1;
+		END_IF
+	
+	4:
+		IF rAxisBasicFB.Meth_ReadObj (TRUE, enumMotionobject.GAIN_SCHEDULE, Value =>rVelocityCtrl.Output.monitor.OrgGainCtrl, Error =>Error) THEN			
+				rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.TORQUE_OFFSET  );
+				ReadPosCtrlState := ReadPosCtrlState +1;						
+		END_IF		
+		
+	5:
+			IF rAxisBasicFB.Meth_ReadObj (TRUE, enumMotionobject.ACC_CLOSE_POS_ERR, Value =>rVelocityCtrl.Output.monitor.OrgAccToCloseThePosError, Error =>Error) THEN			
+				rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.TORQUE_OFFSET  );
+				ReadPosCtrlState := ReadPosCtrlState +1;						
+			END_IF	
+	6:	
+		IF rAxisBasicFB.Meth_ReadObj (TRUE, enumMotionobject.MAX_TORQUE  , Value =>rVelocityCtrl.Output.monitor.OrgMaxTorque, Error =>Error) THEN	
+				fnLogMsg(ADR(LogMsg_0),LOG_INFO,'MAX_TORQUE org=%d',TO_DINT(rVelocityCtrl.Output.monitor.OrgMaxTorque),0,0);		
+				rAxisBasicFB.Meth_ReadObj(FALSE, enumMotionObject.TORQUE_OFFSET  );
+				ReadPosCtrlState := ReadPosCtrlState +1;						
+		 	END_IF		
+
+	7:
+	
+				
+		ReadPosCtrlParamDone := TRUE;
+		Meth_ReadPosCtrlValues := TRUE; 
+	END_CASE	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_ReturnOrgPosCtrlValues" Id="{8c8cd9c8-8bc8-4d0e-88cc-047c112dcad3}">
+      <Declaration><![CDATA[METHOD Meth_ReturnOrgPosCtrlValues : BOOL
+VAR_INPUT
+	Execute : BOOL;
+END_VAR
+
+
+VAR_INST
+		// Service Functions Variablea
+	ReturnOrgTrigger : Trigger ;
+	ReturnOrgState   : SINT;
+END_VAR	
+
+VAR_OUTPUT
+	Error : BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ReturnOrgTrigger.EDGEPOS(Execute) THEN
+	ReturnOrgState  := 1;
+	Meth_ReturnOrgPosCtrlValues := FALSE;
+	Error := FALSE;
+	rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.MAX_TORQUE, rVelocityCtrl.Output.monitor.OrgMaxTorque, Error =>Error );
+END_IF
+
+
+IF ReturnOrgTrigger.EDGENEG(Execute) THEN
+	 rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.MAX_TORQUE,  rVelocityCtrl.Output.monitor.OrgMaxTorque, Error =>Error );
+	 ReturnOrgState:= 0;
+END_IF
+
+
+CASE ReturnOrgState OF
+ 
+		
+	1:	
+		IF  rAxisBasicFB.Meth_WriteObj(TRUE, enumMotionObject.GAIN_SCHEDULE,  rVelocityCtrl.Output.monitor.OrgGainCtrl, Error =>Error ) THEN
+			rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.GAIN_SCHEDULE ,0 );
+ 			ReturnOrgState := ReturnOrgState +1;
+		END_IF		
+			
+	2:
+		IF  rAxisBasicFB.Meth_WriteObj(TRUE, enumMotionObject.VEL_KP,  rVelocityCtrl.Output.monitor.OrgSctrlKp, Error =>Error ) THEN
+			rAxisBasicFB.Meth_WriteObj(FALSE,enumMotionObject.VEL_KP,0  );
+ 			ReturnOrgState := ReturnOrgState +1;
+		END_IF
+	3:
+		IF  rAxisBasicFB.Meth_WriteObj(TRUE, enumMotionObject.VEL_KI,  rVelocityCtrl.Output.monitor.OrgSctrlKi, Error =>Error ) THEN
+			rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.VEL_KP ,0 );
+ 			ReturnOrgState := ReturnOrgState +1;
+		END_IF
+	
+	4:
+		IF  rAxisBasicFB.Meth_WriteObj(TRUE, enumMotionObject.TORQUE_OFFSET, rVelocityCtrl.Output.monitor.OrgCyclicTorque , Error =>Error ) THEN
+			rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.VEL_KP ,0 );
+ 			ReturnOrgState := ReturnOrgState +1;
+		END_IF
+		
+	5:				
+		IF  rAxisBasicFB.Meth_WriteObj(TRUE, enumMotionObject.MAX_TORQUE, rVelocityCtrl.Output.monitor.OrgMaxTorque  , Error =>Error ) THEN
+			rAxisBasicFB.Meth_WriteObj(FALSE, enumMotionObject.VEL_KP ,0 );
+ 			ReturnOrgState := ReturnOrgState +1;
+		END_IF
+	6:	
+		ReadPosCtrlParamDone := TRUE;
+		Meth_ReturnOrgPosCtrlValues := TRUE; 
+	END_CASE	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="ElmoVelocityCtrlAxis_FB">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoVelocityCtrlAxis_FB.METH_ChangeToVelMode">
+      <LineId Id="7" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="90" Count="3" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="4" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="61" Count="4" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoVelocityCtrlAxis_FB.Meth_InitSctrl">
+      <LineId Id="11" Count="23" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="4" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="50" Count="6" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoVelocityCtrlAxis_FB.Meth_ReadPosCtrlValues">
+      <LineId Id="11" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="17" Count="9" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="103" Count="2" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="108" Count="2" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="116" Count="3" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="134" Count="5" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoVelocityCtrlAxis_FB.Meth_ReturnOrgPosCtrlValues">
+      <LineId Id="11" Count="2" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="17" Count="11" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="76" Count="2" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="116" Count="2" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="135" Count="2" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="57" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

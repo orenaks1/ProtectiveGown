@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="putString" Id="{0cd1e89a-a6dd-0fab-12fb-b646f3ccf651}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION putString : bool
+	VAR_INPUT
+		stringPtr : POINTER TO STRING;
+		stringLength : UINT;
+	END_VAR
+	VAR_IN_OUT
+		bufferRef : POINTER TO USINT;
+	END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	memcpy(bufferRef, stringPtr, stringLength);
+	bufferRef := bufferRef + stringLength;
+	putString := TRUE;]]></ST>
+    </Implementation>
+    <LineIds Name="putString">
+      <LineId Id="8" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

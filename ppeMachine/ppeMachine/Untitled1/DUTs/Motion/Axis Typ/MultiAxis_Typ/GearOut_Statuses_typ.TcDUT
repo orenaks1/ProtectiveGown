@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearOut_Statuses_typ" Id="{c55deee6-6cc9-0643-3574-88c1109fb23f}">
+    <Declaration><![CDATA[TYPE GearOut_Statuses_typ EXTENDS MultiAxis_Status_typ:
+	STRUCT
+		
+
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Basic_cycle_Status_typ" Id="{1f98186c-4559-0f92-233a-55c2e83a9397}">
+    <Declaration><![CDATA[TYPE Basic_cycle_Status_typ :
+	STRUCT
+		CycleTimeOut_Fault 	: BOOL;
+		Running 			: BOOL; (*cycle is  running*)
+		Fault 				: BOOL; (*cycle at fault*)
+		Done 				: BOOL; (* cycle Done *)
+		CycleStuck 			: BOOL;
+		SubStepStuck 		: BOOL ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="eVendorNameID" Id="{82a0517a-62ed-0379-301a-67cf120bc596}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+//{attribute 'strict'}
+{attribute 'to_string'}
+TYPE eVendorNameID :
+(	
+	NoVendor := 		0,
+	BR := 				1,
+	Beckhoff := 		2,
+	Elmo := 			3,
+	ControlTechnique :=	4,
+	Servotronics := 	5,
+	Nidec :=			6,
+	LAST		
+)DINT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

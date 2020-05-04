@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="InverterCtrl_Typ" Id="{14c995cc-eafa-4963-9b3c-5b8a0664c1bc}">
+    <Declaration><![CDATA[TYPE InverterCtrl_Typ :
+STRUCT
+	Start:BOOL;
+	ResetError:BOOL;
+	SetVelocity:INT;
+	ActualVelocity:INT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

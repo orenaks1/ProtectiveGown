@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Basic_MC_SetOverride_typ" Id="{df9c7e6e-dd17-0c35-25bd-66e3ec62f3ae}">
+    <Declaration><![CDATA[TYPE Basic_MC_SetOverride_typ : 	
+	STRUCT 
+		Enabled : BOOL;
+		Busy : BOOL;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

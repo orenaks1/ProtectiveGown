@@ -1,0 +1,665 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="ElmoBasicAxis_FB" Id="{2e0e12a1-cbda-0a39-099b-5ee932b872e2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC ElmoBasicAxis_FB EXTENDS CoE_BasicAxis_FB  
+VAR_INPUT		
+	pDigIn: 		    POINTER TO DINT;
+	
+END_VAR
+VAR_IN_OUT	
+END_VAR
+VAR_OUTPUT	
+END_VAR
+
+VAR
+	
+	fbElmoIOsHandle:	FB_ElmoIOsHandle;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+AxisCtrlPtr^.Input.Parameter.Drive.eDriveType := enumDriveType.eElmo;	
+AxisCtrlPtr^.Input.Parameter.Drive.VendorNameID := eVendorNameID.Elmo;
+SUPER^(AxisRef:=AxisRef);
+
+
+IF pDigIn <> 0 THEN
+	fbElmoIOsHandle(DigIn:=	pDigIn^);
+	AxisCtrlPtr^.Output.Status.DriveEnable:=	fbElmoIOsHandle.bEnable;
+END_IF
+
+]]></ST>
+    </Implementation>
+    <Method Name="CreateDriveErrMsgDetails" Id="{9cc976e0-d151-0c3a-0286-72b050a07b1d}">
+      <Declaration><![CDATA[METHOD CreateDriveErrMsgDetails : enumMotorEvents
+VAR_INPUT
+	ErrorId			: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE ErrorId OF
+	16#0:
+		CreateDriveErrMsgDetails := enumMotorEvents.NoEvents;
+		
+	16#2340:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d  ,Short circuit',UDINT_TO_DINT(ErrorId),0,0);
+	16#3120: 
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Under Voltage',UDINT_TO_DINT(ErrorId),0,0);
+	16#3130:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Hall  AC fail,loss off phase',UDINT_TO_DINT(ErrorId),0,0);
+	16#3310:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,' voltage is too high',UDINT_TO_DINT(ErrorId),0,0);
+ 
+	16#4310:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverTemp ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Temp drive overhating',UDINT_TO_DINT(ErrorId),0,0);
+	16#5280:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError ;	
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Gantry position error',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#5441:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveNotEnabled;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Motor disables',UDINT_TO_DINT(ErrorId),0,0);
+	16#5442:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveNotEnabled;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Motor disables by sw',UDINT_TO_DINT(ErrorId),0,0);
+	16#6300:
+		CreateDriveErrMsgDetails := enumMotorEvents.PLCIllegalParam;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d RPDO failed',UDINT_TO_DINT(ErrorId),0,0);
+	16#7121:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Motor stuck',UDINT_TO_DINT(ErrorId),0,0);
+	16#7300:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorFeedBackErr;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Feedback error',UDINT_TO_DINT(ErrorId),0,0);
+	16#7381:
+ 		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d 2 Dig halls sens where cng on the same time',UDINT_TO_DINT(ErrorId),0,0);
+	16#7382: 
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Commutaition procees failed',UDINT_TO_DINT(ErrorId),0,0);
+	16#8110:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Cam Msg lost',UDINT_TO_DINT(ErrorId),0,0);
+	16#8130:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Heartbeat event',UDINT_TO_DINT(ErrorId),0,0);
+	16#8140:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Recovered from bus off',UDINT_TO_DINT(ErrorId),0,0);
+	16#8210:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d access to non configured PDO',UDINT_TO_DINT(ErrorId),0,0);
+	16#8311:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Peak current has been exceeded',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#8480:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSpeedError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d speed tracking Error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8481:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSpeedError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Speed limit Exceeded',UDINT_TO_DINT(ErrorId),0,0);
+	16#8611:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Position tracking error',UDINT_TO_DINT(ErrorId),0,0);
+	16#8680:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Position limit Exceeded',UDINT_TO_DINT(ErrorId),0,0);
+	16#FF02:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Com Error',UDINT_TO_DINT(ErrorId),0,0);
+	16#FF10:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Failed to start motor',UDINT_TO_DINT(ErrorId),0,0);
+	16#FF20:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Saftey torque Off in use',UDINT_TO_DINT(ErrorId),0,0);
+	16#FF40:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Elmo Drive ErrorId %d Gantry slave Disabled',UDINT_TO_DINT(ErrorId),0,0);
+	ELSE
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'unknown Elmo Drive ErrorId %d ',UDINT_TO_DINT(ErrorId),0,0);
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+		 
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="DriveUnitsTorqueToRealValue" Id="{655fd303-8479-4aac-a951-a73c4774eb58}">
+      <Declaration><![CDATA[METHOD DriveUnitsTorqueToRealValue : LREAL
+VAR_INPUT
+	
+	Torque: LREAL;	
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[DriveUnitsTorqueToRealValue := (Torque*AxisCtrlPtr^.Input.Parameter.RatedCurrent)/1000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetCanOpenAdr" Id="{5459baee-fb42-4764-b410-c7c8356edfd8}">
+      <Declaration><![CDATA[METHOD GetCanOpenAdr : BOOL
+VAR_INPUT
+END_VAR
+
+
+VAR
+	
+	SpeedSwSubIndex: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[    SUPER^.GetCanOpenAdr();	
+
+	
+	CoEDrive_Ctrl_Adr.KpSpeed.Index	   := 16#3113;	
+	CoEDrive_Ctrl_Adr.KpSpeed.SunIndex  := 2;
+	CoEDrive_Ctrl_Adr.KpSpeed.Size      := 4;
+	CoEDrive_Ctrl_Adr.KpSpeed.IsReal    := TRUE;
+	
+	
+	CoEDrive_Ctrl_Adr.KiSpeed.Index	    := 16#310C;	
+	CoEDrive_Ctrl_Adr.KiSpeed.SunIndex  := 2;
+   	CoEDrive_Ctrl_Adr.KiSpeed.Size      := 4;
+	CoEDrive_Ctrl_Adr.KiSpeed.IsReal    := TRUE;
+	
+	CoEDrive_Ctrl_Adr.GainScheduler.Index	    := 16#30AE;	
+	CoEDrive_Ctrl_Adr.GainScheduler.SunIndex    := 2;
+   	CoEDrive_Ctrl_Adr.GainScheduler.Size        := 8;
+	
+	
+	CoEDrive_Ctrl_Adr.AccClosePosErr.Index	    := 16#30AE;	
+	CoEDrive_Ctrl_Adr.AccClosePosErr.SunIndex    := 9;
+   	CoEDrive_Ctrl_Adr.AccClosePosErr.Size        := 8;
+	
+	
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetErrCanAdr" Id="{87d06868-b33e-0803-257c-791b5bbbc79f}">
+      <Declaration><![CDATA[METHOD GetErrCanAdr : BOOL
+VAR_INPUT
+END_VAR
+
+
+VAR
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+	
+	CoeErrIdIndex	 := 16#603F;
+	CoeErrIdSubIndex := 0;
+	
+
+	
+   	
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="INIT_Specific" Id="{ff4c39ef-11b0-019e-39fa-a81d964c7711}">
+      <Declaration><![CDATA[METHOD  INIT_Specific : BOOL 
+VAR_INPUT
+	bStart: 					BOOL;
+END_VAR
+VAR_INST	
+	ComDelay:	TON;
+	Elmo_Init_State : INT ;
+	ExecuteTrig: 	Trigger;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ExecuteTrig.EDGEPOS(bStart) THEN
+	INIT_Specific := FALSE ;
+	IF AxisCtrlPtr^.Input.Parameter.Drive.bDisableFoE_Transfer THEN 
+		Elmo_Init_State:= 3;
+	ELSE
+		CoEDrive_Ctrl_Adr.ParamsVersionObj.Index    := 16#2F00;
+		CoEDrive_Ctrl_Adr.ParamsVersionObj.SunIndex := 1; 		
+		Elmo_Init_State:= 1;
+	END_IF
+END_IF
+
+
+IF ExecuteTrig.EDGENEG(bStart) THEN
+	Elmo_Init_State := 0;
+END_IF	
+
+	
+CASE Elmo_Init_State OF							
+	1:
+		Meth_UpdateDriveParams(FALSE);
+		Elmo_Init_State:=	2;
+	2:	
+		IF Meth_UpdateDriveParams(TRUE) THEN
+			Elmo_Init_State:=	3;
+		ELSIF AxisCtrlPtr^.Output.Status.Drive.eUpdate_Staus = enum_DriveUpdateStatus.Error THEN
+			//
+		END_IF
+
+	3:
+		ReadInitDriveParID(FALSE);
+		Elmo_Init_State:=	4;
+		
+	4:
+		IF ReadInitDriveParID(TRUE) THEN
+			Elmo_Init_State:=	10;
+		END_IF			
+
+	10:
+		
+		Elmo_Init_State := 0 ;
+		INIT_Specific := TRUE ;
+		AxisCtrlPtr^.Output.Status.AxisInitDone := TRUE ;
+		AxisCtrlPtr^.Output.Status.ReadyForCmd := TRUE ;
+END_CASE
+	
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_ChangingOperationMode" Id="{335ef2a7-70a9-4328-9a4c-78491bccc262}">
+      <Declaration><![CDATA[METHOD Meth_ChangingOperationMode : BOOL
+VAR_INPUT
+	Execute   : BOOL;
+	OperMode : eDriveModeOfOperation; 
+	
+END_VAR
+VAR_INST
+	
+	ElmoCngOperState : INT;	
+END_VAR
+
+VAR
+	
+	ChangeDone : BOOL;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ChangeModeOperTrig.EDGEPOS(Execute) THEN
+
+	Meth_ChangingOperationMode := FALSE;					
+	ChangeDone := FALSE;
+	ElmoCngOperState := 1;
+
+	
+END_IF
+
+
+IF ChangeModeOperTrig.EDGENEG(Execute) THEN
+	
+	ElmoCngOperState := 0;
+END_IF
+
+
+
+CASE ElmoCngOperState OF
+	0:
+		Meth_CoEChangOperationMode(FALSE,eCaOpDriveModeOfOperation.ProfilePositionMode);
+		
+	1: 
+		//Meth_CoEChangOperationMode
+		CASE OperMode OF
+			eDriveModeOfOperation.ProfilePositionMode				:
+				IF Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.ProfilePositionMode) THEN
+					ChangeDone := TRUE;
+				END_IF
+				
+		    eDriveModeOfOperation.VelocityCtrMode    				:
+				IF Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.ProfileVelocityMode)THEN
+					ChangeDone := TRUE;
+				END_IF
+		    eDriveModeOfOperation.ProfileVelocityMode 	   	    :
+				IF Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.ProfileVelocityMode) THEN
+					ChangeDone := TRUE;
+				END_IF
+				
+		    eDriveModeOfOperation.TorqueVelocityMode 				:
+				IF Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.TorqueVelocityMode) THEN
+					ChangeDone := TRUE;
+				END_IF
+				
+		    eDriveModeOfOperation.HomingMode				    	:
+				IF Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.HomingMode)THEN
+					ChangeDone := TRUE;
+				END_IF
+				
+		    eDriveModeOfOperation.InterpolationPosMode			:
+				IF Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.InterpolationPosMode) THEN
+					ChangeDone := TRUE;
+				END_IF
+		    eDriveModeOfOperation.CyclicSyncMode					:
+				Meth_CoEChangOperationMode(TRUE,eCaOpDriveModeOfOperation.CyclicSyncMode);
+		END_CASE
+		ElmoCngOperState := 2;
+
+	2:
+ 		Meth_ChangingOperationMode := TRUE;
+		
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_TorqueInDriveUnits" Id="{0b404ad3-f140-4a59-b6f1-dbfb474491a6}">
+      <Declaration><![CDATA[METHOD Meth_TorqueInDriveUnits : LREAL
+VAR_INPUT
+	
+	Torque: LREAL;	
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF AxisCtrlPtr^.Input.Parameter.RatedCurrent <> 0 THEN
+	Meth_TorqueInDriveUnits := (Torque*1000)/AxisCtrlPtr^.Input.Parameter.RatedCurrent;
+END_IF	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReadActualCurrent" Id="{e92bc553-4eb8-43f0-9e6c-04388d0f3070}">
+      <Declaration><![CDATA[METHOD ReadActualCurrent : LREAL
+VAR_INPUT
+END_VAR
+VAR_INST
+		
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+// Units [rms]
+
+AxisCtrlPtr^.Output.monitor.ActualCurrent	:=  ( (THIS^.io_ActualCurrent) / 1000.0) * AxisCtrlPtr^.Input.Parameter.RatedCurrent / SQRT(2.0);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReadActualTorque" Id="{703882d2-916f-4ffe-8cd7-2ccba07b8635}">
+      <Declaration><![CDATA[METHOD ReadActualTorque : LREAL
+VAR_INPUT
+END_VAR
+VAR_INST
+		
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// Units [rms]
+//AxisCtrlPtr^.Output.monitor.ActualCurrent Get from ReadActualCurrent method
+// on Elmo it is needed to link only IO  io_ActualCurrent
+AxisCtrlPtr^.Output.monitor.ActualTorque	:=  AxisCtrlPtr^.Output.monitor.ActualCurrent * AxisCtrlPtr^.Input.Parameter.Drive.Kt;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReadInitDriveParID" Id="{cfd5b54e-9c59-48c8-9b20-0b19b3d9d026}">
+      <Declaration><![CDATA[METHOD ReadInitDriveParID : BOOL
+VAR_INPUT
+	bStart : BOOL;
+END_VAR
+
+VAR_INST
+	ExecuteTrig_1: 		Trigger;
+	State_InitSpecific_1: INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF ExecuteTrig_1.EDGEPOS(bStart) THEN
+	ReadInitDriveParID		:= FALSE;
+	State_InitSpecific_1	:= 1;		
+END_IF
+
+IF ExecuteTrig_1.EDGENEG(bStart) THEN
+	State_InitSpecific_1	:= 0;	
+	ReadInitDriveParID		:= FALSE;
+END_IF
+
+CASE State_InitSpecific_1 OF
+
+	 
+	
+	1:
+		SUPER^.EcCoeSdoRead(FALSE);
+		CoeSdoRW.Input.Read.nIndex		:= DINT_TO_WORD(eElmoDriveParID.RatedCurrent);
+		CoeSdoRW.Input.Read.nSubIndex	:= 0;
+		CoeSdoRW.Input.Read.pDstBuf		:= ADR(CoeRead_RatedCurrent);
+		CoeSdoRW.Input.Read.cbBufLen	:= SIZEOF(CoeRead_RatedCurrent);
+		State_InitSpecific_1	:= 2;
+		
+	2:
+		IF SUPER^.EcCoeSdoRead(TRUE) THEN	
+			State_InitSpecific_1	:= 3;
+		END_IF
+		
+	3:
+		SUPER^.EcCoeSdoRead(FALSE);
+		CoeSdoRW.Input.Read.nIndex		:= DINT_TO_WORD(eElmoDriveParID.RatedTorque);
+		CoeSdoRW.Input.Read.nSubIndex	:= 0;
+		CoeSdoRW.Input.Read.pDstBuf		:= ADR(CoeRead_RatedTorque);
+		CoeSdoRW.Input.Read.cbBufLen	:= SIZEOF(CoeRead_RatedTorque);
+		State_InitSpecific_1	:= 4;
+		
+	4:
+		IF SUPER^.EcCoeSdoRead(TRUE) THEN
+			AxisCtrlPtr^.Input.Parameter.RatedCurrent	:= UDINT_TO_LREAL(CoeRead_RatedCurrent) / 1000.0;
+			AxisCtrlPtr^.Input.Parameter.Ratedtorque	:= UDINT_TO_LREAL(CoeRead_RatedTorque) / 1000.0;
+			ReadInitDriveParID		:= TRUE;	
+			State_InitSpecific_1	:= 0;
+		END_IF
+		
+END_CASE ]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="ElmoBasicAxis_FB">
+      <LineId Id="2092" Count="1" />
+      <LineId Id="2171" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="2142" Count="0" />
+      <LineId Id="2115" Count="0" />
+      <LineId Id="2113" Count="0" />
+      <LineId Id="2122" Count="0" />
+      <LineId Id="2112" Count="0" />
+      <LineId Id="2157" Count="0" />
+      <LineId Id="2185" Count="0" />
+      <LineId Id="2156" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.CreateDriveErrMsgDetails">
+      <LineId Id="5" Count="0" />
+      <LineId Id="286" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="280" Count="1" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="256" Count="1" />
+      <LineId Id="246" Count="1" />
+      <LineId Id="258" Count="1" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="260" Count="1" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="262" Count="1" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="264" Count="1" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="266" Count="1" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="270" Count="1" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.DriveUnitsTorqueToRealValue">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.GetCanOpenAdr">
+      <LineId Id="129" Count="6" />
+      <LineId Id="146" Count="1" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="159" Count="1" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="151" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.GetErrCanAdr">
+      <LineId Id="42" Count="1" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.INIT_Specific">
+      <LineId Id="179" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="199" Count="2" />
+      <LineId Id="232" Count="1" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="183" Count="3" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="242" Count="2" />
+      <LineId Id="247" Count="1" />
+      <LineId Id="257" Count="1" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="268" Count="7" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="148" Count="6" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="64" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.Meth_ChangingOperationMode">
+      <LineId Id="11" Count="2" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="23" Count="11" />
+      <LineId Id="216" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="218" Count="1" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="234" Count="1" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="236" Count="1" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="238" Count="1" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="240" Count="1" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="242" Count="1" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="244" Count="1" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.Meth_TorqueInDriveUnits">
+      <LineId Id="12" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.ReadActualCurrent">
+      <LineId Id="3" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.ReadActualTorque">
+      <LineId Id="3" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="ElmoBasicAxis_FB.ReadInitDriveParID">
+      <LineId Id="6" Count="37" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="44" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

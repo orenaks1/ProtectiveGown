@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="MultiAxis_Param_typ" Id="{d36cd456-48e4-0b66-0a08-565a39bc099c}">
+    <Declaration><![CDATA[TYPE MultiAxis_Param_typ :
+	STRUCT
+		ThreadName			: STRING[20];
+		CamTableSelect		: CamTableSelect_Param_typ ;
+		CamIn				: CamIn_Param_typ ;
+		CamOut				: CamOut_Param_typ ;
+		GearInDyn			: GearInDyn_Param_typ ;
+		GearInPos			: GearInPos_Param_typ ;
+		GearOut				: GearOut_Param_typ ;
+		GearInMultiMaster	: GearInMultiMaster_Param_typ ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="LogMsg" Id="{769126b5-6814-0808-0d67-6ca43c9f6d4b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK LogMsg
+VAR_INPUT
+	operationType :OperationTypeEnum ; (*Which operation to do: writing to local array or move from local to global array*)	
+	Enable : BOOL;
+	ptrEncoderAngle : POINTER TO REAL;
+	ptrGlobalArray : POINTER TO LogGlobalArrayObj; (*Address of global array*)
+	logData : LogMsgLogData; (*Log data, moved to function block, after using need to be cleared*)	
+END_VAR
+VAR_OUTPUT
+	ErrorID : USINT;	
+END_VAR
+VAR_STAT
+	UseFunctionSuppressBlank : BOOL := TRUE;
+END_VAR
+
+VAR
+
+	logLocalArray : LogLocalArrayObj;
+	//globalArray : REFERENCE TO LogGlobalArrayObj; (*Pointer of global array structure*)
+	tempIndex : UINT;
+	//encoderAngle : REFERENCE TO REAL;
+	MembersToWrite	: UINT;	
+	i 				: UINT;	
+	NT_GetTime_0 : NT_GetTime;
+	
+	FB_FormatString_0:FB_FormatString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+CASE operationType OF
+	(* Copy log message to local array *)
+	COLLECT2LOCAL:
+	
+		IF Enable THEN (* Writing to local array only if enabled *)
+			IF logLocalArray.pointers.numOfMembers < LOCAL_ARRAY_LENGTH THEN
+				(* Copies data to local structure *)
+				tempIndex := logLocalArray.pointers.writePointer;
+				logLocalArray.array_tc[tempIndex].data := logData;
+				logLocalArray.array_tc[tempIndex].TIME_TC := RTC.TimeStamp_GMT;
+				//NT_GetTime_0(NETID:= ,START := TRUE,TMOUT:= ,BUSY:=,ERR:=,ERRID:= , TIMESTR=>logLocalArray.array_tc[tempIndex].TIME_TC );
+				//NT_GetTime_0(START := FALSE);
+				//RTC_gettime(ADR(logLocalArray.array_tc[tempIndex].TIME_TC));
+				//encoderAngle ACCESS encoderAngleAddr;
+				//Translates from PLC angle (0..360000) to normal angle units (0..720 degrees)
+				logLocalArray.array_tc[tempIndex].Angle := REAL_TO_UINT(ptrEncoderAngle^);  //Oren// REAL_TO_UINT(floor_f((ptrEncoderAngle^*2+500)/1000.0));
+				logLocalArray.pointers.writePointer := (tempIndex + 1) MOD LOCAL_ARRAY_LENGTH;
+				logLocalArray.pointers.numOfMembers := logLocalArray.pointers.numOfMembers + 1;
+			ELSE
+				ErrorID := 1;
+			END_IF;
+		END_IF;	
+	(* Copy all messages from local array to global array *)
+	COPY2GLOBAL:
+
+		//globalArray ACCESS globalArrayAddr;
+		(*IF ptrGlobalArray^.SemData.SemID = 0 THEN
+			IF globalArray.SemData.SemCreate_0.status = 0 THEN  (* SemCreate successful *)
+				globalArray.SemData.SemID := globalArray.SemData.SemCreate_0.ident;  (* copy semaphore-ident the a gobal variable for global use *)
+ 				SemRelease(globalArray.SemData.SemID);  (* release the allocated semaphore *)
+			ELSIF globalArray.SemData.SemCreate_0.status = ERR_FUB_BUSY THEN
+				globalArray.SemData.SemCreate_0();
+			END_IF	
+		END_IF*)   
+
+		IF	// globalArray.SemData.SemID <> 0 AND 
+			//AND ptrGlobalArray^.pointers.numOfMembers < GLOBAL_ARRAY_LENGTH THEN
+			logLocalArray.pointers.numOfMembers > 0 THEN
+			
+			IF ptrGlobalArray^.SemData.SemaStat = 0 THEN (*Allocation succesfull *)
+				ptrGlobalArray^.SemData.SemaStat :=1;
+
+				MembersToWrite := MIN(logLocalArray.pointers.numOfMembers,
+										GLOBAL_ARRAY_LENGTH - ptrGlobalArray^.pointers.numOfMembers);
+				MembersToWrite := MIN(MembersToWrite, MAX_MEMBERS_TO_WRITE);
+				
+				FOR	i := 1 TO MembersToWrite DO							
+					ptrGlobalArray^.array_tc[ptrGlobalArray^.pointers.writePointer]	:= logLocalArray.array_tc[logLocalArray.pointers.readPointer];
+					ptrGlobalArray^.pointers.writePointer	:= (ptrGlobalArray^.pointers.writePointer + 1)	MOD GLOBAL_ARRAY_LENGTH;
+					logLocalArray.pointers.readPointer		:= (logLocalArray.pointers.readPointer + 1)		MOD LOCAL_ARRAY_LENGTH;
+				END_FOR;
+
+				logLocalArray.pointers.numOfMembers		:= logLocalArray.pointers.numOfMembers - MembersToWrite;
+				ptrGlobalArray^.pointers.numOfMembers	:= ptrGlobalArray^.pointers.numOfMembers + MembersToWrite;
+				
+				//release semophere
+				ptrGlobalArray^.SemData.SemaStat :=0;
+				//SemRelease(globalArray.SemData.SemID);
+				
+			END_IF
+		END_IF
+END_CASE;
+]]></ST>
+    </Implementation>
+    <Method Name="EnableLogger" Id="{f8531278-a0d0-05fa-27e8-1d7f721a9c35}">
+      <Declaration><![CDATA[METHOD EnableLogger
+VAR_INPUT
+	toEnable: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Enable := toEnable;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{c40e4576-4208-0479-0fc2-f1b70acc21e4}">
+      <Declaration><![CDATA[METHOD FB_init : BOOL
+VAR_INPUT
+	bInitRetains : BOOL; // if TRUE, the retain variables are initialized (warm start / cold start)
+	bInCopyCode : BOOL;  // if TRUE, the instance afterwards gets moved into the copy code (online change)
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+// beware of overriding initialization has been done by particular user
+IF (ptrGlobalArray = 0) THEN
+	InitLogger('LogName', 0,0);
+	EnableLogger(TRUE);
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="InitLogger" Id="{b938c9f6-d00a-0b32-0972-ab8f78a506e9}">
+      <Declaration><![CDATA[//
+// if globalArrayAddr and/or encoderAngleAddr is set to 0,
+// so if InitLogger is called the first time, init it to defaults,
+// otherwise, keep values as have been already set. 
+
+METHOD InitLogger : BOOL
+VAR_INPUT
+	categoryName		: STRING[LOG_MSG_CATEGORY_LENGTH];
+	globalArrayAddr		: POINTER TO LogGlobalArrayObj;
+	encoderAngleAddr	: POINTER TO REAL;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	THIS^.logData.category := categoryName;
+	
+	// if globalArrayAddr and/or encoderAngleAddr is set to 0,
+	// so IF InitLogger is called the first time, init it TO defaults,
+	// otherwise, keep values as have been already set. 
+
+	IF(globalArrayAddr <> 0) THEN
+		THIS^.ptrGlobalArray := globalArrayAddr;
+	ELSIF(THIS^.ptrGlobalArray = 0) THEN
+		THIS^.ptrGlobalArray := ADR(PcComm.LogGlobalArray);
+	END_IF
+	
+	IF (encoderAngleAddr <> 0)THEN
+		THIS^.ptrEncoderAngle := encoderAngleAddr;
+	ELSIF (THIS^.ptrEncoderAngle = 0) THEN
+		THIS^.ptrEncoderAngle := ADR(CONST_ZERO);
+	END_IF
+
+	InitLogger := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LogMsg" Id="{4d062862-9240-007b-2bb1-ad05d983bae9}">
+      <Declaration><![CDATA[METHOD PUBLIC LogMsg : BOOL
+VAR_INPUT
+		messageLevel : enumLogMessageLevelSeverity;
+		textMessage : REFERENCE TO STRING[LOG_MSG_TEXT_LENGTH];
+		param1 : DINT;
+		param2 : DINT;
+		param3 : DINT;
+		param4 : DINT;
+		param5 : DINT;
+		param6 : DINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	(* Copying data before putting it into local array *)
+	THIS^.logData.levelSeverity := messageLevel;
+	THIS^.logData.text := textMessage;
+    IF (UseFunctionSuppressBlank=TRUE) THEN
+        fnSuppressBlank(ADR(THIS^.logData.text));
+    END_IF;
+	THIS^.logData.params_tc[0] := param1;
+	THIS^.logData.params_tc[1] := param2;
+	THIS^.logData.params_tc[2] := param3;
+	THIS^.logData.params_tc[3] := param4;
+	THIS^.logData.params_tc[4] := param5;
+	THIS^.logData.params_tc[5] := param6;
+	THIS^.operationType := COLLECT2LOCAL;
+	THIS^.logData.noParams := FALSE;	
+	THIS^();
+	LogMsg := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LogMsg_v2" Id="{d512379b-9d7e-478c-84dc-daec6b9a4cc4}">
+      <Declaration><![CDATA[METHOD LogMsg_v2 : BOOL
+VAR_INPUT
+		messageLevel : enumLogMessageLevelSeverity;
+		textMessage : REFERENCE TO STRING[LOG_MSG_TEXT_LENGTH];
+		param1 : T_Arg;
+		param2 : T_Arg;
+		param3 : T_Arg;
+		param4 : T_Arg;
+		param5 : T_Arg;
+		param6 : T_Arg;
+		param7 : T_Arg;
+		param8 : T_Arg;
+		param9 : T_Arg;
+		param10 : T_Arg;		
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	(* Copying data before putting it into local array *)
+	
+	FB_FormatString_0(sFormat := textMessage,arg1 :=param1,arg2 :=param2,arg3 :=param3,arg4 :=param4,arg5 :=param5,arg6 :=param6,arg7 :=param7,arg8 :=param8,arg9 :=param9,arg10 :=param10);
+	IF FB_FormatString_0.bError = FALSE THEN
+		THIS^.logData.levelSeverity := messageLevel;
+		THIS^.logData.text := FB_FormatString_0.sOut;
+	ELSE
+		THIS^.logData.text := 'Log error, Format text error';
+		THIS^.logData.levelSeverity := enumLogMessageLevelSeverity.LOG_ERROR;	
+	END_IF	
+    IF (UseFunctionSuppressBlank=TRUE) THEN
+        fnSuppressBlank(ADR(THIS^.logData.text));
+    END_IF;
+	THIS^.logData.noParams := TRUE;	
+
+	THIS^.operationType := COLLECT2LOCAL;
+	THIS^();
+	LogMsg_v2 := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="LogTransfer" Id="{5a06fed8-3cbb-417a-ab46-6a01cbc25890}">
+      <Declaration><![CDATA[METHOD LogTransfer : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.operationType := COPY2GLOBAL;
+THIS^();
+LogTransfer := TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="LogMsg">
+      <LineId Id="205" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="30" Count="4" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="35" Count="11" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="101" Count="6" />
+      <LineId Id="56" Count="2" />
+      <LineId Id="169" Count="2" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="238" Count="2" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="204" Count="0" />
+    </LineIds>
+    <LineIds Name="LogMsg.EnableLogger">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="LogMsg.FB_init">
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="LogMsg.InitLogger">
+      <LineId Id="9" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="43" Count="2" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="20" Count="2" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="LogMsg.LogMsg">
+      <LineId Id="17" Count="12" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="LogMsg.LogMsg_v2">
+      <LineId Id="14" Count="1" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="LogMsg.LogTransfer">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
