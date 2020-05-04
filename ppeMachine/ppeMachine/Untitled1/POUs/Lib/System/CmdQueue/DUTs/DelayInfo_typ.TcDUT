@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="DelayInfo_typ" Id="{43aa79d4-ba6a-08e6-3f43-d2737801040e}">
+    <Declaration><![CDATA[TYPE DelayInfo_typ :
+STRUCT	
+	RequestId : UDINT;
+	GroupId : UDINT;
+	DelayType : eDelayType;
+	DelayValue : ULINT; // ms or microns
+	pExecuted : POINTER TO BOOL; // need to be persistant
+	PrivateInfo : PVOID;
+	Executed : BOOL;
+	LagError : UDINT; // ms or microns
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

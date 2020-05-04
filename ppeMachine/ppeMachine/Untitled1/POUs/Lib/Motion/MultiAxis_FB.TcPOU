@@ -1,0 +1,972 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="MultiAxis_FB" Id="{d2bd4516-ef90-0721-3263-f8202b687f01}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC MultiAxis_FB
+VAR_INPUT
+	
+	BasicAxisCtrlPtr 	: POINTER TO Basic_axis_typ ;
+	MultiAxisCtrlPtr 	: POINTER TO MultiAxis_typ ;
+	
+END_VAR
+VAR_IN_OUT
+	MasterRef	:	AXIS_REF;
+    MasterRef2 	: 	AXIS_REF;
+    MasterRef3 	: 	AXIS_REF;
+    MasterRef4 	: 	AXIS_REF;
+	AxisRef		: 	AXIS_REF;
+END_VAR
+VAR_OUTPUT
+END_VAR
+	
+VAR
+	LogMsgInit		: BOOL;
+	LogMsg_0 		: LogMsg ;
+	DecoupleTriger	: Trigger ;
+	Decouple		: bool ;
+	fbMC_CamTableSelect	: MC_CamTableSelect;
+	fbMC_CamIn			: MC_CamIn;
+	fbMC_CamOut			: MC_CamOut;
+	fbMC_GearInDyn		: MC_GearInDyn;
+	fbMC_GearInPos		: MC_GearInPos;
+	fbMC_GearOut		: MC_GearOut ;
+	fbMC_GearInMultiMaster : MC_GearInMultiMaster ;
+	
+	ErrorTrig : Trigger ;
+	AxisStep : eMultiAxisState ;
+	tempTrig : Trigger ;
+	
+	
+	
+	tmp_ErrorEntry			: Eh_ErrorEntry_typ;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT LogMsgInit THEN 
+	LogMsg_0.logData.category:=	BasicAxisCtrlPtr^.Input.Parameter.ThreadName;     
+	LogMsg_0.Enable:= 	TRUE; 	
+END_IF
+
+LogMsg_0.ptrGlobalArray:= 	ADR(LogGlobalArray);
+LogMsg_0.ptrEncoderAngle:= 	ADR(BasicAxisCtrlPtr^.Input.Parameter.PosForLog);
+
+IF BasicAxisCtrlPtr^.Output.Status.FAULT THEN
+	
+
+	AxisStep := MultiAxis_STATE_ERROR;
+		
+END_IF
+
+//in case of Stop go to CAM_STATE_WAIT
+IF (BasicAxisCtrlPtr^.Input.Command.Stop = TRUE) OR (BasicAxisCtrlPtr^.Input.Command.Halt = TRUE) THEN
+	AxisStep := MultiAxis_STATE_WAIT;
+END_IF
+
+CASE AxisStep OF
+		
+	(******************** WAIT *************************)
+	MultiAxis_STATE_WAIT:  (* STATE: Wait *)
+		
+		IF BasicAxisCtrlPtr^.Output.Status.ReadyForCmd THEN
+			Disable_All_FB(FALSE);
+			AxisStep := MultiAxis_STATE_ENTER_READY ;
+		END_IF
+		
+	MultiAxis_STATE_ENTER_READY:
+			IF Disable_All_FB(TRUE) THEN
+				AxisStep := MultiAxis_STATE_READY ;
+			END_IF	
+
+	(******************** READY *************************)
+	MultiAxis_STATE_READY:
+	
+		IF MultiAxisCtrlPtr^.Input.Command.CamTableSelect.Start THEN
+			
+			MultiAxisCtrlPtr^.Input.Command.CamTableSelect.Start := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.CamTableSelect.Done := FALSE ;
+			AxisStep := MultiAxis_STATE_CAM_SELECT ;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.CamIn.StartSlave THEN
+			
+			MultiAxisCtrlPtr^.Input.Command.CamIn.StartSlave := FALSE ;
+			fbMC_CamIn.Execute := FALSE;	
+			AxisStep := MultiAxis_STATE_CAM_START ;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.CamIn.DisengageSlave THEN
+			
+			MultiAxisCtrlPtr^.Input.Command.CamIn.DisengageSlave := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.CamOut.Done := FALSE ;
+			fbMC_CamOut.Execute := FALSE ;
+			AxisStep := MultiAxis_STATE_CAM_STOP ;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.GearInPos.StartSlave  THEN
+			MultiAxisCtrlPtr^.Input.Command.GearInPos.StartSlave := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInPos.InSync := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= FALSE ;
+			AxisStep := MultiAxis_STATE_GEAR_IN_POS ;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.GearInDyn.StartSlave THEN
+			MultiAxisCtrlPtr^.Input.Command.GearInDyn.StartSlave := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInDyn.InGear := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= FALSE ;
+			AxisStep := MultiAxis_STATE_GEAR_IN_DYN ;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.GearInDyn.DisengageSlave THEN
+			MultiAxisCtrlPtr^.Input.Command.GearInDyn.DisengageSlave := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInDyn.InGear := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.InGear := FALSE ;
+			AxisStep := MultiAxis_STATE_GEAR_OUT ;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.StartSlave THEN
+			MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.StartSlave := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.InGear := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= FALSE ;
+			AxisStep := MultiAxis_STATE_GEAR_IN_MULTI_MASTER;
+			
+		ELSIF MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.DisengageSlave THEN
+			MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.DisengageSlave := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInDyn.InGear := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.InGear := FALSE ;
+			AxisStep := MultiAxis_STATE_GEAR_OUT ;
+		END_IF
+	
+	(******************** CamTableSelect *************************)	
+	MultiAxis_STATE_CAM_SELECT:
+
+		IF THIS^.CamTableSelect()THEN
+			AxisStep := MultiAxis_STATE_READY;
+		END_IF
+		
+	(******************** START CAM MOVEMENT **********************)	
+	MultiAxis_STATE_CAM_START:
+	
+		fbMC_CamIn.MasterOffset 	:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.MasterOffset;
+		fbMC_CamIn.SlaveOffset 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.SlaveOffset; 
+		fbMC_CamIn.MasterScaling	:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.MasterScaling;
+		fbMC_CamIn.SlaveScaling 	:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.SlaveScaling;
+		fbMC_CamIn.StartMode 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.StartMode;
+		fbMC_CamIn.CamTableID 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.CamTableID;
+		fbMC_CamIn.BufferMode 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.BufferMode;
+		fbMC_CamIn.Options 			:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.Options; 
+		
+		fbMC_CamIn.Execute := TRUE;
+		AxisStep := MultiAxis_STATE_READY;
+		
+	(******************** STOP CAM MOVEMENT **********************)
+	MultiAxis_STATE_CAM_STOP: (* STATE: Stop electronic gear coupling *)
+		
+		IF THIS^.CamOut()THEN
+			fbMC_CamIn.Execute := FALSE;
+			AxisStep := MultiAxis_STATE_READY;
+		END_IF	
+			
+	(******************** GEAR IN DYNAMIC **********************)	
+	MultiAxis_STATE_GEAR_IN_DYN:
+	
+	
+		IF (MultiAxisCtrlPtr^.Input.Command.GearInDyn.DisengageSlave)			 
+				AND NOT THIS^.GearInDyn() THEN
+			AxisStep := MultiAxis_STATE_GEAR_OUT;
+		END_IF
+				
+	(******************** GEAR IN POSITION **********************)
+	MultiAxis_STATE_GEAR_IN_POS:
+	
+		IF MultiAxisCtrlPtr^.Input.Command.GearInPos.DisengageSlave AND NOT THIS^.GearInPos() THEN
+			AxisStep := MultiAxis_STATE_GEAR_OUT;
+		END_IF
+		
+		//THIS^.GearInPos();
+
+	(******************** GEAR IN MultiMaster **********************)
+	MultiAxis_STATE_GEAR_IN_MULTI_MASTER:
+(*	
+		IF ((MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.DisengageSlave) OR (BasicAxisCtrlPtr^.Input.Command.Power = FALSE))  
+			AND NOT THIS^.GearInMultiMaster() THEN
+				AxisStep := MultiAxis_STATE_GEAR_OUT;
+		END_IF
+*)
+
+		IF NOT THIS^.GearInMultiMaster() THEN
+				AxisStep := MultiAxis_STATE_GEAR_OUT;
+		END_IF
+			
+	(******************** GEAR OUT **********************)	
+	MultiAxis_STATE_GEAR_OUT:
+		
+		IF THIS^.GearOut()THEN
+			MultiAxisCtrlPtr^.Output.Status.GearInPos.InSync := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInDyn.InGear := FALSE ;
+			MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.InGear := FALSE ;
+			AxisStep := MultiAxis_STATE_READY;
+		END_IF
+		
+	(******************** Error **********************)	
+	MultiAxis_STATE_ERROR:	
+		
+			THIS^.ResetAll_MC_FB();	
+		
+			IF BasicAxisCtrlPtr^.Output.Status.FAULT THEN						
+				AxisStep := MultiAxis_STATE_ERROR;
+			ELSE
+				MultiAxisCtrlPtr^.Output.Error.ErrorID := 0 ;
+				AxisStep := MultiAxis_STATE_WAIT;
+			END_IF			
+	
+	
+END_CASE 
+
+
+IF DecoupleTriger.EDGEPOS(BasicAxisCtrlPtr^.Output.Status.AxisStatus.Error)THEN
+	Decouple := TRUE ;
+END_IF
+IF Decouple THEN	
+	IF THIS^.GearOut() THEN
+		Decouple := FALSE ;
+	END_IF
+END_IF
+
+(********************** MC_CAMIN FB Call *************************)
+	
+THIS^.CamIn();
+	
+//=====================================================================================================================\\
+
+//IF MultiAxisCtrlPtr^.Output.Error.ErrorID <> 0 THEN
+//	BasicAxisCtrlPtr^.Output.Error.ErrorID := MultiAxisCtrlPtr^.Output.Error.ErrorID ;
+//	MultiAxisCtrlPtr^.Output.Error.ErrorID := 0;
+//END_IF
+
+//fnLogTransfer FUNCTION call
+fnLogTransfer(ADR(LogMsg_0));
+			]]></ST>
+    </Implementation>
+    <Method Name="AddNCError" Id="{a59e1c5e-3247-072b-3454-7843e5bcb708}">
+      <Declaration><![CDATA[METHOD AddNCError : BOOL
+VAR_INPUT
+	ErrorId			: UDINT;
+	ErrorPrefix     : STRING[100];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+	tmp_ErrorEntry.ErrorId		:= ErrorId;
+
+	tmp_ErrorEntry.ErrorText	:= ErrorPrefix;
+
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, 'Task: ');
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, MultiAxisCtrlPtr^.Input.Parameter.ThreadName);	
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, FC_NcErrorMsg(tmp_ErrorEntry.ErrorId));	
+	fnLogMsg(ADR(LogMsg_0),LOG_ERROR,tmp_ErrorEntry.ErrorText,0,0,0);	
+	
+	tmp_ErrorEntry.MotorEvents := CreateNCErrMsgDetails(tmp_ErrorEntry.ErrorId);
+	
+	BasicAxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CamIn" Id="{ccc0fcd8-2eb3-0f2d-2ad4-1ae3c6ea5733}">
+      <Declaration><![CDATA[METHOD PRIVATE CamIn 
+VAR_INPUT
+END_VAR
+
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+(*
+fbMC_CamIn.MasterOffset 	:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.MasterOffset;
+fbMC_CamIn.SlaveOffset 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.SlaveOffset; 
+fbMC_CamIn.MasterScaling	:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.MasterScaling;
+fbMC_CamIn.SlaveScaling 	:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.SlaveScaling;
+fbMC_CamIn.StartMode 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.StartMode;
+fbMC_CamIn.CamTableID 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.CamTableID;
+fbMC_CamIn.BufferMode 		:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.BufferMode;
+fbMC_CamIn.Options 			:= MultiAxisCtrlPtr^.Input.Parameter.CamIn.Options; 
+
+fbMC_CamIn.Execute := TRUE;
+
+IF (MultiAxisCtrlPtr^.Input.Command.CamIn.DisengageSlave = TRUE) THEN
+	CamIn := FALSE ;
+	MultiAxisCtrlPtr^.Input.Command.CamIn.DisengageSlave := FALSE;
+	MultiAxisCtrlPtr^.Output.Status.CamOut.Done := FALSE ;
+	fbMC_CamIn.Execute := FALSE;
+	AxisStep := MultiAxis_STATE_CAM_STOP ;
+ELSE
+	CamIn := TRUE ;
+	AxisStep := MultiAxis_STATE_READY ;
+END_IF
+*)
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_CamIn.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+
+	AddNCError(fbMC_CamIn.ErrorID,' NC Error fbMC_CamIn ErrorID: ');
+	//Log			
+	fbMC_CamIn.Execute := FALSE;
+	AxisStep := MultiAxis_STATE_ERROR;
+END_IF
+
+(* check if Command Aborted occured *)
+IF IntErrorTrig_1.EDGEPOS(fbMC_CamIn.CommandAborted = TRUE) THEN
+	// Add PLCopen FB Error
+	//Log			
+	fbMC_CamIn.Execute := FALSE;
+END_IF
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_CamIn(Master := MasterRef , Slave := AxisRef);
+{warning restore C0371}
+
+
+MultiAxisCtrlPtr^.Output.Status.CamIn.Busy := fbMC_CamIn.Busy ;
+MultiAxisCtrlPtr^.Output.Status.CamIn.CommandAborted := fbMC_CamIn.CommandAborted ;
+MultiAxisCtrlPtr^.Output.Status.CamIn.InSync := fbMC_CamIn.InSync ;
+MultiAxisCtrlPtr^.Output.Status.CamIn.Active := fbMC_CamIn.Active ;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CamOut" Id="{ab36b833-4841-009a-1c40-f3166d0e96ec}">
+      <Declaration><![CDATA[METHOD PRIVATE CamOut : BOOL
+VAR_INPUT
+END_VAR
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CamOut := FALSE ;
+fbMC_CamOut.Execute := TRUE;
+//fbMC_CamOut.Options := MultiAxisCtrlPtr^.Input.Parameter.CamOut.Options ;
+MultiAxisCtrlPtr^.Output.Status.CamOut.Done := FALSE ;
+
+(* check if coupling is stopped *)
+IF (fbMC_CamOut.Done = TRUE) THEN
+	MultiAxisCtrlPtr^.Output.Status.CamOut.Done := TRUE ;
+	fbMC_CamOut.Execute := FALSE;
+	CamOut := TRUE ;
+	//AxisStep := MultiAxis_STATE_READY;
+END_IF
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_CamOut.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+
+	AddNCError(fbMC_CamOut.ErrorID,' NC Error fbMC_CamOut ErrorID: ');
+	//Log
+		
+	fbMC_CamOut.Execute := FALSE;
+	AxisStep := MultiAxis_STATE_ERROR;
+END_IF
+	
+(* MC_CAMOUT FB Call *)
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_CamOut(Slave := AxisRef);
+{warning restore C0371}
+
+MultiAxisCtrlPtr^.Output.Status.CamOut.Busy := fbMC_CamOut.Busy ;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CamTableSelect" Id="{65990bc8-9f6f-01d8-2ede-f6aa715fdbf0}">
+      <Declaration><![CDATA[METHOD PRIVATE CamTableSelect : BOOL
+VAR_INPUT
+END_VAR
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CamTableSelect := FALSE ;
+fbMC_CamTableSelect.Execute := TRUE;
+//fbMC_CamTableSelect.CamTable 		:= MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.CamTable ;
+fbMC_CamTableSelect.CamTableID 		:= MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.CamTableID ;
+fbMC_CamTableSelect.Periodic 		:= MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.Periodic ;
+fbMC_CamTableSelect.MasterAbsolute 	:= MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.MasterAbsolute ;
+fbMC_CamTableSelect.SlaveAbsolute 	:= MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.SlaveAbsolute ;
+
+MultiAxisCtrlPtr^.Output.Status.CamTableSelect.Done := FALSE ;
+
+(* wait for CamTableSelect done *)
+IF (fbMC_CamTableSelect.Done = TRUE) THEN
+	CamTableSelect := TRUE ;
+	MultiAxisCtrlPtr^.Output.Status.CamTableSelect.Done := TRUE ;
+	fbMC_CamTableSelect.Execute := FALSE;
+	//AxisStep := MultiAxis_STATE_READY;
+END_IF
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_CamTableSelect.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+
+	AddNCError(fbMC_CamTableSelect.ErrorID,' NC Error fbMC_CamTableSelect ErrorID: ');
+	//Log
+		
+	fbMC_CamTableSelect.Execute := FALSE;
+	AxisStep := MultiAxis_STATE_ERROR;
+END_IF 
+
+(********************** MC_CAMTABLESELECT FB Call *************************)
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_CamTableSelect(Master := MasterRef,Slave := AxisRef,CamTable := MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.CamTable);
+{warning restore C0371}
+
+MultiAxisCtrlPtr^.Output.Status.CamTableSelect.Busy := fbMC_CamTableSelect.Busy ;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Disable_All_FB" Id="{c0bf2950-e3e5-47ea-85e2-8373ccfa607a}">
+      <Declaration><![CDATA[METHOD PRIVATE Disable_All_FB : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+
+VAR_INST
+	DisableAllTrig: 		Trigger ;	
+	DisableAllState:      USINT;   
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF DisableAllTrig.EDGEPOS(Execute) THEN
+	DisableAllState := 1;
+	Disable_All_FB := FALSE ;
+END_IF
+
+CASE DisableAllState OF
+ 
+		
+	1:
+		IF fbMC_CamIn.Active THEN		
+			DisableAllState := DisableAllState +1;
+		ELSE	
+			DisableAllState := DisableAllState +2;
+		END_IF
+	2:
+		IF CamOut() THEN
+			DisableAllState := DisableAllState +1;
+		END_IF
+		
+	3:
+		IF fbMC_GearInDyn.Active OR fbMC_GearInPos.Active OR fbMC_GearInMultiMaster.Active THEN
+			DisableAllState := DisableAllState +1;
+		ELSE	
+			DisableAllState := DisableAllState +2;
+		END_IF
+	4:
+		IF GearOut() THEN
+			DisableAllState := DisableAllState +1;
+		END_IF
+
+	5:
+		fbMC_CamOut.Execute 			:= fbMC_CamIn.Active   ;
+		fbMC_CamTableSelect.Execute 	:= FALSE ;
+		fbMC_CamIn.Execute 				:= FALSE ;
+		
+		fbMC_GearOut.Execute 			:= FALSE ;
+		fbMC_GearInDyn.Enable 			:= FALSE ;				
+		fbMC_GearInPos.Execute 			:= FALSE ;				
+		fbMC_GearInMultiMaster.Enable	:= FALSE;
+		
+		{warning disable C0371}
+		//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+		fbMC_CamTableSelect(Master := MasterRef,Slave := AxisRef,CamTable := MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.CamTable);
+		fbMC_CamIn(Master := MasterRef , Slave := AxisRef);
+		fbMC_CamOut(Slave := AxisRef);
+		fbMC_GearInDyn(Master := MasterRef , Slave := AxisRef);
+		fbMC_GearInPos(Master := MasterRef , Slave := AxisRef);
+		fbMC_GearOut(Slave := AxisRef);
+		fbMC_GearInMultiMaster(Master1:= MasterRef, Master2:= MasterRef2, Master3:= MasterRef3, Master4:= MasterRef4, Slave:= AxisRef); 
+		{warning restore C0371}
+		
+
+		
+		memset(ADR(MultiAxisCtrlPtr^.Input.Command) ,0 ,SIZEOF(MultiAxisCtrlPtr^.Input.Command));
+		memset(ADR(MultiAxisCtrlPtr^.Output.Status) ,0 ,SIZEOF(MultiAxisCtrlPtr^.Output.Status));
+		
+		Disable_All_FB := TRUE ;
+	
+END_CASE
+ 
+
+
+	
+		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GearInDyn" Id="{2de0e62f-8953-0c99-388e-2ac0f1678248}">
+      <Declaration><![CDATA[METHOD PRIVATE GearInDyn : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+
+END_VAR
+
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//GearInDyn := FALSE ;
+
+fbMC_GearInDyn.Acceleration := MultiAxisCtrlPtr^.Input.Parameter.GearInDyn.Acceleration;
+fbMC_GearInDyn.Deceleration := MultiAxisCtrlPtr^.Input.Parameter.GearInDyn.Deceleration;
+fbMC_GearInDyn.GearRatio 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInDyn.GearRatio;
+fbMC_GearInDyn.Jerk 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInDyn.Jerk;
+fbMC_GearInDyn.BufferMode 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInDyn.BufferMode;
+fbMC_GearInDyn.Options 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInDyn.Options;
+
+IF MultiAxisCtrlPtr^.Input.Command.GearInDyn.DisengageSlave THEN
+	MultiAxisCtrlPtr^.Input.Command.GearInDyn.StartSlave := FALSE ;
+	fbMC_GearInDyn.Enable := FALSE ;
+	GearInDyn := FALSE ;
+ELSE
+	fbMC_GearInDyn.Enable := TRUE ;	
+END_IF
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_GearInDyn.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+	
+	AddNCError(fbMC_GearInDyn.ErrorID,' NC Error fbMC_GearInDyn ErrorID: ');
+	
+	//Log			
+	fbMC_GearInDyn.Enable 	:= FALSE;
+	GearInDyn := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_ERROR;
+END_IF
+
+(* check if Command Aborted occured *)
+IF IntErrorTrig_1.EDGEPOS(fbMC_GearInDyn.CommandAborted = TRUE) THEN
+	// Add PLCopen FB Error
+	//Log	
+	fbMC_GearInDyn.Enable 	:= FALSE;
+	GearInDyn := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_READY;
+END_IF
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_GearInDyn(Master := MasterRef , Slave := AxisRef ) ;
+{warning restore C0371}
+
+
+MultiAxisCtrlPtr^.Output.Status.GearInDyn.Active 			:= fbMC_GearInDyn.Active;
+MultiAxisCtrlPtr^.Output.Status.GearInDyn.Busy 				:= fbMC_GearInDyn.Busy;
+MultiAxisCtrlPtr^.Output.Status.GearInDyn.CommandAborted 	:= fbMC_GearInDyn.CommandAborted;
+MultiAxisCtrlPtr^.Output.Status.GearInDyn.InGear 			:= fbMC_GearInDyn.InGear;
+
+IF tempTrig.EDGEPOS(fbMC_GearInDyn.InGear) THEN
+	GearInDyn := TRUE ;	
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GearInMultiMaster" Id="{1dd4bf1e-7d21-0e1c-23bb-30120c012852}">
+      <Declaration><![CDATA[METHOD PRIVATE GearInMultiMaster : BOOL
+VAR_INPUT
+END_VAR
+
+VAR
+
+END_VAR
+
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//GearInMultiMaster := FALSE ;
+GearInMultiMaster:= fbMC_GearInMultiMaster.InGear ;
+fbMC_GearInMultiMaster.Acceleration := MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.Acceleration;
+fbMC_GearInMultiMaster.Deceleration := MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.Deceleration;
+fbMC_GearInMultiMaster.GearRatio1 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.GearRatio1;
+fbMC_GearInMultiMaster.GearRatio2 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.GearRatio2;
+fbMC_GearInMultiMaster.GearRatio3 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.GearRatio3;
+fbMC_GearInMultiMaster.GearRatio4 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.GearRatio4;
+fbMC_GearInMultiMaster.Jerk 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.Jerk;
+fbMC_GearInMultiMaster.BufferMode 	:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.BufferMode;
+fbMC_GearInMultiMaster.Options 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInMultiMaster.Options;
+
+IF (MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.DisengageSlave) 
+	OR BasicAxisCtrlPtr^.Input.Command.Power = FALSE THEN
+	MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.StartSlave := FALSE;
+	fbMC_GearInMultiMaster.Enable := FALSE ;
+	//GearInMultiMaster := FALSE ;
+ELSE
+	fbMC_GearInMultiMaster.Enable := TRUE ;	
+	GearInMultiMaster := TRUE;
+END_IF
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_GearInMultiMaster.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+	
+	AddNCError(fbMC_GearInMultiMaster.ErrorID,' NC Error fbMC_GearInMultiMaster ErrorID: ');
+	//Log			
+	fbMC_GearInMultiMaster.Enable 	:= FALSE;
+	GearInMultiMaster := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_ERROR;
+END_IF
+
+(* check if Command Aborted occured *)
+IF IntErrorTrig_1.EDGEPOS(fbMC_GearInMultiMaster.CommandAborted = TRUE) THEN
+	// Add PLCopen FB Error
+	//Log	
+	fbMC_GearInMultiMaster.Enable 	:= FALSE;
+	GearInMultiMaster := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_READY;
+END_IF
+
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_GearInMultiMaster(Master1:= MasterRef, Master2:= MasterRef2, Master3:= MasterRef3, Master4:= MasterRef4, Slave:= AxisRef); 
+{warning restore C0371}
+
+
+MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.Active 			:= fbMC_GearInMultiMaster.Active;
+MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.Busy 				:= fbMC_GearInMultiMaster.Busy;
+MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.CommandAborted 	:= fbMC_GearInMultiMaster.CommandAborted;
+MultiAxisCtrlPtr^.Output.Status.GearInMultiMaster.InGear 			:= fbMC_GearInMultiMaster.InGear;
+
+//IF tempTrig.EDGEPOS(fbMC_GearInMultiMaster.InGear) THEN
+//	GearInMultiMaster := TRUE ;	
+//END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GearInPos" Id="{10d92684-0624-0201-2f64-04fa9fa5ff51}">
+      <Declaration><![CDATA[METHOD PRIVATE GearInPos : BOOL
+VAR_INPUT
+END_VAR
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+fbMC_GearInPos.Acceleration 			:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.Acceleration;
+fbMC_GearInPos.Deceleration 			:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.Deceleration;
+fbMC_GearInPos.MasterStartDistance 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.MasterStartDistance;
+fbMC_GearInPos.MasterSyncPosition 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.MasterSyncPosition;
+fbMC_GearInPos.SlaveSyncPosition 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.SlaveSyncPosition;
+fbMC_GearInPos.RatioDenominator 		:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.RatioDenominator;
+fbMC_GearInPos.RatioNumerator 			:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.RatioNumerator;
+fbMC_GearInPos.SyncMode					:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.SyncMode;
+fbMC_GearInPos.Velocity					:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.Velocity;
+fbMC_GearInPos.Jerk 					:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.Jerk;
+fbMC_GearInPos.BufferMode 				:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.BufferMode;
+//fbMC_GearInPos.Options 					:= MultiAxisCtrlPtr^.Input.Parameter.GearInPos.Options;
+
+IF MultiAxisCtrlPtr^.Input.Command.GearInPos.DisengageSlave THEN
+	GearInPos := FALSE ;
+	fbMC_GearInPos.Execute := FALSE ;
+ELSIF NOT MultiAxisCtrlPtr^.Output.Status.GearInPos.InSync THEN
+	fbMC_GearInPos.Execute := TRUE ;	
+END_IF
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_GearInPos.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+	AddNCError(fbMC_GearInPos.ErrorID,' NC Error fbMC_GearInPos ErrorID: ');
+
+	//Log	
+	fbMC_GearInPos.Execute 	:= FALSE;
+	GearInPos := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_ERROR;
+END_IF
+
+(* check if Command Aborted occured *)
+IF IntErrorTrig_1.EDGEPOS(fbMC_GearInPos.CommandAborted = TRUE) THEN
+	// Add PLCopen FB Error
+	//Log		
+	fbMC_GearInPos.Execute 	:= FALSE;
+	GearInPos := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_READY;
+END_IF
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_GearInPos(Slave:= AxisRef , Master := MasterRef ) ;
+{warning restore C0371}
+
+
+MultiAxisCtrlPtr^.Output.Status.GearInPos.Active 			:= fbMC_GearInPos.Active;
+MultiAxisCtrlPtr^.Output.Status.GearInPos.Busy 				:= fbMC_GearInPos.Busy;
+MultiAxisCtrlPtr^.Output.Status.GearInPos.CommandAborted 	:= fbMC_GearInPos.CommandAborted;
+MultiAxisCtrlPtr^.Output.Status.GearInPos.InSync 			:= fbMC_GearInPos.InSync;
+MultiAxisCtrlPtr^.Output.Status.GearInPos.StartSync 		:= fbMC_GearInPos.StartSync;
+
+IF tempTrig.EDGEPOS(MultiAxisCtrlPtr^.Output.Status.GearInPos.InSync) THEN
+	GearInPos := TRUE ;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GearOut" Id="{cf8b28a9-5fc8-0628-004d-0905d0da9f73}">
+      <Declaration><![CDATA[METHOD PRIVATE GearOut : BOOL
+VAR_INPUT
+END_VAR
+VAR_INST
+	IntErrorTrig_0 : Trigger ;
+	IntErrorTrig_1 : Trigger ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//fbMC_GearOut.Options 			:= MultiAxisCtrlPtr^.Input.Parameter.GearOut.Options;
+GearOut := FALSE ;
+fbMC_GearOut.Execute := TRUE ;	
+MultiAxisCtrlPtr^.Input.Command.GearInDyn.DisengageSlave := FALSE ;
+MultiAxisCtrlPtr^.Input.Command.GearInPos.DisengageSlave := FALSE ;
+MultiAxisCtrlPtr^.Input.Command.GearInMultiMaster.DisengageSlave := FALSE ;
+
+(* check if error occured *)
+IF IntErrorTrig_0.EDGEPOS(fbMC_GearOut.Error = TRUE) THEN
+	// Add FB Error to ErrorHandler
+	AddNCError(fbMC_GearOut.ErrorID,' NC Error fbMC_GearOut ErrorID: ');
+	
+	//Log	
+	fbMC_GearOut.Execute 	:= FALSE;
+	GearOut := FALSE ;
+	AxisStep 				:= MultiAxis_STATE_ERROR;
+END_IF
+
+IF (fbMC_GearOut.Done) THEN
+	MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= TRUE ;
+	fbMC_GearOut.Execute 	:= FALSE;
+	GearOut := TRUE ;
+END_IF
+
+{warning disable C0371}
+//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+fbMC_GearOut(Slave := AxisRef) ;
+{warning restore C0371}
+
+
+
+MultiAxisCtrlPtr^.Output.Status.GearOut.Busy 	:= fbMC_GearOut.Busy;
+//MultiAxisCtrlPtr^.Output.Status.GearOut.Done 	:= fbMC_GearOut.Done;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetAll_MC_FB" Id="{1e7b3a5e-6752-088a-24b8-672d10dd5d25}">
+      <Declaration><![CDATA[METHOD PRIVATE ResetAll_MC_FB : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+		fbMC_CamOut.Execute 			:= fbMC_CamIn.Active   ;
+		fbMC_CamTableSelect.Execute 	:= FALSE ;
+		fbMC_CamIn.Execute 				:= FALSE ;
+		
+		fbMC_GearOut.Execute 			:= FALSE ;
+		fbMC_GearInDyn.Enable 			:= FALSE ;				
+		fbMC_GearInPos.Execute 			:= FALSE ;				
+		fbMC_GearInMultiMaster.Enable	:= FALSE;
+		
+		{warning disable C0371}
+		//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+		fbMC_CamTableSelect(Master := MasterRef,Slave := AxisRef,CamTable := MultiAxisCtrlPtr^.Input.Parameter.CamTableSelect.CamTable);
+		fbMC_CamIn(Master := MasterRef , Slave := AxisRef);
+		fbMC_CamOut(Slave := AxisRef);
+		fbMC_GearInDyn(Master := MasterRef , Slave := AxisRef);
+		fbMC_GearInPos(Master := MasterRef , Slave := AxisRef);
+		fbMC_GearOut(Slave := AxisRef);
+		fbMC_GearInMultiMaster(Master1:= MasterRef, Master2:= MasterRef2, Master3:= MasterRef3, Master4:= MasterRef4, Slave:= AxisRef); 
+		{warning restore C0371}
+		
+
+		
+		memset(ADR(MultiAxisCtrlPtr^.Input.Command) ,0 ,SIZEOF(MultiAxisCtrlPtr^.Input.Command));
+		memset(ADR(MultiAxisCtrlPtr^.Output.Status) ,0 ,SIZEOF(MultiAxisCtrlPtr^.Output.Status));
+		
+		ResetAll_MC_FB := TRUE ;
+
+	
+		
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="MultiAxis_FB">
+      <LineId Id="380" Count="0" />
+      <LineId Id="384" Count="0" />
+      <LineId Id="381" Count="1" />
+      <LineId Id="386" Count="0" />
+      <LineId Id="383" Count="0" />
+      <LineId Id="378" Count="0" />
+      <LineId Id="5" Count="2" />
+      <LineId Id="9" Count="15" />
+      <LineId Id="481" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="480" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="479" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="482" Count="0" />
+      <LineId Id="29" Count="38" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="217" Count="3" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="233" Count="4" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="70" Count="34" />
+      <LineId Id="431" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="432" Count="0" />
+      <LineId Id="106" Count="2" />
+      <LineId Id="111" Count="7" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="434" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="523" Count="1" />
+      <LineId Id="526" Count="0" />
+      <LineId Id="522" Count="0" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="120" Count="5" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="126" Count="8" />
+      <LineId Id="136" Count="4" />
+      <LineId Id="142" Count="23" />
+      <LineId Id="332" Count="1" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.AddNCError">
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="8" Count="2" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="16" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.CamIn">
+      <LineId Id="3" Count="27" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="34" Count="10" />
+      <LineId Id="88" Count="2" />
+      <LineId Id="45" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.CamOut">
+      <LineId Id="3" Count="15" />
+      <LineId Id="21" Count="8" />
+      <LineId Id="38" Count="2" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.CamTableSelect">
+      <LineId Id="3" Count="20" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="26" Count="7" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.Disable_All_FB">
+      <LineId Id="54" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="117" Count="2" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="83" Count="24" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="61" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="3" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.GearInDyn">
+      <LineId Id="3" Count="19" />
+      <LineId Id="80" Count="2" />
+      <LineId Id="26" Count="13" />
+      <LineId Id="94" Count="2" />
+      <LineId Id="40" Count="10" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.GearInMultiMaster">
+      <LineId Id="3" Count="4" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="8" Count="4" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="13" Count="4" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="18" Count="4" />
+      <LineId Id="138" Count="1" />
+      <LineId Id="26" Count="14" />
+      <LineId Id="151" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="43" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.GearInPos">
+      <LineId Id="3" Count="23" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="30" Count="13" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="44" Count="10" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.GearOut">
+      <LineId Id="3" Count="4" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="16" Count="10" />
+      <LineId Id="62" Count="3" />
+      <LineId Id="27" Count="7" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MultiAxis_FB.ResetAll_MC_FB">
+      <LineId Id="68" Count="0" />
+      <LineId Id="83" Count="24" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="3" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

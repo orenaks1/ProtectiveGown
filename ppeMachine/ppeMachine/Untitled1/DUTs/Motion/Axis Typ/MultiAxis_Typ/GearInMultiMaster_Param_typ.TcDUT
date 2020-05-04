@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearInMultiMaster_Param_typ" Id="{2a597e75-82be-02b0-2a55-91c7a559f3e4}">
+    <Declaration><![CDATA[TYPE GearInMultiMaster_Param_typ :
+	STRUCT
+	GearRatio1  	: LREAL;
+    GearRatio2   	: LREAL;
+    GearRatio3   	: LREAL;
+    GearRatio4   	: LREAL;
+    Acceleration 	: LREAL;
+    Deceleration 	: LREAL;
+    Jerk         	: LREAL;
+    BufferMode   	: MC_BufferMode;
+    Options      	: ST_GearInMultiMasterOptions;
+
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

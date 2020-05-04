@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="enumMotorEvents" Id="{85290fb6-ec0b-0f46-1de9-57e46a0bd21c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE enumMotorEvents :
+(
+	NoEvents				:=0,
+	MotorPositionError      :=1,
+	MotorSpeedError	        :=2,
+	MotorHomeNotFound	    :=3,
+	MotorOverCurrent	    :=4,
+	MotorOverTemp		    :=5,
+	MotorFeedBackErr	    :=6,
+	MotorGeneralError		:=7,
+	MotorStalled			:=8,
+	MotorSupplyError		:=9,
+	PLCillegalMsg			:=10,
+	PLCIllegalParam			:=11,
+	DriveNotEnabled		    :=12,
+	DriveNotReady           :=13,
+	DriveComError           :=14,
+	BreakResistorError      :=15
+	
+	
+
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

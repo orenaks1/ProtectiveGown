@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ParIDAccess_Par_ReadCoedSdo_typ" Id="{4bca69e1-ce3b-0552-2441-967dfff517c2}">
+    <Declaration><![CDATA[TYPE ParIDAccess_Par_ReadCoedSdo_typ : 	
+	STRUCT  (*parameter structure*)
+		
+        nSubIndex       : BYTE; 
+        nIndex          : WORD;
+		pDstBuf         : POINTER TO DWORD; 
+		cbBufLen        : UDINT; 
+		tTimeout        : TIME := DEFAULT_ADS_TIMEOUT; 
+
+	END_STRUCT
+END_TYPE
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

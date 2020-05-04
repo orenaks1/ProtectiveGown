@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="MultiAxis_typ" Id="{cd5edd1f-7110-0253-082e-f8f4f169326e}">
+    <Declaration><![CDATA[TYPE MultiAxis_typ :
+	STRUCT
+		Input	: MultiAxis_Input_typ ;
+		Output	: MultiAxis_Output_typ ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

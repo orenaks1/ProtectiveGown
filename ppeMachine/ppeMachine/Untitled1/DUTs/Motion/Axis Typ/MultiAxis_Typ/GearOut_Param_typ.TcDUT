@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearOut_Param_typ" Id="{220a9e7e-540a-0a2d-0a5c-5b1b5754063c}">
+    <Declaration><![CDATA[TYPE GearOut_Param_typ :
+	STRUCT
+		Options : ST_GearOutOptions; // Currently not implemented
+
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

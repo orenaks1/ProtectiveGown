@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="WebAxes_typ" Id="{22e44a08-c59f-433e-9303-4958c6c470b6}">
+    <Declaration><![CDATA[TYPE WebAxes_typ :
+STRUCT
+	
+	// Winding	
+	UwVmaster	: 	STRUCT_AxisExtendedCompound;
+	UW_1		:  STRUCT_AxisExtendedCompound;
+	UW_2		:  STRUCT_AxisExtendedCompound;	
+	
+END_STRUCT
+END_TYPE
+
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

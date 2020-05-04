@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Tc2_EtherCAT_Input_typ" Id="{e0e82a7f-151b-0ebc-35ff-a0ed16dcc099}">
+    <Declaration><![CDATA[TYPE Tc2_EtherCAT_Input_typ : 	
+	STRUCT 
+		Command 	: Tc2_EtherCAT_Command_axis_typ;
+		Parameter 	: Tc2_EtherCAT_Parameter_axis_typ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

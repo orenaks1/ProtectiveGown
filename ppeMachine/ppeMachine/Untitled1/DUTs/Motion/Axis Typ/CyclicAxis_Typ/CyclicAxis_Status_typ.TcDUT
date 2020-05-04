@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CyclicAxis_Status_typ" Id="{38f42e55-fdbb-0399-2aae-a987c5e791b9}">
+    <Declaration><![CDATA[TYPE CyclicAxis_Status_typ :
+	STRUCT	
+		CyclicPos:	CyclicPos_Status_typ;	
+		CyclicVel:	CyclicVel_Status_typ;	
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

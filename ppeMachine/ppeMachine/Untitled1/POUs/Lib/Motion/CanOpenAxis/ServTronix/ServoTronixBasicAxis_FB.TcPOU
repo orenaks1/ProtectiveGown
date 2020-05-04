@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="ServoTronixBasicAxis_FB" Id="{d8f73590-00f5-0d6d-1737-e58509b81f1a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC ServoTronixBasicAxis_FB EXTENDS CoE_BasicAxis_FB  
+VAR_INPUT		
+	
+END_VAR
+VAR_IN_OUT	
+END_VAR
+VAR_OUTPUT	
+END_VAR
+
+VAR
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+SUPER^(AxisRef:=AxisRef);
+	
+]]></ST>
+    </Implementation>
+    <Method Name="ReadActualTorque" Id="{94291569-0589-0c2c-2d68-ce4bc95c43a8}">
+      <Declaration><![CDATA[METHOD ReadActualTorque : LREAL
+VAR_INPUT
+END_VAR
+VAR_INST
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE ReadTorqueState OF 
+	
+	0: 
+		IF THIS^.TorqueReadEnable THEN			
+			ReadTorqueState	:= 5;			
+		END_IF
+						
+	5:
+		IF AxisRef.Status.Operational THEN
+			
+			FB_EcCoeSdoRead_RatedTorque(
+						sNetId		:= AxisCtrlPtr^.Input.Parameter.ecNetId ,
+						nSlaveAddr	:= ULINT_TO_UINT(AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr.Value) , 
+						nSubIndex	:=, 
+						nIndex		:= 16#6076 , 
+						pDstBuf		:= ADR(CoeRead_RatedTorque), 
+						cbBufLen	:= SIZEOF(CoeRead_RatedTorque), 
+						bExecute	:= FALSE, 
+						tTimeout	:= T#10S, 
+						bBusy		=> , 
+						bError		=> , 
+						nErrId		=> 
+						);
+			ReadTorqueState	:= 10;
+		END_IF	
+	10: // Can Over Ethercat
+		FB_EcCoeSdoRead_RatedTorque.bExecute	:= TRUE;
+		
+		ReadTorqueState	:= 20;
+	20:
+		IF FB_EcCoeSdoRead_RatedTorque.bError = TRUE THEN
+			FB_EcCoeSdoRead_RatedTorque.bExecute	:= FALSE;
+			ReadTorqueState	:= 5;
+		ELSIF FB_EcCoeSdoRead_RatedTorque.bBusy = FALSE THEN
+			FB_EcCoeSdoRead_RatedTorque.bExecute	:= FALSE;
+			ReadTorqueState	:= 30;
+		END_IF
+		
+	30:
+		tmp_ActualTorque	:= TorqueConstant * (INT_TO_LREAL(THIS^.io_ActualTorque) / 1000.0) * 3.11;	
+			
+			
+END_CASE
+
+FB_EcCoeSdoRead_RatedTorque();
+ReadActualTorque	:= tmp_ActualTorque;
+
+
+
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="ServoTronixBasicAxis_FB">
+      <LineId Id="2092" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="2115" Count="0" />
+      <LineId Id="2112" Count="0" />
+    </LineIds>
+    <LineIds Name="ServoTronixBasicAxis_FB.ReadActualTorque">
+      <LineId Id="107" Count="6" />
+      <LineId Id="115" Count="38" />
+      <LineId Id="102" Count="4" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

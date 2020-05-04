@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="IO_In_Typ" Id="{d9092035-590a-4ea9-8869-60aa4efc0d42}">
+    <Declaration><![CDATA[TYPE IO_In_Typ :
+STRUCT
+	PrimeryPressFeedback :fb_io_in_bool;
+	SeconderyPressFeedbak:fb_io_in_bool;
+	E_StopPressed AT %I* 	: BOOL;
+	
+	UW_1_Diameter AT %I* 	: INT;
+	UW_2_Diameter AT %I* 	: INT;
+	UW_1_LoacCell AT %I* 	: DINT;
+	UW_2_LoacCell AT %I* 	: DINT;	
+	
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

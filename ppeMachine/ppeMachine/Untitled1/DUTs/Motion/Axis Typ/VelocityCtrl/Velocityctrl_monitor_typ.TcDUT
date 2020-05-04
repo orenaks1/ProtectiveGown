@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Velocityctrl_monitor_typ" Id="{b4b72bb1-0dd5-452e-a745-752e9dda2010}">
+    <Declaration><![CDATA[TYPE Velocityctrl_monitor_typ :
+STRUCT
+	OrgVelKp        			: LREAL;
+	SetCyclicTorque 			: LREAL;
+	OrgMaxTorque 				: LREAL;				
+	OrgCyclicTorque 			: LREAL;			
+	OrgSctrlKp 					: LREAL;
+	OrgSctrlKi 					: LREAL;
+	OrgGainCtrl 				: LREAL;
+	OrgAccToCloseThePosError 	:LREAL; 
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

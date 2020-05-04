@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="CyclicPos_Status_typ" Id="{1ac4652b-60cb-0462-3d39-de95b6da43e7}">
+    <Declaration><![CDATA[TYPE CyclicPos_Status_typ :
+	STRUCT
+		Active:		BOOL;	
+		Busy:		BOOL;
+	
+	END_STRUCT
+END_TYPE
+
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

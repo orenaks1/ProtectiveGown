@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Parameters_Typ" Id="{fefcba5b-ea80-4050-ab7b-7404de5956b7}">
+    <Declaration><![CDATA[TYPE Parameters_Typ :
+STRUCT
+	//TimerPressDown1:DINT;//[MS]
+	
+	Continues:BOOL;
+	NumberOfCycles:UDINT;
+	WebLinarSpeed:LREAL;//[mm]
+	WebLinarSpeedSlow:LREAL;//[mm]
+	
+	
+	
+	MotorVelocity :INT;
+	DistanceToMove:UINT;
+	
+	UW_1_Param	: UnwinderParameters_Typ;
+	UW_2_Param	: UnwinderParameters_Typ;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

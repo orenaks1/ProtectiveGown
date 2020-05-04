@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="exCONSTANTS_MATH" Id="{ebdb3b4c-1725-4eb2-92ef-d263482cf474}">
+    <Declaration><![CDATA[TYPE exCONSTANTS_MATH :
+STRUCT
+	/// Kreiszahl PI 
+	PI: REAL := 3.1415926535897931;
+	/// PI * 2 
+	PI2: REAL := 6.2831853071795862;
+	/// PI * 4 
+	PI4: REAL := 12.566370614359173;
+	/// PI / 2 
+	PI05: REAL := 1.5707963267949;
+	/// PI / 4 
+	PI025: REAL := 0.785398163397448;
+	/// 1 / PI 
+	PI_INV: REAL := 0.318309886183791;
+	/// Euler constant e 
+	E: REAL := 2.7182818284590451;
+	/// 1 / e 
+	E_INV: REAL := 0.367879441171442;
+	/// Wurzel von 2 
+	SQ2: REAL := 1.4142135623731;
+	FACTS: ARRAY[0..12] OF DINT := [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

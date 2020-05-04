@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Basic_Command_axis_typ" Id="{4767ce53-bd41-0b2f-3e41-356dfe899d0c}">
+    <Declaration><![CDATA[TYPE Basic_Command_axis_typ : 	
+	STRUCT  (*command structure*)
+		Power : BOOL; (*switch on the controller*)
+		Home : BOOL; (*reference the axis*)
+		MoveAbsolute : BOOL; (*move to an defined position*)
+		MoveAdditive : BOOL; (*move a defiened distance*)
+		MoveVelocity : BOOL; (*start a movement with a defiened velocity*)
+		MoveRelative : BOOL;
+		Halt : BOOL; (*stop every active movement*)
+		Stop : BOOL; (*stop every active movement as long as is set*)
+		MoveJogPos : BOOL; (*move in positive direction as long as is set*)
+		MoveJogNeg : BOOL; (*move in negative direction as long as is set*)
+		SetOverride : BOOL;
+		pDriveAction:  POINTER TO PVOID; //enumDriveAction;
+		ErrorAcknowledge : BOOL; (*reset active errors*)
+		ClearFault: BOOL;
+		AxisInit: 	BOOL;		
+		MonitorDCEnable:	  BOOL;		
+		MonitorTemperatureEnable: BOOL;
+		LogEnable:	BOOL:=	TRUE;
+				
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

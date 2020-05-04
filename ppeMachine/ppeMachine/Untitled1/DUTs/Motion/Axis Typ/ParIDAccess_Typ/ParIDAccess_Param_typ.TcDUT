@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ParIDAccess_Param_typ" Id="{715b1e45-c016-0aab-0ab9-a6f1d63bbfb3}">
+    <Declaration><![CDATA[TYPE ParIDAccess_Param_typ :
+STRUCT
+	
+	ThreadName		: STRING[20];
+	WriteCoeSdo	: ParIDAccess_Par_WriteCoedSdo_typ;
+	ReadCoedSdo	: ParIDAccess_Par_ReadCoedSdo_typ;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

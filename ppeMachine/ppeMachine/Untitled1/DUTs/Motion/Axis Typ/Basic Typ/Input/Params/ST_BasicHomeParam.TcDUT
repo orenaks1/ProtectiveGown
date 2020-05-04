@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ST_BasicHomeParam" Id="{b6d69b93-5e6c-0095-2874-d6e752365de5}">
+    <Declaration><![CDATA[TYPE ST_BasicHomeParam :
+STRUCT
+	HomeMode: 			MC_HomingMode (*USINT*); 
+	HomingOnDrive:      BOOL := FALSE;
+	ExternalEncoder:    BOOL := FALSE;
+	eEncoderType:		E_EncoderType;
+	StartDirection: 	eHomeModeOption;	
+	SwitchVelo: 		LREAL; 	//velovity that searching for the signal - Fast Velo
+	TriggerVelo: 		LREAL ;	//velocity that move the axis to the configured switching edge - Slow Velo*)
+	
+	HomeSetPos: 		LREAL;
+	AlignPos: 			LREAL;
+	
+	Jerk:				LREAL;	
+	Acc:				LREAL;		 	 	
+	Dcc:				LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="VelocityCtrl_Input_typ" Id="{0e3d8da6-b606-4cc0-a499-d5928b62dbe9}">
+    <Declaration><![CDATA[TYPE VelocityCtrl_Input_typ :
+	STRUCT
+		Command 	: VelocityCtrl_CMD_typ ;
+		Parameter	: VelocityCtrl_Param_typ ;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

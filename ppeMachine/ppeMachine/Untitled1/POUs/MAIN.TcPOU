@@ -1,0 +1,207 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="MAIN" Id="{906fbf26-856d-4f0f-b127-1015c6c2feda}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+
+init:BOOL;
+
+uw1_Toque AT %I* 	: INT;
+uw1_Position AT %I* 	: DINT;
+TriggerOff:Trigger;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF init =FALSE THEN
+	init:=TRUE;
+	ACT_Init_param();
+END_IF
+
+ACT_Emergency();
+
+ACT_IO();
+
+ACT_fbCall();]]></ST>
+    </Implementation>
+    <Action Name="ACT_Emergency" Id="{f209a312-0d75-4adb-886d-eb1e7339d1b2}">
+      <Implementation>
+        <ST><![CDATA[
+IF gMachineCtrl.Cmd.EmStop THEN
+	//FB_Machine_Ctrl.ResetCycle:=TRUE;
+	//gMachineCtrl.Cmd.EmStop:=FALSE;
+	
+	gMachineCtrl.Cmd.SwitchOn:=FALSE;
+END_IF
+IF TriggerOff.EDGENEG(gMachineCtrl.Cmd.SwitchOn) THEN
+	gMachineCtrl.Cmd.EmStop:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ACT_fbCall" Id="{82ef3718-f64a-421e-be71-e37b12e669fa}">
+      <Implementation>
+        <ST><![CDATA[
+
+
+RwInverter(
+	//Set_Vel_Link:=gUVCtrl.Input.Par.UV_Inverter_Set_Speed , 
+	//INV_Enable:=gUVCtrl.Input.Cmd.UV_Inverter_Run , 
+	//HWlink:=gMachineCtrl.IO.RwInverter,
+	ctrl:=gMachineCtrl.RwInverter,
+	//ResetError:= , 
+	MasterNetId:= , 
+	nSlaveAddr:= , 
+	nSubIndex:= , 
+	nIndex:= , 
+	//Actual_Vel_Link=>gUVCtrl.Output.Status.UV_Inverter_Actual_Speed , 
+	Error=> , 
+	ErrorCode=> , 
+	Inv_Status=> );
+
+
+	
+FB_OFF.Ctrl_ref 			REF= gMachineCtrl;
+FB_OFF.FB_Machine_Run_ref 	REF= FB_Machine_Run;
+FB_OFF.FB_Mechinit_ref 		REF= FB_Mechinit;
+FB_OFF();	
+	
+FB_Machine_Ctrl.Ctrl_ref 			REF= gMachineCtrl;
+FB_Machine_Ctrl.FB_Machine_Run_ref 	REF= FB_Machine_Run;
+FB_Machine_Ctrl.FB_Mechinit_ref 	REF= FB_Mechinit;
+FB_Machine_Ctrl.FB_OFF_ref			REF= FB_OFF;
+FB_Machine_Ctrl();
+
+FB_Machine_Run.Ctrl_ref 		REF= gMachineCtrl;
+FB_Machine_Run.FB_RW_Ctrl_ref	REF= FB_RW_Ctrl;
+FB_Machine_Run();
+
+
+FB_Mechinit.Ctrl_ref	REF= gMachineCtrl;
+FB_Mechinit();
+
+//FB_RW_Ctrl.Ctrl_ref REF= gMachineCtrl;
+//FB_RW_Ctrl();]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ACT_Init_param" Id="{5ed366ef-f6c6-4a4b-b0fb-fb6ba19d4db9}">
+      <Implementation>
+        <ST><![CDATA[
+
+//gMachineCtrl.Parameters.TimerPressDown1:= 5000;//[ms]
+
+gMachineCtrl.Parameters.NumberOfCycles:= 1;
+
+//Motor Parmeters
+//gMachineCtrl.Parameters.MotorVelocity:=600;//[rpm]
+gMachineCtrl.Parameters.DistanceToMove:=1000;//[mm]
+
+
+gMachineCtrl.Parameters.WebLinarSpeed:=350;//[mm/sec]
+gMachineCtrl.Parameters.WebLinarSpeedSlow:=250;//[mm/sec]
+
+gMachineCtrl.Parameters.UW_1_Param.ForcedDiameter:=400;//[mm/sec]
+gMachineCtrl.Parameters.UW_2_Param.ForcedDiameter:=400;//[mm/sec]
+
+gMachineCtrl.Parameters.UW_1_Param.SetTension := 150;
+gMachineCtrl.Parameters.UW_2_Param.SetTension := 150;
+
+gMachineCtrl.Parameters.UW_1_Param.kp:=0.1;
+gMachineCtrl.Parameters.UW_1_Param.TN:=T#0MS;
+
+gMachineCtrl.Parameters.UW_2_Param.kp:=0.1;
+gMachineCtrl.Parameters.UW_2_Param.TN:=T#0MS;
+
+gMachineCtrl.Parameters.UW_1_Param.kpMove:=1;
+gMachineCtrl.Parameters.UW_1_Param.TNMove:=T#0MS;
+
+gMachineCtrl.Parameters.UW_2_Param.kpMove:=1;
+gMachineCtrl.Parameters.UW_2_Param.TNMove:=T#0MS;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ACT_IO" Id="{2a18bd5c-a292-4da3-a0fd-3fbf174fcec3}">
+      <Implementation>
+        <ST><![CDATA[
+
+//IO
+gMachineCtrl.IO.In.PrimeryPressFeedback(
+	SimFlag:= gMachineCtrl.Simulation);
+	
+gMachineCtrl.IO.In.SeconderyPressFeedbak(
+	SimFlag:= gMachineCtrl.Simulation);]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="MAIN">
+      <LineId Id="17" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.ACT_Emergency">
+      <LineId Id="2" Count="0" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="5" Count="2" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="8" Count="2" />
+    </LineIds>
+    <LineIds Name="MAIN.ACT_fbCall">
+      <LineId Id="2" Count="5" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="8" Count="7" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="42" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.ACT_Init_param">
+      <LineId Id="2" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="27" Count="4" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.ACT_IO">
+      <LineId Id="2" Count="6" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

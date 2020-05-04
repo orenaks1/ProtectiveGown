@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="exINC1" Id="{625838a0-75f8-4157-b188-469444178913}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION exINC1 : INT
+VAR_INPUT
+	X: INT;
+	N: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF X >= N - 1 THEN
+	exINC1 := 0;
+ELSE
+	exINC1 := X + 1;
+END_IF;
+
+
+
+(* revision history
+hm	13. oct. 2008	rev 1.0
+	original version
+
+hm	22. oct. 2008	rev 1.1
+	added statement to return value for compatibility reasons
+
+hm	23. feb. 2009	rev 1.2
+ 	when inc1 is called with X >= N inc will continue with 0
+*)]]></ST>
+    </Implementation>
+    <LineIds Name="exINC1">
+      <LineId Id="3" Count="16" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

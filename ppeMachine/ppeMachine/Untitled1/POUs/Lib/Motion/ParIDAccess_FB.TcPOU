@@ -1,0 +1,477 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="ParIDAccess_FB" Id="{d470cf2c-db84-01e1-13a7-a335a683b55e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC ParIDAccess_FB
+VAR_INPUT
+	
+	BasicAxisCtrlPtr 	: POINTER TO Basic_axis_typ ;
+	ParIDAccessCtrlPtr 	: POINTER TO ParIDAccess_Typ ;
+	
+END_VAR
+VAR_IN_OUT
+
+END_VAR
+VAR_OUTPUT
+END_VAR
+	
+VAR
+	LogMsgInit		: BOOL := TRUE;
+	LogMsg_0 		: LogMsg ;	
+	
+	fbGetCurTaskIdx: 		GETCURTASKINDEX;
+    TaskCycleTimeUDINT: 	UDINT;
+    TaskCycleTime: 			TIME;
+	
+	DisableTriger	: Trigger ;
+
+	FB_EcCoeSdoRead_0 	: FB_EcCoeSdoRead;
+	FB_EcCoeSdoWrite_0 	: FB_EcCoeSdoWrite;
+	StateCoeSdoRead		: UINT;
+	StateCoeSdoWrite	: UINT;	
+	
+	ErrorTrig : Trigger ;
+	AxisStep : eParIDAccessState ;
+	tempTrig : Trigger ;
+			
+	tmp_ErrorEntry			: Eh_ErrorEntry_typ;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF LogMsgInit THEN 
+	LogMsg_0.ptrGlobalArray		:= 	ADR(LogGlobalArray);
+	LogMsg_0.ptrEncoderAngle	:= 	ADR(BasicAxisCtrlPtr^.Input.Parameter.PosForLog);   
+	LogMsg_0.Enable:= 	TRUE; 	
+	LogMsgInit	:= FALSE;
+END_IF
+LogMsg_0.logData.category	:=	BasicAxisCtrlPtr^.Input.Parameter.ThreadName;  
+
+IF (TaskCycleTimeUDINT = 0) THEN
+	fbGetCurTaskIdx();
+	TaskCycleTimeUDINT := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
+	TaskCycleTime	:= UDINT_TO_TIME(TaskCycleTimeUDINT/10000); 
+END_IF 
+
+IF BasicAxisCtrlPtr^.Output.Status.FAULT THEN
+	
+	THIS^.ResetAll_MC_FB();
+
+	AxisStep := ParID_STATE_ERROR;
+		
+END_IF
+
+
+CASE AxisStep OF
+		
+	(******************** WAIT *************************)
+	ParID_STATE_WAIT:  (* STATE: Wait *)
+		
+		IF BasicAxisCtrlPtr^.Output.Status.ReadyForCmd THEN
+			AxisStep := ParID_STATE_READY;
+		END_IF
+		
+		THIS^.ResetAll_MC_FB();
+
+	(******************** READY *************************)
+	ParID_STATE_READY:
+		
+		IF (ParIDAccessCtrlPtr^.Input.Command.ReadCoeSdo = TRUE) THEN
+			THIS^.EcCoeSdoRead(FALSE);
+			AxisStep := ParID_STATE_READ_SDO; 
+			
+		ELSIF (ParIDAccessCtrlPtr^.Input.Command.WriteCoeSdo = TRUE) THEN
+			THIS^.EcCoeSdoWrite(FALSE);
+			AxisStep := ParID_STATE_WRITE_SDO; 
+			
+
+		END_IF
+	
+	(******************** Read Sdo **********************)
+	ParID_STATE_READ_SDO:
+	
+		IF THIS^.EcCoeSdoRead(TRUE) THEN
+			AxisStep := ParID_STATE_READY;
+		END_IF
+		
+	(******************** Write Sdo **********************)
+		
+	ParID_STATE_WRITE_SDO:
+	
+		IF THIS^.EcCoeSdoWrite(TRUE) THEN
+			AxisStep := ParID_STATE_READY;
+		END_IF
+		
+		
+	(******************** Error **********************)	
+	ParID_STATE_ERROR:	
+	
+		THIS^.ResetAll_MC_FB();	
+		
+		IF BasicAxisCtrlPtr^.Output.Status.FAULT THEN
+					
+			AxisStep := ParID_STATE_ERROR;
+		ELSE
+			ParIDAccessCtrlPtr^.Output.Error.ErrorID := 0 ;
+			AxisStep := ParID_STATE_WAIT;
+		END_IF
+	
+	
+END_CASE 
+	
+//=====================================================================================================================\\
+
+
+//fnLogTransfer FUNCTION call
+fnLogTransfer(ADR(LogMsg_0));
+			]]></ST>
+    </Implementation>
+    <Method Name="AddNCError" Id="{b659e8bb-36cb-0256-3981-04256b99d3ae}">
+      <Declaration><![CDATA[METHOD AddNCError : BOOL
+VAR_INPUT
+	ErrorId			: UDINT;
+	ErrorPrefix     : STRING[100];
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+	tmp_ErrorEntry.ErrorId		:= ErrorId;
+
+	tmp_ErrorEntry.ErrorText	:= ErrorPrefix;
+
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, 'Task: ');
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, ParIDAccessCtrlPtr^.Input.Parameter.ThreadName);	
+	tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, FC_NcErrorMsg(tmp_ErrorEntry.ErrorId));	
+	fnLogMsg(ADR(LogMsg_0),LOG_ERROR,tmp_ErrorEntry.ErrorText,0,0,0);	
+	
+	tmp_ErrorEntry.MotorEvents := CreateNCErrMsgDetails(tmp_ErrorEntry.ErrorId);
+	
+	BasicAxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="EcCoeSdoRead" Id="{43a55f0a-8b6b-0f36-36fe-f7a790bbf85f}">
+      <Declaration><![CDATA[METHOD EcCoeSdoRead : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+
+VAR_INST
+	errorTrig: 		Trigger ;	
+	ExecuteTrig: 	Trigger;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF ExecuteTrig.EDGEPOS(Execute) THEN
+	ParIDAccessCtrlPtr^.Input.Command.ReadCoeSdo 	:= FALSE;
+	EcCoeSdoRead:= FALSE;
+	StateCoeSdoRead	:= 1;		
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	
+	ParIDAccessCtrlPtr^.Output.Status.ReadCoeSdo.Done 	:= FALSE;
+	FB_EcCoeSdoRead_0.bExecute 							:= FALSE;
+	StateCoeSdoRead		:= 0;	
+	EcCoeSdoRead		:= FALSE;
+	
+END_IF
+
+
+CASE StateCoeSdoRead OF
+	
+	0:
+		// Wait	
+	1:
+	
+		FB_EcCoeSdoRead_0.sNetId		:= F_CreateAmsNetId(BasicAxisCtrlPtr^.Input.Parameter.ecNetIdArr); 
+		FB_EcCoeSdoRead_0.nSlaveAddr	:= LREAL_TO_UINT(BasicAxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr);
+		FB_EcCoeSdoRead_0.nSubIndex		:= ParIDAccessCtrlPtr^.Input.Parameter.ReadCoedSdo.nSubIndex;
+		FB_EcCoeSdoRead_0.nIndex		:= ParIDAccessCtrlPtr^.Input.Parameter.ReadCoedSdo.nIndex; 
+		FB_EcCoeSdoRead_0.pDstBuf		:= ParIDAccessCtrlPtr^.Input.Parameter.ReadCoedSdo.pDstBuf; 
+		FB_EcCoeSdoRead_0.cbBufLen		:= ParIDAccessCtrlPtr^.Input.Parameter.ReadCoedSdo.cbBufLen; 
+		FB_EcCoeSdoRead_0.tTimeout		:= ParIDAccessCtrlPtr^.Input.Parameter.ReadCoedSdo.tTimeout; 
+		StateCoeSdoRead	:= 2;	
+	2:	
+
+		FB_EcCoeSdoRead_0.bExecute		:= TRUE;	
+		IF (FB_EcCoeSdoRead_0.bBusy = TRUE) THEN
+			StateCoeSdoRead	:= 3;	
+		END_IF
+
+	3:	
+		IF (FB_EcCoeSdoRead_0.bBusy = FALSE) THEN
+			FB_EcCoeSdoRead_0.bExecute		:= FALSE;
+			ParIDAccessCtrlPtr^.Output.Status.ReadCoeSdo.Done	:= TRUE;
+			EcCoeSdoRead	:= TRUE;
+			StateCoeSdoRead	:= 0;	
+		END_IF
+	
+END_CASE
+
+FB_EcCoeSdoRead_0();
+
+(* check if error occured *)
+IF errorTrig.EDGEPOS(FB_EcCoeSdoRead_0.bError) THEN
+	
+	// Add FB Error to ErrorHandler	
+	AddNCError(FB_EcCoeSdoRead_0.nErrId,'NC Error FB_EcCoeSdoRead_0 ErrorID: ');
+	
+	EcCoeSdoRead :=  FALSE ;
+	ParIDAccessCtrlPtr^.Input.Command.ReadCoeSdo := FALSE;
+	FB_EcCoeSdoRead_0.bExecute := FALSE;
+END_IF
+
+ParIDAccessCtrlPtr^.Output.Status.ReadCoeSdo.Busy	:= FB_EcCoeSdoRead_0.bBusy;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="EcCoeSdoWrite" Id="{d8511020-23ca-0634-32c0-22c483db57aa}">
+      <Declaration><![CDATA[METHOD EcCoeSdoWrite : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+
+VAR_INST
+	errorTrig: 		Trigger ;	
+	ExecuteTrig: 	Trigger;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF ExecuteTrig.EDGEPOS(Execute) THEN
+	ParIDAccessCtrlPtr^.Input.Command.WriteCoeSdo 		:= FALSE;
+	EcCoeSdoWrite		:= FALSE;
+	StateCoeSdoWrite	:= 1;		
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	
+	ParIDAccessCtrlPtr^.Output.Status.WriteCoeSdo.Done := FALSE;
+	FB_EcCoeSdoWrite_0.bExecute 				:= FALSE;
+	StateCoeSdoWrite	:= 0;	
+	EcCoeSdoWrite		:= FALSE;
+	
+END_IF
+
+
+CASE StateCoeSdoWrite OF
+	
+	0:
+		// Wait	
+	1:
+	
+		FB_EcCoeSdoWrite_0.sNetId		:= F_CreateAmsNetId(BasicAxisCtrlPtr^.Input.Parameter.ecNetIdArr); 
+		FB_EcCoeSdoWrite_0.nSlaveAddr	:= BasicAxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+		FB_EcCoeSdoWrite_0.nSubIndex	:= ParIDAccessCtrlPtr^.Input.Parameter.WriteCoeSdo.nSubIndex;
+		FB_EcCoeSdoWrite_0.nIndex		:= ParIDAccessCtrlPtr^.Input.Parameter.WriteCoeSdo.nIndex; 
+		FB_EcCoeSdoWrite_0.pSrcBuf		:= ParIDAccessCtrlPtr^.Input.Parameter.WriteCoeSdo.pSrcBuf; 
+		FB_EcCoeSdoWrite_0.cbBufLen		:= ParIDAccessCtrlPtr^.Input.Parameter.WriteCoeSdo.cbBufLen; 
+		FB_EcCoeSdoWrite_0.tTimeout		:= ParIDAccessCtrlPtr^.Input.Parameter.WriteCoeSdo.tTimeout; 
+		StateCoeSdoWrite	:= 2;	
+	2:	
+
+		FB_EcCoeSdoWrite_0.bExecute		:= TRUE;	
+		IF (FB_EcCoeSdoWrite_0.bBusy = TRUE) THEN
+			StateCoeSdoWrite	:= 3;	
+		END_IF
+
+	3:	
+		IF (FB_EcCoeSdoWrite_0.bBusy = FALSE) THEN
+			FB_EcCoeSdoWrite_0.bExecute		:= FALSE;
+			ParIDAccessCtrlPtr^.Output.Status.WriteCoeSdo.Done	:= TRUE;
+			EcCoeSdoWrite		:= TRUE;
+			StateCoeSdoWrite	:= 0;	
+		END_IF
+	
+END_CASE
+
+FB_EcCoeSdoWrite_0();
+
+(* check if error occured *)
+IF errorTrig.EDGEPOS(FB_EcCoeSdoWrite_0.bError) THEN
+	
+	// Add FB Error to ErrorHandler	
+	AddNCError(FB_EcCoeSdoWrite_0.nErrId,'NC Error FB_EcCoeSdoWrite_0 ErrorID: ');
+	
+	EcCoeSdoWrite :=  FALSE ;
+	ParIDAccessCtrlPtr^.Input.Command.WriteCoeSdo := FALSE;
+	FB_EcCoeSdoWrite_0.bExecute := FALSE;
+END_IF
+
+ParIDAccessCtrlPtr^.Output.Status.WriteCoeSdo.Busy	:= FB_EcCoeSdoWrite_0.bBusy;
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetAll_MC_FB" Id="{79d30fe5-3c7c-0171-1131-a34706e5ab95}">
+      <Declaration><![CDATA[METHOD PRIVATE ResetAll_MC_FB : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+		ResetAll_MC_FB := FALSE ;
+				
+		FB_EcCoeSdoRead_0.bExecute	:= FALSE;
+		FB_EcCoeSdoWrite_0.bExecute	:= FALSE;
+		{warning disable C0371}
+		//Warning: Access to VAR_IN_OUT <Var> declared in <POU> from external context <Method/Transition/Property>
+		FB_EcCoeSdoRead_0(); 
+		FB_EcCoeSdoWrite_0() ;
+		{warning restore C0371}
+		
+		
+		memset(ADR(ParIDAccessCtrlPtr^.Input.Command) ,0 ,SIZEOF(ParIDAccessCtrlPtr^.Input.Command));
+		memset(ADR(ParIDAccessCtrlPtr^.Output.Status) ,0 ,SIZEOF(ParIDAccessCtrlPtr^.Output.Status));
+		
+		ResetAll_MC_FB := TRUE ;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="ParIDAccess_FB">
+      <LineId Id="548" Count="0" />
+      <LineId Id="774" Count="0" />
+      <LineId Id="773" Count="0" />
+      <LineId Id="550" Count="0" />
+      <LineId Id="772" Count="0" />
+      <LineId Id="551" Count="0" />
+      <LineId Id="846" Count="0" />
+      <LineId Id="723" Count="0" />
+      <LineId Id="719" Count="2" />
+      <LineId Id="718" Count="0" />
+      <LineId Id="724" Count="0" />
+      <LineId Id="568" Count="7" />
+      <LineId Id="581" Count="14" />
+      <LineId Id="780" Count="0" />
+      <LineId Id="782" Count="8" />
+      <LineId Id="781" Count="0" />
+      <LineId Id="604" Count="1" />
+      <LineId Id="791" Count="0" />
+      <LineId Id="801" Count="0" />
+      <LineId Id="792" Count="2" />
+      <LineId Id="799" Count="1" />
+      <LineId Id="795" Count="1" />
+      <LineId Id="802" Count="0" />
+      <LineId Id="797" Count="1" />
+      <LineId Id="614" Count="1" />
+      <LineId Id="632" Count="15" />
+      <LineId Id="660" Count="1" />
+      <LineId Id="666" Count="3" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="ParIDAccess_FB.AddNCError">
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="8" Count="2" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="16" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="ParIDAccess_FB.EcCoeSdoRead">
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="95" Count="4" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="83" Count="5" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="63" Count="9" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+    </LineIds>
+    <LineIds Name="ParIDAccess_FB.EcCoeSdoWrite">
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="95" Count="4" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="83" Count="5" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="59" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="63" Count="9" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+    </LineIds>
+    <LineIds Name="ParIDAccess_FB.ResetAll_MC_FB">
+      <LineId Id="3" Count="2" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="20" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EcCoeSdo_Status_typ" Id="{5f10336a-80df-0e91-0090-4e62fd68ca40}">
+    <Declaration><![CDATA[TYPE EcCoeSdo_Status_typ : 	
+	STRUCT 
+		Done : BOOL;
+		Busy : BOOL;
+		CommandAborted : BOOL;
+		Active : BOOL ;
+	END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <ImagePool Name="ImagePool" Id="{bc0fe90c-bde1-483d-a35b-3087c47ebaa9}">
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="ImagePoolObject">
+          <v n="UniqueIdGenerator">"25"</v>
+          <l n="BitmapPool" t="ArrayList" cet="ImagePoolItem">
+            <o>
+              <v n="BitmapID">"logo"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\logo.svg"</v>
+              <v n="ItemID">4</v>
+            </o>
+            <o>
+              <v n="BitmapID">"play-button-svgrepo-com"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\play-button-svgrepo-com.svg"</v>
+              <v n="ItemID">10</v>
+            </o>
+            <o>
+              <v n="BitmapID">"stop-svgrepo-com"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\stop-svgrepo-com.svg"</v>
+              <v n="ItemID">14</v>
+            </o>
+            <o>
+              <v n="BitmapID">"engine-motor-svgrepo-com"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\engine-motor-svgrepo-com.svg"</v>
+              <v n="ItemID">16</v>
+            </o>
+            <o>
+              <v n="BitmapID">"power-power-button-svgrepo-com"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\power-power-button-svgrepo-com.svg"</v>
+              <v n="ItemID">18</v>
+            </o>
+            <o>
+              <v n="BitmapID">"emergency-stop-button-icon-364856"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\emergency-stop-button-icon-364856.png"</v>
+              <v n="ItemID">20</v>
+            </o>
+            <o>
+              <v n="BitmapID">"power-button-svgrepo-com"</v>
+              <v n="FileID">"5ce3da45-db07-42e7-a21c-a00fff4ed8f6|VISUs\Img\power-button-svgrepo-com.svg"</v>
+              <v n="ItemID">22</v>
+            </o>
+            <o>
+              <v n="BitmapID">""</v>
+              <v n="FileID">""</v>
+              <v n="ItemID">24</v>
+            </o>
+          </l>
+          <v n="GuidInit">{a21d75af-70fb-4291-af61-96b656fbd0ee}</v>
+          <v n="GuidReInit">{f8286402-5789-4061-ae99-0131a4374c69}</v>
+          <v n="GuidExitX">{79d56d4b-a055-4bb4-aaa0-be88da2a6b0c}</v>
+          <v n="ValidIds">true</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Boolean">System.Boolean</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="ImagePoolItem">{215b2719-0347-4e4d-ba85-8bcd66946f66}</Type>
+        <Type n="ImagePoolObject">{bb0b9044-714e-4614-ad3e-33cbdf34d16b}</Type>
+        <Type n="Int32">System.Int32</Type>
+        <Type n="String">System.String</Type>
+      </TypeList>
+    </XmlArchive>
+  </ImagePool>
+</TcPlcObject>

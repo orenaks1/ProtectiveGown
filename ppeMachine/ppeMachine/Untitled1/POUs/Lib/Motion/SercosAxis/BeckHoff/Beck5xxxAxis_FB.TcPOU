@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="Beck5xxxAxis_FB" Id="{498f222f-8d95-4547-924e-ddeaf13fdab4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC Beck5xxxAxis_FB EXTENDS SercosBasicAxis_FB  
+VAR_INPUT		
+	io_SafetyState: 		INT;	
+END_VAR
+VAR_IN_OUT	
+END_VAR
+VAR_OUTPUT	
+END_VAR
+
+VAR
+	DebugError					: UINT;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+SUPER^(AxisRef:=AxisRef);
+
+AxisCtrlPtr^.Output.Status.DriveEnable:=	 NOT (INT_TO_BOOL(io_SafetyState));
+	
+]]></ST>
+    </Implementation>
+    <Method Name="CreateDriveErrMsgDetails" Id="{2002a1a9-c2fe-4b05-accf-6554dad73e10}">
+      <Declaration><![CDATA[METHOD CreateDriveErrMsgDetails : enumMotorEvents
+VAR_INPUT
+	ErrorId			: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE ErrorId OF
+	 0: 
+		CreateDriveErrMsgDetails := enumMotorEvents.NoEvents ;
+	16#CD40..16#CD47 :
+	
+		CreateDriveErrMsgDetails := enumMotorEvents.NoEvents ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'Beckhoff Drive8 Warning %d',UDINT_TO_DINT(ErrorId),0,0);
+
+ 	16#D006: 
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveNotReady ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Not Valid',UDINT_TO_DINT(ErrorId),0,0);
+	16#D010: 
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveNotReady ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Not Ready',UDINT_TO_DINT(ErrorId),0,0);
+	16#D011: 
+		CreateDriveErrMsgDetails := enumMotorEvents.NoEvents ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Ready',UDINT_TO_DINT(ErrorId),0,0);
+	16#D015:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Axis error',UDINT_TO_DINT(ErrorId),0,0);
+	16#D019:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Invalid state',UDINT_TO_DINT(ErrorId),0,0);
+	16#D101:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError ;	
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Drive Not Enabled',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#D782,16#D783,16#D784:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorFeedBackErr;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Endat Encoder Error',UDINT_TO_DINT(ErrorId),0,0);
+	16#DCBB:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Communication aborted',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#DD42:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d DC link current in limit',UDINT_TO_DINT(ErrorId),0,0);
+	16#ED00:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverTemp ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Terminal-Overtemperature',UDINT_TO_DINT(ErrorId),0,0);
+	
+	16#ECD0:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Positive limit switch warning',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#ECD1:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Neg limit switch warning',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#ED01:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Overload - motor',UDINT_TO_DINT(ErrorId),0,0);
+	16#ED40:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Internal brake resistor',UDINT_TO_DINT(ErrorId),0,0);
+	16#ED41:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d External brake resistor',UDINT_TO_DINT(ErrorId),0,0);	
+	16#ED42:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Overtemperature - Amplifier',UDINT_TO_DINT(ErrorId),0,0);		
+		
+	16#ED43:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Undervoltage - DC link',UDINT_TO_DINT(ErrorId),0,0);
+	16#F2A0:
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveComError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d commutation error',UDINT_TO_DINT(ErrorId),0,0);
+	16#F2A1,16#F2A3:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorOverCurrent ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Overcurrent error motor',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#F2E1:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSpeedError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Velocity Control error motor',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#F321:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError  ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d  following error Detected',UDINT_TO_DINT(ErrorId),0,0);
+ 
+	16#F324..16#F344:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Position control - Interpolator error',UDINT_TO_DINT(ErrorId),0,0);
+	16#F700..16#FCB4:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError ;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d General Error',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#FCD0,16#FCD1:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorPositionError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d limit switch error',UDINT_TO_DINT(ErrorId),0,0);
+	16#FCD2,16#FCD3:
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSpeedError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Speed Error',UDINT_TO_DINT(ErrorId),0,0);
+	16#FD4B :
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d DC link undervoltage',UDINT_TO_DINT(ErrorId),0,0);
+
+	16#FD4C :
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d DC link Over voltage',UDINT_TO_DINT(ErrorId),0,0);
+		
+		
+	16#FD51 :
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorSupplyError;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Power supply phase error',UDINT_TO_DINT(ErrorId),0,0);
+		
+	16#FDD3 :
+		CreateDriveErrMsgDetails := enumMotorEvents.DriveNotEnabled;
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d Safety switch off while the axis was enabled.',UDINT_TO_DINT(ErrorId),0,0);
+	ELSE
+		fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'unknown ErrorId %d ',UDINT_TO_DINT(ErrorId),0,0);
+		CreateDriveErrMsgDetails := enumMotorEvents.MotorGeneralError;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="Beck5xxxAxis_FB">
+      <LineId Id="2092" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="2131" Count="0" />
+      <LineId Id="2129" Count="0" />
+      <LineId Id="2115" Count="0" />
+      <LineId Id="2112" Count="0" />
+    </LineIds>
+    <LineIds Name="Beck5xxxAxis_FB.CreateDriveErrMsgDetails">
+      <LineId Id="13" Count="1" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="230" Count="3" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="171" Count="1" />
+      <LineId Id="17" Count="3" />
+      <LineId Id="174" Count="1" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="21" Count="13" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="66" Count="4" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="179" Count="2" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="115" Count="2" />
+      <LineId Id="183" Count="1" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="187" Count="1" />
+      <LineId Id="185" Count="1" />
+      <LineId Id="118" Count="8" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="217" Count="2" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="210" Count="1" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="127" Count="5" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="133" Count="2" />
+      <LineId Id="189" Count="6" />
+      <LineId Id="197" Count="2" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="200" Count="3" />
+      <LineId Id="234" Count="1" />
+      <LineId Id="91" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

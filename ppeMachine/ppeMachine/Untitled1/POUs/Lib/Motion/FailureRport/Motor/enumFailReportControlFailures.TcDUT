@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="enumFailReportControlFailures" Id="{4ad7eb2c-65db-0f42-3fd1-faadebd1c602}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+//{attribute 'strict'}
+TYPE enumFailReportControlFailures :
+(
+	IllegalMessageReceived		:=0,
+	FunctionBlockError	    	:=1,
+	DriveNotReadyForCommand		:=2,
+	IllegalParameterReceived	:=3,
+	CycleTimeViolation			:=4,
+	CommunicationErrorWithDrive	:=5,
+	InternalTimeout 			:=6
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

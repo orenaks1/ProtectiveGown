@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Encoder_Status_Typ" Id="{0ba83cfe-dd09-481f-9bc3-65090265f26f}">
+    <Declaration><![CDATA[TYPE Encoder_Status_Typ :
+STRUCT
+	CounterValue AT %I* 	: UINT;
+	SetCounterDone AT %I* 	: BOOL;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

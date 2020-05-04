@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ST_BasicInverter" Id="{a1259a6d-0e24-0e66-2e87-abb1aaa32dfa}">
+    <Declaration><![CDATA[TYPE ST_BasicInverter :	
+STRUCT
+	StatusWord		AT %I* 	: UINT;
+	ActualSpeed		AT %I*	: INT;
+	ControlWord 	AT %Q* 	: UINT;
+	SetSpeed		AT %Q*	: INT;
+	InfoData				: ST_InfoData;
+	stWcState 		AT %I*  : ST_WcState;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EcCoeSdoRead_Param_typ" Id="{354f991c-e898-0cf8-1bca-c32d6be6081c}">
+    <Declaration><![CDATA[TYPE EcCoeSdoRead_Param_typ :
+	STRUCT
+		sNetId          : T_AmsNetId; 
+        nSlaveAddr      : UINT; 
+        nSubIndex       : BYTE; 
+        nIndex          : WORD;
+		pDstBuf         : POINTER TO DWORD; 
+		cbBufLen        : UDINT; 
+		tTimeout        : TIME := DEFAULT_ADS_TIMEOUT; 
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

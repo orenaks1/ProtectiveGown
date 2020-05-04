@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="LocalEvent_Typ" Id="{446ddc68-8e82-0560-12aa-d71f76bcb414}">
+    <Declaration><![CDATA[TYPE LocalEvent_Typ :
+STRUCT
+	EventHeader:EventHeader_Typ;
+	EventParameters:EventParam_Typ;
+	rEvent : REFERENCE TO EventHelper;
+//	flowId:DINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

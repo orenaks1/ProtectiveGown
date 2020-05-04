@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="ParIDAccess_Output_typ" Id="{a30a4226-3575-0ad3-0aa9-072f32b3faa4}">
+    <Declaration><![CDATA[TYPE ParIDAccess_Output_typ :
+	STRUCT
+		monitor 	: ParIDAccess_monitor_typ ;
+		Status		: ParIDAccess_Status_axis_typ ;
+		Error		: ParIDAccess_Error_typ ;
+		
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,477 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_OFF" Id="{072cc586-3a14-4c75-ad84-f17af05d0717}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_OFF EXTENDS CycleHandleFB
+VAR_INPUT
+	Ctrl_ref:			REFERENCE TO Ctrl_Typ;
+	FB_RW_Ctrl_ref:			REFERENCE TO FB_RW_Ctrl;
+	FB_Machine_Run_ref:		REFERENCE TO FB_Machine_Run;
+	FB_Mechinit_ref:		REFERENCE TO FB_Mechinit;
+
+	
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	MethInitDone:		BOOL;
+END_VAR
+
+VAR CONSTANT
+// States are global
+		
+	OFF_INIT:			INT:=0;
+	OFF_STOP_MOTOR:		INT:=5;
+	OFF_GEAR_OUT:		INT:=6;
+	OFF_MOTOR:			INT:=10;
+	OFF_RESET_CYCLES:	INT:=20;
+	OFF_RESET_IO:	INT:=30;
+	OFF_DONE:			INT:=100;
+END_VAR	]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+IF NOT MethInitDone THEN
+	MethInitDone	:= Meth_Init();
+END_IF
+
+IF  THIS^.CMD.Pause = FALSE THEN
+	
+	//-----------------------------
+	//State Machine
+	//-----------------------------
+	CASE THIS^.StepNo OF
+		OFF_INIT:
+			IF THIS^.StepOneShotTrig THEN
+				THIS^.Monitoring.StepMessage	:= 'Init: Start.';
+				THIS^.Delay(IN:=FALSE);
+			ELSIF Meth_Enable(TRUE) THEN
+				THIS^.StepNo	:= 	OFF_RESET_IO;
+			END_IF
+			
+			OFF_RESET_IO:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Rest all IO';
+				ELSIF Meth_Rest_IO() THEN
+					THIS^.StepNo	:= 	OFF_GEAR_OUT;
+				END_IF			
+			
+			OFF_GEAR_OUT:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Gear Out';
+					THIS^.Meth_GearOut(FALSE);
+				ELSIF Meth_GearOut(TRUE) THEN
+					THIS^.StepNo	:= 	OFF_STOP_MOTOR;
+				END_IF					
+				
+			OFF_STOP_MOTOR:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Stop Motors';
+					THIS^.Meth_StopMotors(FALSE);
+				ELSIF Meth_StopMotors(TRUE) THEN
+					THIS^.StepNo	:= 	OFF_MOTOR;
+				END_IF					
+				
+			OFF_MOTOR:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Switch Motors Off';
+					THIS^.Meth_SwitchOff(FALSE);
+				ELSIF Meth_SwitchOff(TRUE) THEN
+					THIS^.StepNo	:= 	OFF_RESET_CYCLES;
+				END_IF		
+
+			OFF_RESET_CYCLES:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Rest all cycles';
+				ELSIF Meth_ResatAllCycles() THEN
+					THIS^.StepNo	:= 	OFF_DONE;
+				END_IF				
+				
+					
+				
+			OFF_DONE:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'OFF cycle Done';
+				ELSIF Meth_Done(TRUE) THEN
+					THIS^.StepNo	:= 	OFF_INIT;
+				END_IF					
+				
+		END_CASE
+	
+	ELSE
+		THIS^.Monitoring.StepMessage:= 'Pause';
+		
+		IF THIS^.Status.Fault = TRUE THEN
+		//IF Meth_EmStop(TRUE) THEN
+				THIS^.CMD.ResetCycle	:= TRUE;		// Reset the all state machine to start point
+		//END_IF
+			
+		END_IF
+		
+	END_IF
+	
+	THIS^.Delay();
+	THIS^.CH_Logic();
+	
+	// Reset Meth_EmStop when at Init State
+	IF THIS^.Pause = FALSE THEN
+		//Meth_EmStop(FALSE);
+	END_IF								]]></ST>
+    </Implementation>
+    <Method Name="Meth_Done" Id="{dbd38f49-4fbf-4edd-86fd-5a872fdbeee6}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_Done : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	//THIS^.Monitoring.StepMessage			:= 'Press 1 engage';
+	//THIS^.Monitoring.Error_Text				:= 'Press 1 engage Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	//THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	//THIS^.Parameter.TimeOut					:= T#5S;
+
+	THIS^.Status.Done		:= TRUE;
+	THIS^.Status.Running	:= FALSE;									
+	Meth_Done	:= TRUE;	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Enable" Id="{b64613dc-4cc5-4156-81e9-2b9fb8acc3cc}">
+      <Declaration><![CDATA[METHOD PRIVATE Meth_Enable : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+IF THIS^.CMD.Start THEN
+	
+	THIS^.Monitoring.StepMessage			:= 'Start';
+	THIS^.Monitoring.Error_Text				:= 'Start Fail';
+	THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#0.5S;
+
+	THIS^.CMD.Start			:= FALSE;
+	THIS^.Status.Done		:= FALSE;
+	THIS^.Status.Running	:= TRUE;
+	
+	// Reset Commands and Statuses												
+	
+	Meth_Enable	:= TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_GearOut" Id="{86b65f9b-2b9a-4dc6-8bfe-daa349102d39}">
+      <Declaration><![CDATA[METHOD Meth_GearOut : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+VAR_INST	
+	ExecuteTrig: 	Trigger;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ExecuteTrig.EDGEPOS(Execute) THEN
+	Meth_GearOut	:= FALSE;
+	THIS^.SubStepNo:= 	1;	
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	Meth_GearOut	:=	FALSE;
+END_IF
+
+CASE THIS^.SubStepNo OF
+	   
+	1:
+	
+		IF (gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.SynchronizedMotion = TRUE) THEN
+			THIS^.Monitoring.StepMessage	:= 'Set Gear out command UW1';							
+			gWebAxes.UW_1.Crtl.MultiAxis.Input.Command.GearInMultiMaster.DisengageSlave	:= TRUE;
+			THIS^.SubStepNo	:= 2;	
+		ELSE
+			THIS^.Monitoring.StepMessage	:= 'UW1 not synchronized, continue';	
+			THIS^.SubStepNo	:= 2;				
+		END_IF	
+			
+	
+	2:	
+		IF (gWebAxes.UW_2.Crtl.Basic_axis.Output.Status.AxisStatus.SynchronizedMotion = TRUE) THEN
+			THIS^.Monitoring.StepMessage	:= 'Set Gear out command UW2';							
+			gWebAxes.UW_2.Crtl.MultiAxis.Input.Command.GearInMultiMaster.DisengageSlave	:= TRUE;
+			THIS^.SubStepNo	:= 3;	
+		ELSE
+			THIS^.Monitoring.StepMessage	:= 'UW2 not synchronized, continue';	
+			THIS^.SubStepNo	:= 3;				
+		END_IF	
+		
+	3:	
+		THIS^.Monitoring.StepMessage:= 'Wait for Gear out UW 1+2';
+									
+		IF  gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.SynchronizedMotion = FALSE
+		AND gWebAxes.UW_2.Crtl.Basic_axis.Output.Status.AxisStatus.SynchronizedMotion = FALSE THEN
+			Meth_GearOut:=TRUE;
+		END_IF	
+
+							
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Init" Id="{565eb6d6-bf99-4d14-923d-856872346f6c}">
+      <Declaration><![CDATA[METHOD Meth_Init :BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//resets
+
+
+Meth_Init:=TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_ResatAllCycles" Id="{3de7e222-fe0c-4347-a5a1-f796a0820628}">
+      <Declaration><![CDATA[METHOD Meth_ResatAllCycles : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+FB_Machine_Run_ref.ResetCycle	 :=TRUE;
+FB_Mechinit_ref.ResetCycle		 :=TRUE;
+
+
+Meth_ResatAllCycles:=TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_Rest_IO" Id="{47759a35-0d5c-4528-b786-5af609a0aae9}">
+      <Declaration><![CDATA[METHOD Meth_Rest_IO : BOOL
+VAR_INPUT
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+Ctrl_ref.IO.Out.HeaterOn := FALSE;
+
+
+Meth_Rest_IO:=TRUE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_StopMotors" Id="{0c147cf7-e2b2-48a5-8289-0b0151d7c74f}">
+      <Declaration><![CDATA[METHOD Meth_StopMotors : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+VAR_INST	
+	ExecuteTrig: 	Trigger;	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ExecuteTrig.EDGEPOS(Execute) THEN
+	Meth_StopMotors	:= FALSE;
+	THIS^.SubStepNo:= 	1;	
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	Meth_StopMotors	:=	FALSE;
+END_IF
+
+CASE THIS^.SubStepNo OF
+	   
+	1:
+		THIS^.Monitoring.StepMessage:= 'Stop Motors';
+		
+		gWebAxes.UW_1.Crtl.Basic_axis.Input.Parameter.Acceleration := 	10000000;
+		gWebAxes.UW_1.Crtl.Basic_axis.Input.Parameter.Deceleration := 	10000000;		
+		gWebAxes.UW_1.Crtl.Basic_axis.Input.Command.Stop :=		TRUE;
+		
+		gWebAxes.UW_2.Crtl.Basic_axis.Input.Parameter.Acceleration := 	10000000;
+		gWebAxes.UW_2.Crtl.Basic_axis.Input.Parameter.Deceleration := 	10000000;		
+		gWebAxes.UW_2.Crtl.Basic_axis.Input.Command.Stop :=		TRUE;		
+				
+								
+		THIS^.SubStepNo	:= 2;		
+			
+	
+	2:	
+		THIS^.Monitoring.StepMessage:= 'Wait for standstill UW 1';
+									
+		IF gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.StandStill
+		OR gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled THEN
+			THIS^.SubStepNo	:= 3 ;
+		END_IF
+		
+	3:	
+		THIS^.Monitoring.StepMessage:= 'Wait for standstill UW 2';
+									
+		IF gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.StandStill
+		OR  gWebAxes.UW_2.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled THEN
+			//THIS^.SubStepNo	:= 4 ;
+			Meth_StopMotors:=TRUE;
+		END_IF	
+
+							
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_SwitchOff" Id="{523f90b1-f35e-439f-9446-a68653f7ea20}">
+      <Declaration><![CDATA[METHOD Meth_SwitchOff : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+VAR_INST
+	ExecuteTrig: 	Trigger;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+IF ExecuteTrig.EDGEPOS(Execute) THEN
+	Meth_SwitchOff:=	FALSE;
+	THIS^.SubStepNo:= 	1;	
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	Meth_SwitchOff:=	FALSE;
+END_IF
+
+CASE THIS^.SubStepNo OF
+	(* Power ON*)
+	1:
+		THIS^.Monitoring.StepMessage	:= 'Power OFF';								
+		gWebAxes.UW_1.Crtl.Basic_axis.Input.Command.Power		:= FALSE;
+		gWebAxes.UW_2.Crtl.Basic_axis.Input.Command.Power		:= FALSE;	
+		
+		THIS^.SubStepNo:= 2;		
+	
+	2:	
+		THIS^.Monitoring.StepMessage:= 'Wait for Disabled UW 1';
+									
+		IF gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled THEN
+			THIS^.SubStepNo	:= 3 ;
+		END_IF
+		
+	3:	
+		THIS^.Monitoring.StepMessage:= 'Wait for Disabled UW 2';
+									
+		IF gWebAxes.UW_2.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled  THEN
+			Meth_SwitchOff	:= TRUE;
+		END_IF		
+		
+							
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_OFF">
+      <LineId Id="26" Count="17" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="119" Count="4" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="127" Count="5" />
+      <LineId Id="125" Count="1" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="50" Count="3" />
+      <LineId Id="82" Count="5" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="97" Count="3" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="90" Count="4" />
+      <LineId Id="88" Count="1" />
+      <LineId Id="54" Count="19" />
+      <LineId Id="46" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_Done">
+      <LineId Id="34" Count="7" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_Enable">
+      <LineId Id="24" Count="1" />
+      <LineId Id="6" Count="12" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_GearOut">
+      <LineId Id="71" Count="6" />
+      <LineId Id="12" Count="4" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="124" Count="6" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="131" Count="6" />
+      <LineId Id="102" Count="4" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_Init">
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_ResatAllCycles">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_Rest_IO">
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_StopMotors">
+      <LineId Id="71" Count="6" />
+      <LineId Id="12" Count="5" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="30" Count="3" />
+      <LineId Id="95" Count="15" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_OFF.Meth_SwitchOff">
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="15" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="26" Count="7" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

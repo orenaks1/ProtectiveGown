@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="EcSoeWrite_Param_typ" Id="{0d978765-2598-0247-1ef9-60de9d93217b}">
+    <Declaration><![CDATA[TYPE EcSoeWrite_Param_typ :
+	STRUCT
+		sNetId          : T_AmsNetId; 
+        nSlaveAddr      : UINT; 
+        nIdn            : WORD; 
+        nElement        : BYTE;
+        nDriveNo        : BYTE;
+        pCommand        : BOOL;
+        pSrcBuf         : POINTER TO DWORD; 
+        cbBufLen        : UDINT; 
+        bExecute        : BOOL;
+        tTimeout        : TIME := DEFAULT_ADS_TIMEOUT; 
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

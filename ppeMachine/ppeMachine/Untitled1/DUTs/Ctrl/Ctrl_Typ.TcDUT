@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Ctrl_Typ" Id="{0fe6f4ad-1274-43f0-91c4-7eb8c78aa5a7}">
+    <Declaration><![CDATA[TYPE Ctrl_Typ :
+STRUCT
+	Cmd:Cmd_Typ;
+	RwInverter:InverterCtrl_Typ;
+	Parameters:Parameters_Typ;
+	IO:IO_Typ;
+	Status:Status_Typ;
+	
+	Simulation:BOOL;
+	Manual:BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

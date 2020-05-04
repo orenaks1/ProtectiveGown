@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Terminal_Group_Output_typ" Id="{6091f005-4a03-033b-0219-71b657ed6ef8}">
+    <Declaration><![CDATA[TYPE Terminal_Group_Output_typ : 	
+	STRUCT  
+		Status:  Terminal_Group_Status_typ;
+		Monitor: Terminal_Group_Monitor_typ;
+	END_STRUCT
+END_TYPE
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

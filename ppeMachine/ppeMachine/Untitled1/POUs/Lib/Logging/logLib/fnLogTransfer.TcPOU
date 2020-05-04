@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="fnLogTransfer" Id="{74a50646-1b73-04e1-357d-a23466a0a7af}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION fnLogTransfer : BOOL
+VAR_INPUT
+	logMsgPtr : POINTER TO LogMsg;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+fnLogTransfer := logMsgPtr^.LogTransfer();
+]]></ST>
+    </Implementation>
+    <LineIds Name="fnLogTransfer">
+      <LineId Id="18" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

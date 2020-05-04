@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Tension_Typ" Id="{1d78aa3c-38fd-47b4-8eac-7df3dab94486}">
+    <Declaration><![CDATA[TYPE Tension_Typ :
+STRUCT
+	stLutDataParam		:ST_LookUpTableParam;
+	Tension_Unfiltred	:LREAL;
+	LoadCellLPF			:FB_LPF;
+	Tension_filtred		:LREAL;
+	FB_TensionLoop:FB_TensionLoop;
+	
+	TensionGear:LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

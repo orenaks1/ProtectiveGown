@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_TensionLoop" Id="{6a309c82-5169-0702-0047-e6d555b4cbf9}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TensionLoop
+VAR_INPUT
+ Enable:			BOOL;
+ SetTension:		REAL;
+ ActTension:		REAL;
+ Hold:				BOOL;
+ Invert:			BOOL;
+//	stParams:		ST_CTRL_PID_PARAMS;
+ Kp:				LREAL;
+ Tn:				TIME;
+ Td:				TIME;
+ PidOutMaxValue:	LREAL;
+ PidOutMinValue:	LREAL;	
+	
+END_VAR
+VAR_OUTPUT
+	CorrectionSpeed:	REAL;
+END_VAR
+VAR
+ Error:	REAL;
+ PID:				FB_CTRL_PID;
+ PidLimiter:		FB_CTRL_LIMITER;
+ Pidstparams:		ST_CTRL_PID_PARAMS;
+ LimiterstParams:	ST_CTRL_LIMITER_PARAMS;	
+	
+ fbGetCurTaskIdx: 		GETCURTASKINDEX;
+ TaskCycleTimeUDINT: 	UDINT;
+ TaskCycleTime: 		TIME;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF (TaskCycleTimeUDINT = 0) THEN
+	fbGetCurTaskIdx();
+	TaskCycleTimeUDINT := _TaskInfo[fbGetCurTaskIdx.index].CycleTime;
+	TaskCycleTime	:= UDINT_TO_TIME(TaskCycleTimeUDINT/10000); 
+END_IF
+
+
+IF (Enable = FALSE) THEN
+	pid.eMode	:= eCTRL_MODE_IDLE;
+ELSE
+	pid.eMode	:= eCTRL_MODE_ACTIVE;	
+END_IF
+
+// Call PID function	
+
+PID.fSetpointValue	:= SetTension; 
+PID.fActualValue	:= ActTension; 
+PID.bHold			:= Hold;
+
+Pidstparams.fKp	:= Kp; 
+Pidstparams.tTn	:= Tn; 
+Pidstparams.tTd	:= Td; 
+Pidstparams.fOutMaxLimit	:= PidOutMaxValue;
+Pidstparams.fOutMinLimit	:= PidOutMinValue;
+Pidstparams.tCtrlCycleTime	:= TaskCycleTime; 
+Pidstparams.tTaskCycleTime	:= TaskCycleTime;
+
+PID(stParams := Pidstparams);
+
+// Call Limiter function
+
+LimiterstParams.tTaskCycleTime	:= TaskCycleTime;
+LimiterstParams.tCtrlCycleTime	:= TaskCycleTime;
+LimiterstParams.fMaxOutput		:= Pidstparams.fOutMaxLimit;
+LimiterstParams.fMinOutput		:= Pidstparams.fOutMinLimit;
+
+PidLimiter.fIn	:= PID.fOut; 
+PidLimiter(stParams := LimiterstParams);
+
+IF (Invert = FALSE) THEN
+	CorrectionSpeed	:= LREAL_TO_REAL(PidLimiter.fOut);
+ELSE
+	CorrectionSpeed	:= LREAL_TO_REAL(- PidLimiter.fOut);	
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TensionLoop">
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="3" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="54" Count="2" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="134" Count="6" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="88" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

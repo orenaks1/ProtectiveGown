@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="fb_io_in_bool" Id="{cb366695-a736-429b-8ba9-a477ce532cee}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK fb_io_in_bool
+VAR_INPUT
+	hw_value AT %I* 	: BOOL;
+	SimFlag:BOOL;
+	SimValue:BOOL:=TRUE;
+END_VAR
+VAR_OUTPUT
+	Value:BOOL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF SimFlag THEN
+	Value:= SimValue;
+ELSE
+	value:= hw_value;
+END_IF	]]></ST>
+    </Implementation>
+    <LineIds Name="fb_io_in_bool">
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="16" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

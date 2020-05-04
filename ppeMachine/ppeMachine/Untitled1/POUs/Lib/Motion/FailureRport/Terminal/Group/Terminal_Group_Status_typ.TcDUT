@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Terminal_Group_Status_typ" Id="{611d08e6-9c11-0a18-3f2c-bdf51dc3ee7f}">
+    <Declaration><![CDATA[TYPE Terminal_Group_Status_typ : 	
+	STRUCT  		
+		Active:         BOOL;	
+		errorBit:       ULINT; 
+		
+	END_STRUCT
+END_TYPE
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="strcmp" Id="{7903d126-7d0f-4a01-983f-d34a56fb6a1e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION strcmp : DINT
+VAR_INPUT
+	pStr1 : POINTER TO STRING;
+	pStr2 : POINTER TO STRING;
+END_VAR
+VAR
+	pArr1	: POINTER TO BYTE;
+	pArr2	: POINTER TO BYTE;
+	dif		: DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+pArr1		:= pStr1;
+pArr2		:= pStr2;
+WHILE (pArr1^ <> 0 OR pArr2^ <> 0) AND_THEN dif = 0 DO	
+	dif	:= pArr1^ - pArr2^;
+	pArr1 := pArr1+1;
+	pArr2 := pArr2+1;
+END_WHILE
+
+strcmp := dif;
+]]></ST>
+    </Implementation>
+    <LineIds Name="strcmp">
+      <LineId Id="89" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="86" Count="2" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

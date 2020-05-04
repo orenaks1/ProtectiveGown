@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="bk5xxxBasicAxis_FB" Id="{b77b2bc0-2247-4c7a-bd38-3884568fedd8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK bk5xxxBasicAxis_FB EXTENDS BeckHoffBasicAxis_FB
+VAR_INPUT
+	pDigIn: 	POINTER TO INT;	
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+AxisCtrlPtr^.Input.Parameter.Drive.eDriveType	:= enumDriveType.e5xxxBeckhoff;
+AxisCtrlPtr^.Input.Parameter.Drive.VendorNameID	:= eVendorNameID.Beckhoff;
+
+
+SUPER^(AxisRef:=AxisRef);
+
+IF (pDigIn <> 0) THEN
+	AxisCtrlPtr^.Output.Status.DriveEnable	:= pDigIn^.7;
+ELSE
+	AxisCtrlPtr^.Output.Status.DriveEnable	:= TRUE;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="bk5xxxBasicAxis_FB">
+      <LineId Id="25" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="47" Count="4" />
+      <LineId Id="46" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

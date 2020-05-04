@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="Terminal_Group_Ctrl_typ" Id="{cac29ed4-0e5a-0737-1d4f-7e7a8e53b991}">
+    <Declaration><![CDATA[TYPE Terminal_Group_Ctrl_typ : 	
+	STRUCT
+  
+		In : Terminal_Group_Input_typ;
+		
+		Out : Terminal_Group_Output_typ;
+		
+	END_STRUCT
+END_TYPE
+
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

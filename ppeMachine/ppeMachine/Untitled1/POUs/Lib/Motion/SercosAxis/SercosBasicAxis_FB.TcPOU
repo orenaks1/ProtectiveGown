@@ -1,0 +1,520 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="SercosBasicAxis_FB" Id="{2b7cf6b6-c7e7-06db-38c0-c72ad898ecd7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC SercosBasicAxis_FB EXTENDS BasicAxis_FB  
+VAR_INPUT
+	io_Class1diagnostic: 	INT;		// (C1D) s-0-11 S-0-135
+END_VAR
+VAR_IN_OUT
+	
+END_VAR
+
+VAR_OUTPUT
+	
+END_VAR
+VAR
+	FB_EcSoeRead_0 		: FB_EcSoeRead ;
+	FB_EcSoeWrite_0		: FB_EcSoeWrite ;
+	SercosDrive_Ctrl_Adr: SercosDrive_Ctrl_Adr_typ;
+	InitIdnsAdr: BOOL := FALSE;
+	SercosDriveDeviceError	: BOOL;
+	DiagnosticTON  				: TON;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+AxisCtrlPtr^.Input.Parameter.Drive.eDriveType := enumDriveType.e5xxxBeckhoff;	
+AxisCtrlPtr^.Input.Parameter.Drive.VendorNameID := eVendorNameID.Beckhoff;
+
+SercosDriveDeviceError	:= io_Class1diagnostic.13;
+
+IF InitIdnsAdr = FALSE THEN
+	GetIdns();
+	InitIdnsAdr := TRUE;
+END_IF
+
+
+{warning disable C0371}
+ SUPER^(AxisRef:=AxisRef);
+{warning restore C0371}
+
+]]></ST>
+    </Implementation>
+    <Method Name="CreateDriveErrMsgDetails" Id="{38a19548-bd0c-06a0-25b2-c1b585da6bbe}">
+      <Declaration><![CDATA[METHOD CreateDriveErrMsgDetails : enumMotorEvents
+VAR_INPUT
+		ErrorId			: UDINT;		
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'ErrorId %d ',ErrorId,0,0);
+//Etz to do
+CreateDriveErrMsgDetails := enumMotorEvents.NoEvents;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="DriveErrorHandling" Id="{8ff97df1-708d-0742-1497-574150cbc062}">
+      <Declaration><![CDATA[METHOD DriveErrorHandling : BOOL
+
+VAR
+	Error : BOOL;
+END_VAR
+
+VAR_INST
+	ErrHandState	: INT;
+	FB_SoEReset_0	: FB_SoEReset;
+	FB_EcSoERead_DriveError		: FB_EcSoERead;
+	tmpDriveErrorId				: UDINT;
+
+	MC_Reset_0					: MC_Reset;
+	
+	tmpErrorEntry			: Eh_ErrorEntry_typ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+CASE ErrHandState OF
+	0: // logic init
+
+			ErrHandState	 := 100;
+			DiagnosticTON.PT := T#2S;
+	
+	//************************* Sercos Logic **********************************************
+	100: // wait errors	
+		IF AxisRef.Status.DriveDeviceError OR SercosDriveDeviceError THEN
+			FB_SoEReset_0.Execute				:= FALSE;
+			FB_EcSoERead_DriveError.bExecute	:= FALSE;
+			ErrHandState	:= 110;
+		ELSIF AxisRef.NcToPlc.ErrorCode <> 0 
+			AND AxisRef.NcToPlc.ErrorCode <> 18000 THEN
+			ErrHandState	:= 300;
+		ELSIF AxisCtrlPtr^.Output.Error.fbErrorHandler.EntriesCount > 0 THEN
+			// do nothing
+			DiagnosticTON.IN := TRUE;
+		ELSE	
+			DiagnosticTON.IN := TRUE;
+		END_IF
+		
+	(*	IF DiagnosticTON.Q THEN
+			IF Meth_ReadDiagnostic(TRUE,Error => Error) THEN
+				 IF Error THEN
+					FB_SoEReset_0.Execute				:= FALSE;
+					FB_EcSoERead_DriveError.bExecute	:= FALSE;
+					ErrHandState	:= 110;
+				 END_IF
+				 DiagnosticTON.IN := FALSE;
+				 Meth_ReadDiagnostic(FALSE);
+			END_IF
+		ELSE
+			Meth_ReadDiagnostic(FALSE);
+		END_IF	*)
+		
+
+		IF ErrHandState <> 100 THEN
+			DiagnosticTON.IN := FALSE;
+		END_IF
+		
+	110: // read sercos drive error
+		FB_EcSoERead_DriveError.sNetId		:= strEcNetId;
+		FB_EcSoERead_DriveError.nSlaveAddr	:= AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+		FB_EcSoERead_DriveError.pDstBuf		:= ADR(tmpDriveErrorId);
+		FB_EcSoERead_DriveError.cbBufLen		:= SIZEOF(tmpDriveErrorId);
+		FB_EcSoERead_DriveError.nDriveNo		:= 0;
+		FB_EcSoERead_DriveError.nElement		:= EC_SOE_ELEMENT_VALUE;		
+		FB_EcSoERead_DriveError.nIdn			:= S_0_IDN+SercosDrive_Ctrl_Adr.DriveError;
+		FB_EcSoERead_DriveError.bExecute		:= TRUE;
+		
+		ErrHandState	:= 111;
+	111:
+		IF NOT FB_EcSoERead_DriveError.bBusy THEN
+			FB_EcSoERead_DriveError.bExecute		:= FALSE;
+			IF NOT FB_EcSoERead_DriveError.bError THEN
+				// Add Drive Error to ErrorHandler
+				tmp_ErrorEntry.ErrorId		:= tmpDriveErrorId;
+				tmp_ErrorEntry.ErrorText	:= 'Drive ErrorID: ';
+				tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+				tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, ', Or 0x');
+				tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_HEX_STRING(tmp_ErrorEntry.ErrorId));
+				tmp_ErrorEntry.MotorEvents  := CreateDriveErrMsgDetails(tmp_ErrorEntry.ErrorId);
+				AxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+				
+				ErrHandState	:= 112;	// sercos reset
+		
+			ELSE
+				fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'EcSoERead Error %d ,nIdn %d ' ,UDINT_TO_DINT(FB_EcSoERead_DriveError.nErrId),FB_EcSoERead_DriveError.nIdn,0);
+				ErrHandState	:= 110;	// read one more time
+			END_IF
+		END_IF
+	112: // wait speed decrease
+		IF AxisCtrlPtr^.Output.monitor.ActVelocity < 500 THEN
+			ErrHandState	:= 120;	// sercos reset
+		END_IF
+		
+	120: // SercosReset
+		FB_SoEReset_0.NetId:= AxisCtrlPtr^.Input.Parameter.pcNetId;
+		FB_SoEReset_0.Timeout:= T#10S;
+		FB_SoEReset_0.Execute:= TRUE;
+		
+		ErrHandState	:= 121;
+		
+	121: // wait sercos reset done
+		IF AxisRef.Status.DriveDeviceError = FALSE THEN
+			FB_SoEReset_0.Execute	:= FALSE;
+			
+			ErrHandState	:= 300;
+			
+		END_IF
+		
+
+	300: // Run MC_Reset
+		MC_Reset_0.Execute	:= TRUE;
+		ErrHandState		:= 301;
+	301:
+		IF MC_Reset_0.Done 
+			AND AxisRef.NcToPlc.ErrorCode = 0
+			(*AND Axis.Status.DriveDeviceError = FALSE*) THEN
+			MC_Reset_0.Execute	:= FALSE;
+	
+			ErrHandState	:= 0;
+		
+		ELSIF MC_Reset_0.Error THEN
+			MC_Reset_0.Execute	:= FALSE;
+			// Add FB Error to ErrorHandler
+			tmp_ErrorEntry.ErrorId		:= MC_Reset_0.ErrorID;
+			tmp_ErrorEntry.ErrorText	:= 'FB MC_Reset_0 ErrorID: ';
+			tmp_ErrorEntry.ErrorText	:= CONCAT(tmp_ErrorEntry.ErrorText, UDINT_TO_STRING(tmp_ErrorEntry.ErrorId));
+			AxisCtrlPtr^.Output.Error.fbErrorHandler.ErrorPush(tmp_ErrorEntry);
+			
+			ErrHandState	:= 0;
+		END_IF
+		
+		IF (AxisCtrlPtr^.Output.Status.CommunicationError = TRUE) THEN
+			MC_Reset_0.Execute	:= FALSE;
+			ErrHandState		:= 400;	
+		END_IF
+		
+	400:
+		IF (AxisCtrlPtr^.Output.Status.CommunicationError = FALSE) THEN
+			ErrHandState	:= 300;	
+		END_IF
+		
+END_CASE
+DiagnosticTON();
+
+FB_EcSoERead_DriveError();
+{warning disable C0371}
+FB_SoEReset_0(Axis:= AxisRef);
+MC_Reset_0(Axis:= AxisRef);
+{warning restore C0371}
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="GetIdns" Id="{f5b5139a-3e4d-4c77-9594-1de1fdfc3eb2}">
+      <Declaration><![CDATA[METHOD GetIdns : BOOL
+VAR_INPUT
+END_VAR
+
+
+VAR
+	
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SercosDrive_Ctrl_Adr.DriveError := 390;
+SercosDrive_Ctrl_Adr.Diagnostic := 13;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_ReadDiagnostic" Id="{9b0a8def-115f-447a-ba60-d01da04ce776}">
+      <Declaration><![CDATA[METHOD Meth_ReadDiagnostic : BOOL
+VAR_INPUT
+	Execute: BOOL;
+END_VAR
+
+VAR_INST
+	ReadDiagState : INT;
+	ReadDiagTrig: Trigger;
+	
+	Diagnostic  				: UINT;
+
+END_VAR
+
+VAR_OUTPUT
+	Error: BOOL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF ReadDiagTrig.EDGEPOS(Execute) THEN
+	ReadDiagState := 1;
+END_IF
+
+
+IF ReadDiagTrig.EDGENEG(Execute) THEN
+	ReadDiagState := 1;
+END_IF
+
+
+
+CASE ReadDiagState OF
+	0:
+		FB_EcSoeRead_0.bExecute := FALSE;	
+	1:
+	
+		IF DiagnosticTON.Q THEN
+			 FB_EcSoeRead_0.sNetId		:= strEcNetId;
+			 FB_EcSoeRead_0.nSlaveAddr	:= AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+		     FB_EcSoeRead_0.pDstBuf		:= ADR(Diagnostic);
+		     FB_EcSoeRead_0.cbBufLen		:= SIZEOF(Diagnostic);
+		     FB_EcSoeRead_0.nDriveNo		:= 0;
+		     FB_EcSoeRead_0.nElement		:= EC_SOE_ELEMENT_VALUE;		
+		     FB_EcSoeRead_0.nIdn			:= S_0_IDN+SercosDrive_Ctrl_Adr.Diagnostic;
+		     FB_EcSoeRead_0.bExecute		:= TRUE;
+			 ReadDiagState := ReadDiagState +1;
+		END_IF
+	2:
+		IF NOT FB_EcSoeRead_0.bBusy THEN
+			FB_EcSoeRead_0.bExecute		:= FALSE;
+			IF NOT FB_EcSoeRead_0.bError THEN
+				ReadDiagState := ReadDiagState +1;
+		
+			ELSE
+				fnLogMsg(ADR(LogMsg_0),LOG_ERROR,'EcSoERead Error %d ,nIdn %d ' ,UDINT_TO_DINT(FB_EcSoeRead_0.nErrId),FB_EcSoeRead_0.nIdn,0);
+				ReadDiagState	:= 0;	// read one more time
+			END_IF
+		END_IF
+	3: // MSG parsing bit 13
+		IF Diagnostic.13 = TRUE THEN
+			Error	:= TRUE;
+		END_IF	
+		Meth_ReadDiagnostic := TRUE;
+
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReadActualTorque" Id="{822831ec-d3e1-0f44-0249-136e8616ef77}">
+      <Declaration><![CDATA[METHOD PRIVATE ReadActualTorque : LREAL
+VAR_INPUT
+END_VAR
+VAR_INST
+	ReadTorqueState	: INT;		
+	tmp_ActualTorque			: LREAL;
+	p92							: REAL	:= 6.22;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*
+
+CASE ReadTorqueState OF 
+	
+	0: 
+		
+		IF THIS^.TorqueReadEnable THEN
+			ReadTorqueState	:= 100;
+		END_IF
+				
+	100: // Sercos Over Ethercat
+	
+		IF THIS^.AxisRexrothTyp THEN
+			ReadTorqueState	:= 150;
+		ELSE
+			ReadTorqueState	:= 110;
+		END_IF
+	110:
+		ReadTorqueState	:= 150;
+	150:
+		IF THIS^.AxisRexrothTyp THEN
+			tmp_ActualTorque	:= INT_TO_LREAL(io_ActualTorque) / 100.0;
+		ELSE
+			tmp_ActualTorque	:= p92/1000.0 * INT_TO_LREAL(io_ActualTorque) * TorqueConstant;
+		END_IF
+END_CASE
+*)
+ReadActualTorque	:= tmp_ActualTorque;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReadDriveError" Id="{8b407cca-db7f-0a59-2d08-3dd7edb1d12a}">
+      <Declaration><![CDATA[METHOD ReadDriveError
+VAR_INPUT
+END_VAR
+VAR_INST 
+	ErrIdIndex	: WORD;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[DriveError := AxisRef.NcToPlc.StateDWord AND 16#10000000 ;
+//AxisRef.Status.DriveDeviceError ; //this flag can be used to monitor an drive error
+
+//=======================================================================================================\\	
+	ErrIdIndex	:= 16#603F;
+
+//=======================================================================================================\\		
+
+
+//=============================================EcSoERead==========================================================\\			
+
+ //works somehow
+		
+	CASE driveReadErrorState OF 
+		0:
+			IF AxisRef.Status.DriveDeviceError  AND DriveErrorID = 0 AND NOT (FB_EcSoERead_0.bError = TRUE)
+				AND NOT SercosReadDriveErrorIdDone  THEN
+					driveReadErrorState := 1 ;
+			END_IF
+
+		1:
+			FB_EcSoERead_0.sNetId		:= AxisCtrlPtr^.Input.Parameter.ecNetId;
+			FB_EcSoERead_0.nSlaveAddr	:= AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+			FB_EcSoERead_0.pDstBuf		:= ADR(DriveErrorID);
+			FB_EcSoERead_0.cbBufLen		:= SIZEOF(DriveErrorID);
+			FB_EcSoERead_0.nDriveNo		:= 0;
+			FB_EcSoERead_0.nElement		:= EC_SOE_ELEMENT_VALUE;		
+			FB_EcSoERead_0.nIdn			:= S_0_IDN+390;
+			FB_EcSoERead_0.bExecute		:= TRUE;
+			FB_EcSoERead_0();
+			
+			driveReadErrorState := 2 ;
+		2:
+			SercosReadDriveErrorIdDone := NOT FB_EcSoERead_0.bBusy ;
+			IF SercosReadDriveErrorIdDone THEN
+				driveReadErrorState := 0 ;
+			END_IF
+		
+			//AxisState := BASIC_STATE_ERROR;	
+			
+	END_CASE
+	
+	IF NOT FB_EcSoERead_0.bBusy THEN
+	
+		FB_EcSoERead_0.sNetId		:= AxisCtrlPtr^.Input.Parameter.ecNetId;
+		FB_EcSoERead_0.nSlaveAddr	:=  AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+		FB_EcSoERead_0.pDstBuf		:= ADR(DriveErrorID);
+		FB_EcSoERead_0.cbBufLen		:= SIZEOF(DriveErrorID);
+		FB_EcSoERead_0.nDriveNo		:= 0;
+		FB_EcSoERead_0.nElement		:= EC_SOE_ELEMENT_VALUE;		
+		FB_EcSoERead_0.nIdn			:= S_0_IDN+390;
+		FB_EcSoERead_0.bExecute		:= FALSE;
+		FB_EcSoERead_0();
+	
+		IF FB_EcSoERead_0.bError = TRUE THEN
+			FB_EcSoERead_0.sNetId		:= AxisCtrlPtr^.Input.Parameter.ecNetId;
+			FB_EcSoERead_0.nSlaveAddr	:=  AxisCtrlPtr^.Input.Parameter.Drive.EtherCatAddr;
+			FB_EcSoERead_0.pDstBuf		:= ADR(DriveErrorID);
+			FB_EcSoERead_0.cbBufLen		:= SIZEOF(DriveErrorID);
+			FB_EcSoERead_0.nDriveNo		:= 0;
+			FB_EcSoERead_0.nElement		:= EC_SOE_ELEMENT_VALUE;		
+			FB_EcSoERead_0.nIdn			:= S_0_IDN+390;
+			FB_EcSoERead_0.bExecute		:= TRUE;
+			FB_EcSoERead_0();
+		END_IF
+	
+	END_IF
+
+//=======================================================================================================\\	
+FB_EcSoERead_0();
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="SercosBasicAxis_FB">
+      <LineId Id="2134" Count="2" />
+      <LineId Id="2092" Count="0" />
+      <LineId Id="2159" Count="0" />
+      <LineId Id="2157" Count="0" />
+      <LineId Id="2137" Count="0" />
+      <LineId Id="2113" Count="2" />
+      <LineId Id="2093" Count="0" />
+      <LineId Id="2181" Count="2" />
+      <LineId Id="2185" Count="0" />
+      <LineId Id="2180" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="2094" Count="0" />
+    </LineIds>
+    <LineIds Name="SercosBasicAxis_FB.CreateDriveErrMsgDetails">
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="SercosBasicAxis_FB.DriveErrorHandling">
+      <LineId Id="3" Count="5" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="21" Count="11" />
+      <LineId Id="229" Count="2" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="250" Count="1" />
+      <LineId Id="248" Count="1" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="243" Count="2" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="225" Count="2" />
+      <LineId Id="34" Count="21" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="56" Count="5" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="62" Count="21" />
+      <LineId Id="133" Count="21" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="206" Count="3" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="210" Count="2" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="155" Count="1" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="159" Count="1" />
+      <LineId Id="164" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SercosBasicAxis_FB.GetIdns">
+      <LineId Id="94" Count="0" />
+      <LineId Id="103" Count="0" />
+    </LineIds>
+    <LineIds Name="SercosBasicAxis_FB.Meth_ReadDiagnostic">
+      <LineId Id="85" Count="5" />
+      <LineId Id="93" Count="2" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="28" Count="8" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="60" Count="3" />
+      <LineId Id="73" Count="6" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="100" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="82" Count="0" />
+    </LineIds>
+    <LineIds Name="SercosBasicAxis_FB.ReadActualTorque">
+      <LineId Id="3" Count="8" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="68" Count="15" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="SercosBasicAxis_FB.ReadDriveError">
+      <LineId Id="3" Count="3" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="89" Count="61" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <GVL Name="PcComm" Id="{873ef020-c2c9-0f3d-124a-79a2ee2ac97a}">
+    <Declaration><![CDATA[//{attribute 'qualified_only'}
+VAR_GLOBAL
+	LogGlobalArray : LogGlobalArrayObj;	
+END_VAR
+
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

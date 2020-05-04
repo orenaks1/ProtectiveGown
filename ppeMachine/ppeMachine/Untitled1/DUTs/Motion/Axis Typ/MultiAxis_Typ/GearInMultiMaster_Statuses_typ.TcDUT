@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <DUT Name="GearInMultiMaster_Statuses_typ" Id="{ab7b6fd3-c4c8-0b04-1e57-574929e14933}">
+    <Declaration><![CDATA[TYPE GearInMultiMaster_Statuses_typ :
+	STRUCT
+		InGear 			: 		BOOL;
+		Busy 			: 		BOOL; 
+		Active 			: 		BOOL; 
+		CommandAborted 	: 		BOOL;
+	END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
