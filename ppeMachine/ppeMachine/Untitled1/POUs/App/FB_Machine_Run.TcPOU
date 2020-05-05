@@ -630,8 +630,9 @@ END_VAR
 											
 	THIS^.Delay.IN:=TRUE;
 	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeGripperRetract);// Ctrl_ref.Parameters.TimerPressDown1);
-	IF  gMachineCtrl.Status.UW_1_DancerFull 
-	AND gMachineCtrl.Status.UW_2_DancerFull   THEN
+	IF  (gMachineCtrl.Status.UW_1_DancerFull 
+	AND gMachineCtrl.Status.UW_2_DancerFull)
+	OR gMachineCtrl.Simulation THEN
 		Meth_WaitDancerFull	:= TRUE;
 	END_IF		
 ]]></ST>
@@ -835,6 +836,7 @@ END_VAR
       <LineId Id="48" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="76" Count="0" />
+      <LineId Id="82" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="47" Count="0" />
       <LineId Id="5" Count="0" />

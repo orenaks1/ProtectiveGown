@@ -5,16 +5,16 @@
 STRUCT
 	LifeTimerCounter:UDINT;
 	//Timers
-	TimeColdCutPressDown: DINT := 3000;
-	TimeGripperStartPosition: DINT := 30000;
-	TimeGripperHomePosition: DINT := 6000;
+	TimeColdCutPressDown: DINT := 500;
+	TimeGripperStartPosition: DINT := 20000;
+	TimeGripperHomePosition: DINT := 7000;
 	//TimeGripperMoveDelay: DINT := 3500;
 	TimeGripperOpen: DINT := 3000;
-	TimeGripperRetract: DINT := 3000;
-	TimeHotWeldPressDown: DINT := 3000;
-	TimerHotWeldingOn: DINT := 3000;
-	TimerHotWeldingOff: DINT := 3000;
-	TimerPressUp: DINT := 3000;
+	TimeGripperRetract: DINT := 4000;
+	TimeHotWeldPressDown: DINT := 5000;
+	TimerHotWeldingOn: DINT := 6000;
+	TimerHotWeldingOff: DINT := 2000;
+	TimerPressUp: DINT := 4000;
 	
 	TimerMotorOn: DINT := 3000;
 END_STRUCT

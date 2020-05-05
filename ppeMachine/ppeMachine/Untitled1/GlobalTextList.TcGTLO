@@ -21,6 +21,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"35"</v>
+              <v n="TextDefault">"Back"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"942"</v>
               <v n="TextDefault">"Close Valves"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -96,6 +101,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"119"</v>
+              <v n="TextDefault">"Forward"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"511"</v>
               <v n="TextDefault">"Gripper Close"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -103,6 +113,11 @@
             <o>
               <v n="TextID">"235"</v>
               <v n="TextDefault">"Gripper Open"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"855"</v>
+              <v n="TextDefault">"Gripper Open/Close"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -116,8 +131,28 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"809"</v>
+              <v n="TextDefault">"Gripper Retract/Extract"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"721"</v>
+              <v n="TextDefault">"Grpper Position"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"828"</v>
+              <v n="TextDefault">"Heater Off"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"824"</v>
               <v n="TextDefault">"Heater On"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"562"</v>
+              <v n="TextDefault">"Heater On "</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -133,6 +168,11 @@
             <o>
               <v n="TextID">"18"</v>
               <v n="TextDefault">"Hot Welding On"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"373"</v>
+              <v n="TextDefault">"Hot Welding On/Off"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -218,6 +258,26 @@
             <o>
               <v n="TextID">"667"</v>
               <v n="TextDefault">"Press Down"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"387"</v>
+              <v n="TextDefault">"Press Down Time"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"227"</v>
+              <v n="TextDefault">"Press Up/Down"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"488"</v>
+              <v n="TextDefault">"Press UpTime"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"8"</v>
+              <v n="TextDefault">"Press Valve"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

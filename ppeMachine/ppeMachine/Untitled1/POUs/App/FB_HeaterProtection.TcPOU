@@ -7,6 +7,7 @@ VAR_INPUT
 END_VAR
 VAR_OUTPUT
 	Done:BOOL;
+	Busy:BOOL;
 END_VAR
 VAR
 	Timer:TON;
@@ -19,6 +20,8 @@ IF Excute THEN
 	Step:= 10;
 	Done:=FALSE;
 	Excute:=FALSE;
+	Busy:=TRUE;
+	
 	
 END_IF
 
@@ -38,6 +41,7 @@ CASE Step OF
 	20:
 		Done:=TRUE;
 		Timer.IN:=FALSE;
+		Busy:=FALSE;
 	
 END_CASE
 
@@ -48,7 +52,9 @@ Timer();
       <LineId Id="13" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="0" />
-      <LineId Id="35" Count="2" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="37" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="17" Count="0" />
@@ -62,6 +68,7 @@ Timer();
       <LineId Id="25" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="40" Count="1" />
+      <LineId Id="56" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="28" Count="0" />

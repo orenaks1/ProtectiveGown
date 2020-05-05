@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MotorDataSheet>
+  <!--P14140729995-->
+  <DataVersion>1.0.0</DataVersion>
+  <Vendor>
+    <Name>Nidec</Name>
+    <DisplayName>Nidec</DisplayName>
+  </Vendor>
+  <MotorGroups>
+    <MotorGroup>
+      <Type>142</Type>
+      <DisplayName>142</DisplayName>
+    </MotorGroup>
+  </MotorGroups>
+  <Motors>
+    <Motor>
+      <OrderCode>NidecLTN</OrderCode>
+      <GroupType>142</GroupType>
+      <ElectricMotorType>NidecLTN</ElectricMotorType>
+      <AssemblyType>NidecLTN_Assembly</AssemblyType>
+    </Motor>
+  </Motors>
+  <Parametersets>
+    <ElectricMotorParameterset>
+      <ElectricMotorType>NidecLTN</ElectricMotorType>
+      <Parameter>
+        <Comment>Motor vendor</Comment>
+        <Name>Vendor</Name>
+        <Data type="visibleString">Nidec</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Electric motor type</Comment>
+        <Name>ElecType</Name>
+        <Data type="visibleString">NidecLTN</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Motor construction</Comment>
+        <Name>ConstrType</Name>
+        <Data type="real64">
+          <!--0:SyncRot-->0.000000</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Pole Pairs</Comment>
+        <Name>PolePairs</Name>
+        <Data type="real64">5</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Standstill Current</Comment>
+        <Name>I0rms</Name>
+        <Data type="real64" unitSiNumerator="ampere">11.00</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Rated Current</Comment>
+        <Name>Inrms</Name>
+        <Data type="real64" unitSiNumerator="ampere">9.00</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Peak Current</Comment>
+        <Name>Iprms</Name>
+        <Data type="real64" unitSiNumerator="ampere">33.40</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Nominal Voltage</Comment>
+        <Name>Unrms</Name>
+        <Data type="real64" unitSiNumerator="volt">560</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Max DC-Link Voltage</Comment>
+        <Name>Umaxrms</Name>
+        <Data type="real64" unitSiNumerator="volt">890</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Max Torque</Comment>
+        <Name>Mpeak</Name>
+        <Data type="real64" unitSiNumerator="newton metre">52.00</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Torque Constant</Comment>
+        <Name>kT</Name>
+        <Data type="real64" unitSiNumerator="newton metre" unitSiDenominator="ampere">1.60</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>EMK</Comment>
+        <Name>kErms</Name>
+        <Data type="real64" unitSiNumerator="volt" unitSiDenominator="revolutions/minute (rpm)">0.0980</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Winding resistance Ph-Ph 20°C</Comment>
+        <Name>R</Name>
+        <Data type="real64" unitSiNumerator="ohm">0.6</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Lq Ph-Ph</Comment>
+        <Name>Lq</Name>
+        <Data type="real64" unitSiNumerator="henry">0.0086</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Max speed</Comment>
+        <Name>Nmax</Name>
+        <Data type="real64" unitSiNumerator="revolutions/minute (rpm)">4800</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>J motor with brake and encoder</Comment>
+        <Name>J</Name>
+        <Data type="real64" unitSiNumerator="moment of inertia">0.007000</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>T motor warn limit</Comment>
+        <Name>TMotorWarn</Name>
+        <Data type="real64" unitSiNumerator="degree Celsius">80.0</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>T motor shut down</Comment>
+        <Name>TMotorLimit</Name>
+        <Data type="real64" unitSiNumerator="degree Celsius">140.0</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Motor thermal constant</Comment>
+        <Name>Mtc</Name>
+        <Data type="real64" unitSiNumerator="minute (time)">1.00</Data>
+      </Parameter>
+    </ElectricMotorParameterset>
+    <AssemblyParameterset>
+      <AssemblyType>NidecLTN_Assembly</AssemblyType>
+      <Parameter>
+        <Comment>Motor temperature sensor type</Comment>
+        <Name>TempSensorType</Name>
+        <Data type="real64">
+          <!--4:KTY84_130-->4.000000</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Motor temperature sensor connection</Comment>
+        <Name>TempSensorCon</Name>
+        <Data type="real64">
+          <!--2:MotorWire-->2.000000</Data>
+      </Parameter>
+      <Parameter>
+        <Comment>Motor feedback connection</Comment>
+        <Name>FbCon</Name>
+        <Data type="real64">
+          <!--1:FeedbackWire-->1.000000</Data>
+      </Parameter>
+    </AssemblyParameterset>
+  </Parametersets>
+</MotorDataSheet>

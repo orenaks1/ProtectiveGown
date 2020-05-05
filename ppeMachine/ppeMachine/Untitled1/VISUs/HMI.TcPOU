@@ -12,11 +12,12 @@ VAR
 	
 	//Timers color
 	TimerColdCutColor:BOOL;
+	TimerGripperPostionColor:BOOL;	
 	TimerHotWeldColor:BOOL;
-	TimerHeaterOnColor:BOOL;
-	TimerHeaterOffColor:BOOL;
-	TimerValveCloseColor:BOOL;	
+	TimerHeaterOnColor:BOOL;	
 	StateMotorOnColor:BOOL;		
+	TimerGripperopenColor:BOOL;
+	TimerGripperRetractColor:BOOL;
 	
 	//Estop Dialog
 	bOpen 						: BOOL;
@@ -45,7 +46,9 @@ ACT_init();
 
 IF init THEN
 	ACT_Timers();
-	ACT_Dialogs();
+	IF gMachineCtrl.Simulation = FALSE THEN
+		ACT_Dialogs();
+	END_IF	
 	
 	IF gMachineCtrl.Cmd.SwitchOn THEN
 		SwitchOnButtonColor := gMachineCtrl.Cmd.SwitchOn ;
@@ -109,40 +112,52 @@ init:=timerInit.Q;
       <Implementation>
         <ST><![CDATA[
 
+IF FB_Machine_Run.StepNo = MACHINE_GRIPPER_END_POSITION 
+OR FB_Machine_Run.StepNo = MACHINE_GRIPPER_START_POSITION THEN
+	TimerGripperPostionColor:=TRUE;
+ELSE
+	TimerGripperPostionColor:=FALSE;
+END_IF
+
+
 IF FB_Machine_Run.StepNo = MACHINE_COLD_CUT_VALVE_OPEN THEN
 	TimerColdCutColor:=TRUE;
 ELSE
 	TimerColdCutColor:=FALSE;
 END_IF
 
-IF FB_Machine_Run.StepNo = MACHINE_WELD_VALVE_OPEN THEN
+IF FB_Machine_Run.StepNo = MACHINE_WELD_VALVE_OPEN
+OR FB_Machine_Run.StepNo = MACHINE_VALVE_CLOSE THEN
 	TimerHotWeldColor:=TRUE;
 ELSE
 	TimerHotWeldColor:=FALSE;
 END_IF
 
-IF FB_Machine_Run.StepNo = MACHINE_HEATER_ON THEN
+IF FB_Machine_Run.FB_HeaterProtection.Busy
+OR FB_Machine_Run.StepNo = MACHINE_HEATER_OFF THEN
 	TimerHeaterOnColor:=TRUE;
 ELSE
 	TimerHeaterOnColor:=FALSE;
 END_IF
 
-IF FB_Machine_Run.StepNo = MACHINE_HEATER_OFF THEN
-	TimerHeaterOffColor:=TRUE;
+IF FB_Machine_Run.StepNo = MACHINE_GRIPPER_OPEN
+OR FB_Machine_Run.StepNo = MACHINE_GRIPPER_CLOSE THEN
+	TimerGripperopenColor:=TRUE;
 ELSE
-	TimerHeaterOffColor:=FALSE;
-END_IF
-
-IF FB_Machine_Run.StepNo = MACHINE_VALVE_CLOSE THEN
-	TimerValveCloseColor:=TRUE;
-ELSE
-	TimerValveCloseColor:=FALSE;
+	TimerGripperopenColor:=FALSE;
 END_IF
 
 IF FB_Machine_Run.StepNo = MACHINE_MOTOR_ON THEN
 	StateMotorOnColor:=TRUE;
 ELSE
 	StateMotorOnColor:=FALSE;
+END_IF
+
+IF FB_Machine_Run.StepNo = MACHINE_GRIPPER_RETRACT
+OR FB_Machine_Run.StepNo = MACHINE_GRIPPER_EXCTRACT THEN
+	TimerGripperRetractColor:=TRUE;
+ELSE
+	TimerGripperRetractColor:=FALSE;
 END_IF]]></ST>
       </Implementation>
     </Action>
@@ -151,7 +166,9 @@ END_IF]]></ST>
       <LineId Id="153" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="196" Count="0" />
       <LineId Id="84" Count="0" />
+      <LineId Id="197" Count="0" />
       <LineId Id="111" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="86" Count="0" />
@@ -184,18 +201,27 @@ END_IF]]></ST>
       <LineId Id="1" Count="2" />
     </LineIds>
     <LineIds Name="HMI.ACT_Timers">
+      <LineId Id="38" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="42" Count="2" />
+      <LineId Id="40" Count="0" />
       <LineId Id="2" Count="5" />
       <LineId Id="1" Count="0" />
-      <LineId Id="9" Count="4" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="11" Count="2" />
       <LineId Id="8" Count="0" />
-      <LineId Id="15" Count="4" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="17" Count="2" />
       <LineId Id="14" Count="0" />
-      <LineId Id="21" Count="4" />
+      <LineId Id="49" Count="5" />
       <LineId Id="20" Count="0" />
-      <LineId Id="27" Count="4" />
-      <LineId Id="26" Count="0" />
       <LineId Id="33" Count="4" />
       <LineId Id="32" Count="0" />
+      <LineId Id="56" Count="5" />
+      <LineId Id="55" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

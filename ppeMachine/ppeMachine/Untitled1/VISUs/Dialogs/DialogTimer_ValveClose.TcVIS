@@ -167,7 +167,7 @@
                 <v n="VisualElementIdentifier">"GenElemInst_2"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
-                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="IInputAction[]">
+                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputCloseDialogAction[]">
                   <v>OnMouseClick</v>
                   <a cet="InputCloseDialogAction">
                     <o>
@@ -325,7 +325,7 @@
                     </o>
                     <o>
                       <v n="Id">2477733581L</v>
-                      <v n="Value">"PersistentStruct.TimerPressUp"</v>
+                      <v n="Value">"PersistentStruct.TimeGripperRetract"</v>
                     </o>
                     <o>
                       <v n="Id">823443203L</v>
@@ -339,7 +339,7 @@
                 <v n="VisualElementIdentifier">"GenElemInst_3"</v>
                 <n n="VisualElementOfflinePaintCommands" />
                 <n n="VisualElementFrameInformation" />
-                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="IInputAction[]">
+                <d n="VisualElementInputActions" t="Hashtable" ckt="String" cvt="InputBoxInputAction[]">
                   <v>OnMouseClick</v>
                   <a cet="InputBoxInputAction">
                     <o>
@@ -472,10 +472,10 @@
               <d n="FbMethods" t="CaseInsensitiveHashtable" ckt="String" cvt="Guid">
                 <v>FB_Init</v>
                 <v>88bff169-999c-488e-bf13-a82774e86635</v>
-                <v>FB_Exit</v>
-                <v>b6b759da-a504-4159-bbd2-cf3f8f0ffd45</v>
                 <v>FB_Reinit</v>
                 <v>df025fe7-71e5-43e6-a15a-97249b56ce4c</v>
+                <v>FB_Exit</v>
+                <v>b6b759da-a504-4159-bbd2-cf3f8f0ffd45</v>
               </d>
               <v n="FbName">"NotImportant"</v>
               <v n="FbGuid">{236adcb8-990b-4000-aa90-ff7a950ec6b8}</v>
@@ -556,12 +556,12 @@
             <d2 n="Size" ckt="Int32" cvt="VisualObjectSize">
               <v>0</v>
               <o>
-                <v n="Width">400</v>
+                <v n="Width">500</v>
                 <v n="Height">150</v>
               </o>
               <v>1</v>
               <o>
-                <v n="Width">400</v>
+                <v n="Width">500</v>
                 <v n="Height">150</v>
               </o>
             </d2>
@@ -583,9 +583,10 @@
         <Type n="Guid">System.Guid</Type>
         <Type n="Hashtable">System.Collections.Hashtable</Type>
         <Type n="HotkeyConfiguration">{6b108d46-58af-4e41-a3f4-174d8f160cc4}</Type>
-        <Type n="IInputAction[]">_3S.CoDeSys.VisualElem.IInputAction[], VisualElem, Version=3.5.13.0, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="InputBoxInputAction">{e8e7e747-f76f-4dee-ab1c-b9637e41ac26}</Type>
+        <Type n="InputBoxInputAction[]">_3S.CoDeSys.VisualElem.InputBoxInputAction[], VisualElem.plugin, Version=3.5.13.30, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="InputCloseDialogAction">{5d84b30d-2b79-4065-9de4-596597fc09b4}</Type>
+        <Type n="InputCloseDialogAction[]">_3S.CoDeSys.VisualElem.InputCloseDialogAction[], VisualElem.plugin, Version=3.5.13.30, Culture=neutral, PublicKeyToken=null</Type>
         <Type n="Int16">System.Int16</Type>
         <Type n="Int32">System.Int32</Type>
         <Type n="Int64">System.Int64</Type>
