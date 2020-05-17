@@ -1689,6 +1689,22 @@ External Setpoint Generation:
 					<Vars VarGrpType="1">
 						<Name>Task2ms Inputs</Name>
 						<Var>
+							<Name>AxesList.gWebAxes.UwVmaster.Ref.NcToPlc</Name>
+							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.UW_1.Ref.NcToPlc</Name>
+							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.UW_2.Ref.NcToPlc</Name>
+							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.Output.Ref.NcToPlc</Name>
+							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+						</Var>
+						<Var>
 							<Name>GVL.gMachineCtrl.IO.In.UW_1_Diameter</Name>
 							<Type>INT</Type>
 						</Var>
@@ -1720,22 +1736,6 @@ External Setpoint Generation:
 							<Name>GVL.gMachineCtrl.IO.In.UW_2_DancerPosition</Name>
 							<Type>INT</Type>
 						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.UwVmaster.Ref.NcToPlc</Name>
-							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.UW_1.Ref.NcToPlc</Name>
-							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.UW_2.Ref.NcToPlc</Name>
-							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.Output.Ref.NcToPlc</Name>
-							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
-						</Var>
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>Task2ms Outputs</Name>
@@ -1765,6 +1765,22 @@ External Setpoint Generation:
 						<Var>
 							<Name>MAIN.uw1_Position</Name>
 							<Type>DINT</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.UwVmaster.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.UW_1.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.UW_2.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>AxesList.gWebAxes.Output.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
+							<Type>UDINT</Type>
 						</Var>
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.In.PrimeryPressFeedback.hw_value</Name>
@@ -1809,22 +1825,6 @@ External Setpoint Generation:
 						<Var>
 							<Name>GVL.RwInverter.HWlink.stWcState</Name>
 							<Type GUID="{DC6AC025-CDE2-A3AC-75E4-2374AA8A4DA5}">ST_WcState</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.UwVmaster.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
-							<Type>UDINT</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.UW_1.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
-							<Type>UDINT</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.UW_2.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
-							<Type>UDINT</Type>
-						</Var>
-						<Var>
-							<Name>AxesList.gWebAxes.Output.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
-							<Type>UDINT</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2">
@@ -1889,9 +1889,6 @@ External Setpoint Generation:
 				</Image>
 				<Image Id="5" AddrType="10" ImageType="3">
 					<Name>Image-2</Name>
-				</Image>
-				<Image Id="6" AddrType="10" ImageType="3">
-					<Name>Image-3</Name>
 				</Image>
 				<Box Id="2" BoxType="9099">
 					<Name>Term 1 (EK1100)</Name>
@@ -3728,8 +3725,8 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						<DcMode>446353796e633132350000000000000053796e63206379636c652074696d653a20313235c2b57300000000000000000048e80100a861000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>446353796e6336322e3500000000000053796e63206379636c652074696d653a2036322e35c2b573000000000000000024f400000000000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<MBoxUserCmdData>02000500100000000d000000000000000000000000000000000000000000000003400a8000000000ff1f0000000000004665617475726520666c61677300</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a0000001500000000000000000000000000000000000000000000000340010000000000401f546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a0000001700000000000000000000000000000000000000000000000340020000000000401f5473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a00000015000000000000000000000000000000000000000000000003400100000000001027546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a000000170000000000000000000000000000000000000000000000034002000000000010275473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000000e000000000000000000000000000000000000000000000003402000000000000b004f7065726174696f6e206d6f646500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a000000140000000000000000000000000000000000000000000000034030810000000001004c6f67676572206d657373616765206c6576656c00</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000001800000000000000000000000000000000000000000000000340d087000000000300436f6e6669677572656420736166657479206f7074696f6e00</MBoxUserCmdData>
@@ -4205,8 +4202,8 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						<DcMode>446353796e633132350000000000000053796e63206379636c652074696d653a20313235c2b57300000000000000000048e80100a861000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>446353796e6336322e3500000000000053796e63206379636c652074696d653a2036322e35c2b573000000000000000024f400000000000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<MBoxUserCmdData>02000500100000000d000000000000000000000000000000000000000000000003400a8000000000ff1f0000000000004665617475726520666c61677300</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a0000001500000000000000000000000000000000000000000000000340010000000000401f546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a0000001700000000000000000000000000000000000000000000000340020000000000401f5473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a00000015000000000000000000000000000000000000000000000003400100000000001027546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a000000170000000000000000000000000000000000000000000000034002000000000010275473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000000e000000000000000000000000000000000000000000000003402000000000000b004f7065726174696f6e206d6f646500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a000000140000000000000000000000000000000000000000000000034030810000000001004c6f67676572206d657373616765206c6576656c00</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000001400000000000000000000000000000000000000000000000340c98000000000a00f4e6f6d696e616c206d61696e20766f6c7461676500</MBoxUserCmdData>
@@ -4821,13 +4818,10 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 		</Variants>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500862000403}" Id="#x02030050"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0120-500851000403}" Id="#x02030030"/>
 		<MappingInfo Identifier="{00000000-2002-0850-0020-500810000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{00000000-0040-0304-2100-040343000403}" Id="#x02030060"/>
-		<MappingInfo Identifier="{00000000-0050-0304-2100-040351000403}" Id="#x02030030"/>
 		<MappingInfo Identifier="{08502001-0010-0304-0020-500810000403}" Id="#x02030020" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502001-0050-0304-0020-500850000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502002-0010-0500-0020-500821000403}" Id="#x02030070" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502002-0010-0500-0020-500830000403}" Id="#x02030040" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^Untitled1^Untitled1 Instance">
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 1 (Unidrive M300 RFC-A)">
 				<Link VarA="PlcTask Inputs^GVL.RwInverter.HWlink.ActualSpeed" VarB="Transmit PDO Mapping 6^vl velocity actual value"/>

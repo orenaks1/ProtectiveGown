@@ -1065,6 +1065,14 @@
       <SubType>Code</SubType>
       <DependentUpon>VISUs\VisualizationManager.TcVMO</DependentUpon>
     </Compile>
+    <Compile Include="VISUs\Dialogs\Dialog_Output.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>VISUs\VisualizationManager.TcVMO</DependentUpon>
+    </Compile>
+    <Compile Include="VISUs\Dialogs\Dialog_Settings.TcVIS">
+      <SubType>Code</SubType>
+      <DependentUpon>VISUs\VisualizationManager.TcVMO</DependentUpon>
+    </Compile>
     <Compile Include="VISUs\Dialogs\Winders.TcVIS">
       <SubType>Code</SubType>
       <DependentUpon>VISUs\VisualizationManager.TcVMO</DependentUpon>

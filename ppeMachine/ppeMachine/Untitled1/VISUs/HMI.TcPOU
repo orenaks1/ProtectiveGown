@@ -27,6 +27,7 @@ VAR
 	EstopDialogBackgroundColor	: BOOL;
 	timerDialogsBackground		:TON;
 	
+	TC_Restart:TC_Restart;
 	
 	
 	//Scaling 
@@ -78,7 +79,9 @@ IF init THEN
 		EnableManualButton:=TRUE;
 	END_IF
 
-END_IF]]></ST>
+END_IF
+
+TC_Restart();]]></ST>
     </Implementation>
     <Action Name="ACT_Dialogs" Id="{494fad89-e0ef-4d56-a0db-15a871147a1a}">
       <Implementation>
@@ -189,6 +192,8 @@ END_IF]]></ST>
       <LineId Id="38" Count="0" />
       <LineId Id="70" Count="0" />
       <LineId Id="68" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="237" Count="0" />
     </LineIds>
     <LineIds Name="HMI.ACT_Dialogs">
       <LineId Id="2" Count="11" />
