@@ -70,10 +70,11 @@ FB_OFF.FB_Machine_Run_ref 	REF= FB_Machine_Run;
 FB_OFF.FB_Mechinit_ref 		REF= FB_Mechinit;
 FB_OFF();	
 	
-FB_Machine_Ctrl.Ctrl_ref 			REF= gMachineCtrl;
-FB_Machine_Ctrl.FB_Machine_Run_ref 	REF= FB_Machine_Run;
-FB_Machine_Ctrl.FB_Mechinit_ref 	REF= FB_Mechinit;
-FB_Machine_Ctrl.FB_OFF_ref			REF= FB_OFF;
+FB_Machine_Ctrl.Ctrl_ref 				REF= gMachineCtrl;
+FB_Machine_Ctrl.FB_Machine_Run_ref 		REF= FB_Machine_Run;
+FB_Machine_Ctrl.FB_Mechinit_ref 		REF= FB_Mechinit;
+FB_Machine_Ctrl.FB_MechinitOutput_ref  	REF= FB_Mechinit_Output;
+FB_Machine_Ctrl.FB_OFF_ref				REF= FB_OFF;
 FB_Machine_Ctrl();
 
 FB_Machine_Run.Ctrl_ref 		REF= gMachineCtrl;
@@ -83,6 +84,10 @@ FB_Machine_Run();
 
 FB_Mechinit.Ctrl_ref	REF= gMachineCtrl;
 FB_Mechinit();
+
+
+FB_Mechinit_Output.Ctrl_ref	REF= gMachineCtrl;
+FB_Mechinit_Output();
 
 //FB_RW_Ctrl.Ctrl_ref REF= gMachineCtrl;
 //FB_RW_Ctrl();]]></ST>
@@ -173,6 +178,7 @@ gMachineCtrl.IO.In.E_StopPressed := NOT(gMachineCtrl.IO.In.E_StopPressedRaw);
       <LineId Id="29" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="41" Count="0" />
+      <LineId Id="55" Count="0" />
       <LineId Id="51" Count="0" />
       <LineId Id="30" Count="0" />
       <LineId Id="32" Count="1" />
@@ -180,7 +186,11 @@ gMachineCtrl.IO.In.E_StopPressed := NOT(gMachineCtrl.IO.In.E_StopPressedRaw);
       <LineId Id="31" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="42" Count="2" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="0" />
       <LineId Id="35" Count="0" />
+      <LineId Id="56" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="37" Count="0" />
     </LineIds>

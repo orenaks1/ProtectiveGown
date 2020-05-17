@@ -246,8 +246,12 @@ UW_2_Data.Tension.FB_TensionLoop.Hold			:= FALSE;]]></ST>
 							BasicAxisCtrlPtr := ADR(gWebAxes.UW_2.Crtl.Basic_axis), 
 							MultiAxisCtrlPtr := ADR(gWebAxes.UW_2.Crtl.MultiAxis));
 
+							
+	Output_AxisFB(AxisCtrlPtr:=ADR(gWebAxes.Output.Crtl.Basic_axis),AxisRef:= gWebAxes.Output.Ref);
+	
+
 						
-UwVmaster_AxisFB(AxisCtrlPtr:=ADR(gWebAxes.UwVmaster.Crtl.Basic_axis),AxisRef:= gWebAxes.UwVmaster.Ref);	]]></ST>
+	UwVmaster_AxisFB(AxisCtrlPtr:=ADR(gWebAxes.UwVmaster.Crtl.Basic_axis),AxisRef:= gWebAxes.UwVmaster.Ref);	]]></ST>
       </Implementation>
     </Action>
     <Action Name="ACT_Tension_1" Id="{302f6f97-a189-4e01-89de-62cb0664ed8e}">
@@ -425,7 +429,12 @@ END_IF
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="prg_Motion.ACT_MotionFBcall">
-      <LineId Id="2" Count="16" />
+      <LineId Id="2" Count="14" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="18" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="prg_Motion.ACT_Tension_1">

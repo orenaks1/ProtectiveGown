@@ -9,7 +9,7 @@ FB_Machine_Ctrl:FB_Machine_Ctrl;
 FB_Machine_Run:FB_Machine_Run;
 FB_Mechinit:FB_Mechinit;
 FB_OFF:FB_OFF;
-
+FB_Mechinit_Output:FB_MechinitOutput;
 
 FB_RW_Ctrl:FB_RW_Ctrl;
 RwInverter :FB_INV;
@@ -23,6 +23,10 @@ RwInverter :FB_INV;
 	UW_2_AxisFB			: Beck5xxxAxis_FB;
 	UW_2_MultiAxisFB	: MultiAxis_FB;
 	UW_2_CyclicAxisFB	: CyclicAxis_FB;	
+	
+	Output_AxisFB		: ElmoBasicAxis_FB;
+//	Uutput_MultiAxisFB	: MultiAxis_FB;
+//	Uutput_CyclicAxisFB	: CyclicAxis_FB;
 	
 	UwVmaster_AxisFB		: CoE_BasicAxis_FB;
 	

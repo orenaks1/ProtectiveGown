@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.3">
+  <POU Name="FB_ElmoIOsHandle" Id="{36c983f1-4ac7-09bf-2b3e-f2c3d424e5f4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ElmoIOsHandle
+VAR_INPUT
+	DigIn:		DINT;		
+END_VAR
+VAR_OUTPUT
+	bEnable:			BOOL;
+	bDriveHomeSignal:	BOOL;
+	arrDigIn:			ARRAY[1..10] OF BOOL;		
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bEnable:=			DigIn.3;
+bDriveHomeSignal:= 	DigIn.2;
+arrDigIn[1]:=		DigIn.16;		
+arrDigIn[2]:=		DigIn.17;		
+arrDigIn[3]:=		DigIn.18;		
+arrDigIn[4]:=		DigIn.19;			
+arrDigIn[5]:=		DigIn.20;			
+arrDigIn[6]:=		DigIn.21;			
+arrDigIn[7]:=		DigIn.22;	
+arrDigIn[8]:=		DigIn.23;
+arrDigIn[9]:=		DigIn.24;
+arrDigIn[10]:=		DigIn.25;
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ElmoIOsHandle">
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="29" Count="3" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="36" Count="4" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

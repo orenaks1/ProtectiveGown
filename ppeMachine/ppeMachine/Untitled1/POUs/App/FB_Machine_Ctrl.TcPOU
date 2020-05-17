@@ -6,6 +6,7 @@ VAR_INPUT
 	Ctrl_ref:					REFERENCE TO Ctrl_Typ;
 	FB_Machine_Run_ref:			REFERENCE TO FB_Machine_Run;
 	FB_Mechinit_ref:			REFERENCE TO FB_Mechinit;
+	FB_MechinitOutput_ref:		REFERENCE TO FB_MechinitOutput;
 	FB_OFF_ref:					REFERENCE TO FB_OFF;
 END_VAR
 VAR_OUTPUT
@@ -20,12 +21,12 @@ END_VAR
 VAR CONSTANT
 
 // States		
-	MAIN_INIT:				INT:=0;
-	MAIN_OFF:				INT:=10;
-	MAIN_STANDBY:			INT:=11;
-	MAIN_MECHINIT:			INT:=15;
-	MAIN_RUN:				INT:=20;
-	MAIN_EM_STOP:			INT:=100;
+	MAIN_INIT:						INT:=0;
+	MAIN_OFF:						INT:=10;
+	MAIN_STANDBY:					INT:=11;
+	MAIN_MECHINIT:					INT:=15;
+	MAIN_RUN:						INT:=20;
+	MAIN_EM_STOP:					INT:=100;
 
 
 END_VAR
@@ -259,17 +260,22 @@ END_IF
 CASE THIS^.SubStepNo OF
 	   
 	1:
-		THIS^.Monitoring.StepMessage	:= 'Start mechint';
-		THIS^.FB_Mechinit_ref.Start	:=TRUE;
+		THIS^.Monitoring.StepMessage		:= 'Start mechint';
+		THIS^.FB_Mechinit_ref.Start			:=TRUE;
+		THIS^.FB_MechinitOutput_ref.Start	:=TRUE;		
 		THIS^.SubStepNo:=2;
 		
 	2:
-		THIS^.Monitoring.StepMessage	:= 'Wait  Mechint';
+		THIS^.Monitoring.StepMessage	:= 'Wait  Mechint Output';
+		IF THIS^.FB_MechinitOutput_ref.Done	THEN
+			THIS^.SubStepNo:=3;
+		END_IF
+	3:
+		THIS^.Monitoring.StepMessage	:= 'Wait  Mechint Input';
 		IF THIS^.FB_Mechinit_ref.Done	THEN
 			THIS^.SubStepNo:=0;
 			Meth_Mechint	:=	TRUE;
-		END_IF
-	
+		END_IF	
 END_CASE
 		]]></ST>
       </Implementation>
@@ -438,13 +444,15 @@ END_IF]]></ST>
       <LineId Id="20" Count="3" />
       <LineId Id="19" Count="0" />
       <LineId Id="31" Count="0" />
+      <LineId Id="43" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="30" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="29" Count="0" />
       <LineId Id="35" Count="0" />
-      <LineId Id="33" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="44" Count="4" />
       <LineId Id="28" Count="0" />
       <LineId Id="24" Count="1" />
     </LineIds>

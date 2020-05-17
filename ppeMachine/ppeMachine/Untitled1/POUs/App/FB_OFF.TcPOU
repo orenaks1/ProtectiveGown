@@ -296,6 +296,11 @@ CASE THIS^.SubStepNo OF
 		gWebAxes.UW_2.Crtl.Basic_axis.Input.Parameter.Acceleration := 	10000000;
 		gWebAxes.UW_2.Crtl.Basic_axis.Input.Parameter.Deceleration := 	10000000;		
 		gWebAxes.UW_2.Crtl.Basic_axis.Input.Command.Stop :=		TRUE;		
+		
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Acceleration := 	10000;//[mm
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Deceleration := 	10000;		
+		gWebAxes.Output.Crtl.Basic_axis.Input.Command.Stop :=		TRUE;		
+						
 				
 								
 		THIS^.SubStepNo	:= 2;		
@@ -314,11 +319,17 @@ CASE THIS^.SubStepNo OF
 									
 		IF gWebAxes.UW_1.Crtl.Basic_axis.Output.Status.AxisStatus.StandStill
 		OR  gWebAxes.UW_2.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled THEN
-			//THIS^.SubStepNo	:= 4 ;
-			Meth_StopMotors:=TRUE;
+			THIS^.SubStepNo	:= 4 ;
 		END_IF	
 
-							
+	4:	
+		THIS^.Monitoring.StepMessage:= 'Wait for standstill Output';
+									
+		IF gWebAxes.Output.Crtl.Basic_axis.Output.Status.AxisStatus.StandStill
+		OR  gWebAxes.Output.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled THEN
+			//THIS^.SubStepNo	:= 4 ;
+			Meth_StopMotors:=TRUE;
+		END_IF								
 END_CASE
 ]]></ST>
       </Implementation>
@@ -349,6 +360,7 @@ CASE THIS^.SubStepNo OF
 		THIS^.Monitoring.StepMessage	:= 'Power OFF';								
 		gWebAxes.UW_1.Crtl.Basic_axis.Input.Command.Power		:= FALSE;
 		gWebAxes.UW_2.Crtl.Basic_axis.Input.Command.Power		:= FALSE;	
+		gWebAxes.Output.Crtl.Basic_axis.Input.Command.Power		:= FALSE;
 		
 		THIS^.SubStepNo:= 2;		
 	
@@ -363,6 +375,12 @@ CASE THIS^.SubStepNo OF
 		THIS^.Monitoring.StepMessage:= 'Wait for Disabled UW 2';
 									
 		IF gWebAxes.UW_2.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled  THEN
+			THIS^.SubStepNo	:= 4 ;
+		END_IF	
+	4:	
+		THIS^.Monitoring.StepMessage:= 'Wait for Disabled Output';
+									
+		IF gWebAxes.Output.Crtl.Basic_axis.Output.Status.AxisStatus.Disabled  THEN
 			Meth_SwitchOff	:= TRUE;
 		END_IF		
 		
@@ -456,9 +474,13 @@ END_CASE]]></ST>
       <LineId Id="91" Count="0" />
       <LineId Id="93" Count="1" />
       <LineId Id="92" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="120" Count="2" />
+      <LineId Id="119" Count="0" />
       <LineId Id="30" Count="3" />
-      <LineId Id="95" Count="15" />
+      <LineId Id="95" Count="14" />
       <LineId Id="46" Count="1" />
+      <LineId Id="123" Count="6" />
       <LineId Id="43" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="5" Count="0" />
@@ -466,12 +488,15 @@ END_CASE]]></ST>
     <LineIds Name="FB_OFF.Meth_SwitchOff">
       <LineId Id="5" Count="0" />
       <LineId Id="10" Count="15" />
+      <LineId Id="70" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="26" Count="7" />
       <LineId Id="47" Count="0" />
       <LineId Id="49" Count="3" />
-      <LineId Id="63" Count="0" />
+      <LineId Id="77" Count="0" />
       <LineId Id="48" Count="0" />
+      <LineId Id="72" Count="4" />
+      <LineId Id="71" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="42" Count="0" />
       <LineId Id="9" Count="0" />

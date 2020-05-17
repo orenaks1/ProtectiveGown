@@ -441,6 +441,9 @@
     <Compile Include="POUs\App\FB_Mechinit.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\App\FB_MechinitOutput.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\App\FB_OFF.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -702,6 +705,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\Lib\Motion\CanOpenAxis\Elmo\ElmoVelocityCtrlAxis_FB.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\Lib\Motion\CanOpenAxis\Elmo\FB_ElmoIOsHandle.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\Lib\Motion\CanOpenAxis\e_Homing_Contol_Word.TcDUT">

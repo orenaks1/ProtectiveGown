@@ -17,7 +17,9 @@ STRUCT
 	UW_2_DancerFull AT %I* 	: BOOL;
 	
 	UW_1_DancerPosition AT %I* 	: INT;
-	UW_2_DancerPosition AT %I* 	: INT;	
+	UW_2_DancerPosition AT %I* 	: INT;
+
+	HomeOutAxis	 AT %I* 	: BOOL;
 	
 	
 END_STRUCT
