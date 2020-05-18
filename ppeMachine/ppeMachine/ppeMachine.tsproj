@@ -1483,10 +1483,16 @@ External Setpoint Generation:
 	<Project ProjectGUID="{18DFDB75-7F02-41AE-85C6-169F5091A9AB}" TargetNetId="192.168.101.10.1.1" Target64Bit="true" ShowHideConfigurations="#x106">
 		<System>
 			<Settings MaxCpus="2"/>
-			<Licenses>
+			<Licenses CacheOrCheckLicensesOnStartup="true">
 				<Target>
-					<ManualSelect>{796D380F-D49E-4C0C-A05F-500052FAC883}</ManualSelect>
-					<LicenseDevice DongleHardwareId="2"/>
+					<TargetSelect TargetId="2">{6C4B2C28-7A9E-41AD-B5FE-6D61422A73D6}</TargetSelect>
+					<TargetSelect TargetId="2">{B27B051A-CA6A-42EA-833E-82CC92903D83}</TargetSelect>
+					<TargetSelect TargetId="2">{66689887-CCBD-452C-AC9A-039D997C6E66}</TargetSelect>
+					<TargetSelect TargetId="2">{777F1598-583B-4503-99BB-7C02E0ABD97E}</TargetSelect>
+					<TargetSelect TargetId="2">{7AFD0713-1333-4A3B-938C-7B9BD0418C8D}</TargetSelect>
+					<TargetSelect TargetId="2">{FBEA583E-F05B-406A-BD9F-2BFA59244888}</TargetSelect>
+					<TargetSelect TargetId="2">{520DE751-9DB6-47CB-8240-BD5C466E7E64}</TargetSelect>
+					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020007" DongleLevel="40" DongleSystemId="{DFD2E9D7-A6E1-6F3F-9983-672BDEDCD9BB}" DongleVolumeId="{6CF29595-4AA5-6D96-F194-729B5A74CA40}" DongleVolumeNo="217" DongleSerialNumber="100043600"/>
 				</Target>
 			</Licenses>
 			<Tasks>
@@ -3018,13 +3024,14 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 							<CoeProfile ProfileNo="19665801"/>
 						</EtherCAT>
 					</Box>
-					<Box Id="7" BoxType="9099">
+					<Box Id="7" BoxType="9099" BoxFlags="#x00000020">
 						<Name>Term 7 (EL6070-1208)</Name>
 						<ImageId>1004</ImageId>
-						<EtherCAT SlaveType="2" PdiType="#x0005" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="51" FoeType="1" VendorId="#x00000002" ProductCode="#x17b63052" RevisionNo="#x001204b8" InfoDataAddr="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6070-1208 1Ch. Licensing-Terminal" Desc="EL6070-1208" PortABoxInfo="#x0100000d">
-							<SyncMan>001000012600010001000000000000000001001026010000</SyncMan>
-							<SyncMan>001100012200010002000000000000000001001122010000</SyncMan>
+						<EtherCAT SlaveType="2" PdiType="#x0005" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="35" FoeType="1" VendorId="#x00000002" ProductCode="#x17b63052" RevisionNo="#x001204b8" InfoDataAddr="true" RepeatSupport="true" TimeoutMailbox2="3000" CheckRevisionNoType="3" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6070-1208 1Ch. Licensing-Terminal" Desc="EL6070-1208" PortABoxInfo="#x0100000d">
+							<SyncMan>001000012600010001000000300000010001001026010000</SyncMan>
+							<SyncMan>001100012200010002000000300000010001001122010000</SyncMan>
 							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+							<CoeProfile ProfileNo="43914121" DisplayName="Licensing"/>
 						</EtherCAT>
 					</Box>
 					<Box Id="28" BoxType="9099">
