@@ -164,9 +164,9 @@ CASE THIS^.SubStepNo OF
 		gWebAxes.Output.Crtl.Basic_axis.Input.Command.MoveAdditive		:= TRUE;
 		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Acceleration	:= 10000;//[mm/sec^2]
 		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Deceleration	:= 10000;//[mm/sec^2]	
-		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Distance		:= 3000;//[mm/sec^2]	
-		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Velocity		:= 500;//[mm/sec]	
-		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Direction		:= MC_Direction.MC_Negative_Direction;		
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Distance		:= -2500;//[mm/sec^2]	
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Velocity		:= gMachineCtrl.Parameters.OutGripperHomeVelocity;//[mm/sec]	
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Direction		:= MC_Direction.MC_Positive_Direction;		
 		
 		THIS^.SubStepNo:= 2;		
 	

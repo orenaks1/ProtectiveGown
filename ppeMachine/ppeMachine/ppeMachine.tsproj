@@ -1475,9 +1475,10 @@ External Setpoint Generation:
 		<ImageData Id="1001">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ffff0000ff0000ff0000ff0000ff0000ff0000c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
 		<ImageData Id="1002">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff00ff0000ff0000ff0000ff0000ff0000ff00c0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
 		<ImageData Id="1003">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
-		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a002000000000000000000000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff000000ff00ffff00ffff00ffff0000ff0000ff0000ff0000808080ff00ff000000000000000000000000000000000000000000ff00ffff00ffff00ffff0000c0c0c0c0c0c0c0c0c0808080ff00ff0000000000000000000000000000000000000000000000ff0000ffff00ffc0c0c0ff0000c0c0c0c0c0c0808080ff00ff000000000000000000000000000000000000000000ff00ffff00ffff00ffc0c0c0c0c0c0ff0000c0c0c0808080ff00ffff00ffff00ffff00ff000000ff00ffff00ff000000ff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0ff0000808080ff00ff000000000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff0000c0c0c0c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000ff0000c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ff</ImageData>
-		<ImageData Id="1005">424dca000000000000005a00000028000000100000000e000000010004000000000070000000120b0000120b00000900000009000000ffffff009999990066666600cccccc00333333000066330033996600336666000033330000003121300000000031112211130000003761221122300000156722112221000025672211213300004565221130000000856522110000000085572211000000004421221100000000212221110000000024444311000000002230433100000000411123310000000033333333000000</ImageData>
-		<ImageData Id="1006">424de6000000000000007600000028000000100000000e000000010004000000000070000000c40e0000c40e000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00ffffffffffffffffffffffffffffffff79999997ffffffff99977999ffffffff9998ff89ffffffff99999fffffffffff999997ffff777777999999ffff777777799999ffff877777fffffffffff77777ffffffff78ff8777ffffffff77777777ffffffff77777777ffffffffffffffff</ImageData>
+		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ff000000000000ff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ff000000ff00ffff00ff000000ff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff000000ff00ffff00ffff00ffff00ffff00ffc0c0c000ffffc0c0c000ffff808080ff00ffff00ffff00ffff00ffff00ff000000ff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff000000ff00ffff00ff000000ff00ffff00ffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ffff00ff000000000000ff00ffff00ffff00ffc0c0c0ff0000c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c00000ffc0c0c00000ff808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0000000c0c0c0000000808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0008000c0c0c0008000808080ff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1005">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000c40e0000c40e00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff007fff007fff007fff007fff007fff007fffc0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff</ImageData>
+		<ImageData Id="1006">424dd6020000000000003600000028000000100000000e0000000100180000000000a002000000000000000000000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff808080808080808080808080808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ff000000ff00ffff00ffff00ffff0000ff0000ff0000ff0000808080ff00ff000000000000000000000000000000000000000000ff00ffff00ffff00ffff0000c0c0c0c0c0c0c0c0c0808080ff00ff0000000000000000000000000000000000000000000000ff0000ffff00ffc0c0c0ff0000c0c0c0c0c0c0808080ff00ff000000000000000000000000000000000000000000ff00ffff00ffff00ffc0c0c0c0c0c0ff0000c0c0c0808080ff00ffff00ffff00ffff00ff000000ff00ffff00ff000000ff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0ff0000808080ff00ff000000000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff0000c0c0c0c0c0c0ff0000808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0ff0000ff0000c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffc0c0c0c0c0c0c0c0c0c0c0c0808080ff00ff</ImageData>
+		<ImageData Id="1007">424de6000000000000007600000028000000100000000e000000010004000000000070000000c40e0000c40e000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00ffffffffffffffffffffffffffffffff79999997ffffffff99977999ffffffff9998ff89ffffffff99999fffffffffff999997ffff777777999999ffff777777799999ffff877777fffffffffff77777ffffffff78ff8777ffffffff77777777ffffffff77777777ffffffffffffffff</ImageData>
 	</ImageDatas>
 	<Project ProjectGUID="{18DFDB75-7F02-41AE-85C6-169F5091A9AB}" TargetNetId="192.168.101.10.1.1" Target64Bit="true" ShowHideConfigurations="#x106">
 		<System>
@@ -1485,6 +1486,7 @@ External Setpoint Generation:
 			<Licenses>
 				<Target>
 					<ManualSelect>{796D380F-D49E-4C0C-A05F-500052FAC883}</ManualSelect>
+					<LicenseDevice DongleHardwareId="2"/>
 				</Target>
 			</Licenses>
 			<Tasks>
@@ -1526,9 +1528,14 @@ External Setpoint Generation:
 				<Axis Id="2" CreateSymbols="true" AxisType="1" AxisFolder="Axes\Output">
 					<Name>OutAxis</Name>
 					<AxisPara>
+						<Dynamic Acceleration="15000" Deceleration="15000" Jerk="15000"/>
+						<Velo Maximum="5000"/>
+						<PositionAreaControl Enable="false"/>
+						<TargetPosControl Enable="false"/>
 						<OtherSettings AllowMotionCmdToSlave="true"/>
 					</AxisPara>
-					<Encoder Name="Enc" EncType="1">
+					<Encoder Name="Enc" EncType="19">
+						<EncPara ScaleFactorNumerator="75" ScaleFactorDenominator="8192" MaxCount="#xffffffff"/>
 						<Vars VarGrpType="1">
 							<Name>Inputs</Name>
 							<Var>
@@ -1585,9 +1592,9 @@ External Setpoint Generation:
 							</Var>
 						</Vars>
 					</Encoder>
-					<Drive Name="Drive" DrvType="5">
-						<DrvPara>
-							<Analog TorqueSetpointScale="10" ScaleFactorActTorque="0.1"/>
+					<Drive Name="Drive" DrvType="16">
+						<DrvPara MaxCount="#xffffffff" DriveControlDWord="#x00020000">
+							<Analog VeloReferenz="5000" VeloScale="125" TorqueSetpointScale="10" ScaleFactorActTorque="0.1"/>
 							<TimeComp TaskDelayCycles="1"/>
 						</DrvPara>
 						<Vars VarGrpType="1">
@@ -1628,22 +1635,6 @@ External Setpoint Generation:
 								<SubVar TypeFormatIndex="2">
 									<Name>nDataOut2</Name>
 								</SubVar>
-								<SubVar>
-									<Name>nCtrl2</Name>
-									<Comment><![CDATA[Digital Outputs Setpoint Generator:
-0x41 (0100 0001) = Minus (0x42 for inverse motor polarity)
-0x42 (0100 0010) = Plus (0x41 for inverse motor polarity)
-0x80 (1000 0000) = Stop
-]]></Comment>
-								</SubVar>
-								<SubVar>
-									<Name>nCtrl3</Name>
-									<Comment><![CDATA[Digital Outputs (Setpoint Generator + Position Controller):
-0x41 (0100 0001) = Minus (0x42 for inverse motor polarity)
-0x42 (0100 0010) = Plus (0x41 for inverse motor polarity)
-0x80 (1000 0000) = Stop
-]]></Comment>
-								</SubVar>
 								<SubVar TypeFormatIndex="2">
 									<Name>nDataOut3</Name>
 								</SubVar>
@@ -1661,6 +1652,8 @@ External Setpoint Generation:
 					</Drive>
 					<Controller Name="Ctrl" CtrType="1">
 						<CtrPara PriorControlFactor="1">
+							<PosDiffControl Enable="false"/>
+							<PID PosKp="0"/>
 							<Observer BandWidth="20"/>
 						</CtrPara>
 					</Controller>
@@ -1721,14 +1714,6 @@ External Setpoint Generation:
 							<Type>DINT</Type>
 						</Var>
 						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.UW_1_DancerFull</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.UW_2_DancerFull</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>GVL.gMachineCtrl.IO.In.UW_1_DancerPosition</Name>
 							<Type>INT</Type>
 						</Var>
@@ -1783,30 +1768,6 @@ External Setpoint Generation:
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.PrimeryPressFeedback.hw_value</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.SeconderyPressFeedbak.hw_value</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.E_StopPressedRaw</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.HomeOutAxis</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>GVL.gMachineCtrl.IO.EncoderRW.Status.CounterValue</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL.gMachineCtrl.IO.EncoderRW.Status.SetCounterDone</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>GVL.RwInverter.HWlink.StatusWord</Name>
 							<Type>UINT</Type>
 						</Var>
@@ -1826,15 +1787,91 @@ External Setpoint Generation:
 							<Name>GVL.RwInverter.HWlink.stWcState</Name>
 							<Type GUID="{DC6AC025-CDE2-A3AC-75E4-2374AA8A4DA5}">ST_WcState</Type>
 						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.PrimeryPressFeedback.hw_value</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.SeconderyPressFeedbak.hw_value</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.E_StopPressedRaw</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_1_DancerFullRaw</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_2_DancerFullRaw</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.HomeOutAxis</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.HomeOutAxisLimit</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.GripperStartPosition</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.GripperEndPosition</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_1_DancerEmpetyRaw</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_2_DancerEmpetyRaw</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_1_DancerEmpety</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_2_DancerEmpety</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.EncoderRW.Status.CounterValue</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.EncoderRW.Status.SetCounterDone</Name>
+							<Type>BOOL</Type>
+						</Var>
 					</Vars>
 					<Vars VarGrpType="2">
 						<Name>PlcTask Outputs</Name>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.SetSpeed</Name>
+							<Type>INT</Type>
+						</Var>
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.Out.HeaterOn</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.Out.GripperOpen</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.Out.Output_GripperClose</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.Out.Output_GripperOpen</Name>
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
@@ -1850,6 +1887,14 @@ External Setpoint Generation:
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>GVL.gMachineCtrl.IO.Out.ExternalNipMotor</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.Out.Buzzer</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>GVL.gMachineCtrl.IO.EncoderRW.Ctrl.SetCounterCmd</Name>
 							<Type>BOOL</Type>
 						</Var>
@@ -1857,15 +1902,15 @@ External Setpoint Generation:
 							<Name>GVL.gMachineCtrl.IO.EncoderRW.Ctrl.SetCounterValue</Name>
 							<Type>UINT</Type>
 						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.ControlWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.SetSpeed</Name>
-							<Type>INT</Type>
-						</Var>
 					</Vars>
+					<UnrestoredVarLinks ImportTime="2020-05-18T13:49:50">
+						<OwnerA Name="InputDst" Prefix="TIPC^Untitled1^Untitled1 Instance" Type="1">
+							<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1859)">
+								<Link VarA="GVL.gMachineCtrl.IO.In.UW_1_DancerFull" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 1^Input" Size="1" RestoreInfo="ANotFound"/>
+								<Link VarA="GVL.gMachineCtrl.IO.In.UW_2_DancerFull" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 2^Input" Size="1" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<TaskPouOids>
 						<TaskPouOid Prio="1" OTCID="#x08502002"/>
 						<TaskPouOid Prio="20" OTCID="#x08502001"/>
@@ -1880,8 +1925,8 @@ External Setpoint Generation:
 				<AddressInfo>
 					<Pnp>
 						<DeviceDesc>Ethernet 2 (X001)</DeviceDesc>
-						<DeviceName>\DEVICE\{6A95DDF9-BD22-4A8A-979B-15A8E5BFC498}</DeviceName>
-						<DeviceData>00010548fb76</DeviceData>
+						<DeviceName>\DEVICE\{10CC507D-1DDD-44D9-91FE-910768887BEF}</DeviceName>
+						<DeviceData>0001054d625e</DeviceData>
 					</Pnp>
 				</AddressInfo>
 				<Image Id="1" AddrType="9" ImageType="3">
@@ -1889,6 +1934,12 @@ External Setpoint Generation:
 				</Image>
 				<Image Id="5" AddrType="10" ImageType="3">
 					<Name>Image-2</Name>
+				</Image>
+				<Image Id="6" AddrType="10" ImageType="3">
+					<Name>Image-3</Name>
+				</Image>
+				<Image Id="7" AddrType="10" ImageType="3">
+					<Name>Image-4</Name>
 				</Image>
 				<Box Id="2" BoxType="9099">
 					<Name>Term 1 (EK1100)</Name>
@@ -2967,412 +3018,24 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 							<CoeProfile ProfileNo="19665801"/>
 						</EtherCAT>
 					</Box>
-					<Box Id="14" BoxType="9099" BoxFlags="#x00000020">
-						<Name>Term 14 (EL3356-0010)</Name>
-						<ImageId>1002</ImageId>
-						<EtherCAT SlaveType="2" PdiType="#x0c05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x0d1c3052" RevisionNo="#x0019000a" InfoDataAddr="true" TimeoutMailbox2="2000" CheckRevisionNoType="3" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL3356-0010 1Ch. Ana. Input Resistor Bridge Terminal, 24bit, High Precision" Desc="EL3356-0010" PortABoxInfo="#x0100000d">
-							<SyncMan>001080002600010001000000400080008000001026010000</SyncMan>
-							<SyncMan>801080002200010002000000400080008000801022010000</SyncMan>
-							<SyncMan>001102002400010003000000000000000200001124010000</SyncMan>
-							<SyncMan>801106002000010004000000000000000600801120010000</SyncMan>
-							<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-							<Fmmu>0000000000000000801100010100000002000000000000000000000000000000</Fmmu>
+					<Box Id="7" BoxType="9099">
+						<Name>Term 7 (EL6070-1208)</Name>
+						<ImageId>1004</ImageId>
+						<EtherCAT SlaveType="2" PdiType="#x0005" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="51" FoeType="1" VendorId="#x00000002" ProductCode="#x17b63052" RevisionNo="#x001204b8" InfoDataAddr="true" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL6070-1208 1Ch. Licensing-Terminal" Desc="EL6070-1208" PortABoxInfo="#x0100000d">
+							<SyncMan>001000012600010001000000000000000001001026010000</SyncMan>
+							<SyncMan>001100012200010002000000000000000001001122010000</SyncMan>
 							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-							<BootStrapData>0010f400f410f400</BootStrapData>
-							<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
-							<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000020030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-							<DcMode>4443494e00000000000000000000000044432d53796e6368726f6e2028696e7075742062617365642900000000000000000000000000000000000000000020030100000000000000000001000000000000000000000000000000000000000000</DcMode>
-							<Pdo Name="RMB Status" Index="#x1a00" Flags="#x0010" SyncMan="3">
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Overrange" Index="#x6000" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Data invalid" Index="#x6000" Sub="#x04">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000002}">ARRAY [0..1] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Error" Index="#x6000" Sub="#x07">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__Calibration in progress" Index="#x6000" Sub="#x08">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__Steady state" Index="#x6000" Sub="#x09">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000004}">ARRAY [0..3] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Sync error" Index="#x6000" Sub="#x0e">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__TxPDO Toggle" Index="#x6000" Sub="#x10">
-									<Type>BIT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Value (INT32)" Index="#x1a01" Flags="#x0010" SyncMan="3">
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Value" Index="#x6000" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Value (Real)" Index="#x1a02" Flags="#x0010">
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Value (Real)" Index="#x6000" Sub="#x12">
-									<Type>REAL</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Timestamp" Index="#x1a03" Flags="#x0010">
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Timestamp" Index="#x6000" Sub="#x13">
-									<Type>ULINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Standard Channel 1" Index="#x1a04" Flags="#x0010">
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Underrange" Index="#x6010" Sub="#x01">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Overrange" Index="#x6010" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000004}">ARRAY [0..3] OF BIT</Type>
-								</Entry>
-								<Entry Name="Error" Index="#x6010" Sub="#x07">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000007}">ARRAY [0..6] OF BIT</Type>
-								</Entry>
-								<Entry Name="TxPDO Toggle" Index="#x6010" Sub="#x10">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Value" Index="#x6010" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Compact Channel 1" Index="#x1a05" Flags="#x0010">
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Value" Index="#x6010" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Standard Channel 2" Index="#x1a06" Flags="#x0010">
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Underrange" Index="#x6020" Sub="#x01">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Overrange" Index="#x6020" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000004}">ARRAY [0..3] OF BIT</Type>
-								</Entry>
-								<Entry Name="Error" Index="#x6020" Sub="#x07">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000007}">ARRAY [0..6] OF BIT</Type>
-								</Entry>
-								<Entry Name="TxPDO Toggle" Index="#x6020" Sub="#x10">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Value" Index="#x6020" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Compact Channel 2" Index="#x1a07" Flags="#x0010">
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Value" Index="#x6020" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Control" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-								<Entry Name="Ctrl__Start calibration" Index="#x7000" Sub="#x01">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Disable calibration" Index="#x7000" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Input freeze" Index="#x7000" Sub="#x03">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Sample mode" Index="#x7000" Sub="#x04">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Tara" Index="#x7000" Sub="#x05">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__">
-									<Type GUID="{18071995-0000-0000-0000-002000000003}">ARRAY [0..2] OF BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__">
-									<Type GUID="{18071995-0000-0000-0000-002000000008}">ARRAY [0..0] OF BYTE</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Filter frequency" Index="#x1601" InOut="1" Flags="#x0010">
-								<Entry Name="Filter frequency" Index="#x7000" Sub="#x11">
-									<Type>UINT</Type>
-								</Entry>
-							</Pdo>
-							<CoeProfile ProfileNo="24253321"/>
-							<CoeProfile ProfileNo="19665801"/>
-							<CoeProfile ProfileNo="19665801"/>
 						</EtherCAT>
 					</Box>
-					<Box Id="8" BoxType="9099" BoxFlags="#x00000020">
-						<Name>Term 8 (EL3356-0010)</Name>
-						<ImageId>1002</ImageId>
-						<EtherCAT SlaveType="2" PdiType="#x0c05" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="39" FoeType="1" VendorId="#x00000002" ProductCode="#x0d1c3052" RevisionNo="#x0019000a" InfoDataAddr="true" TimeoutMailbox2="2000" CheckRevisionNoType="3" PortPhys="51" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL3356-0010 1Ch. Ana. Input Resistor Bridge Terminal, 24bit, High Precision" Desc="EL3356-0010" PortABoxInfo="#x0100000e">
-							<SyncMan>001080002600010001000000400080008000001026010000</SyncMan>
-							<SyncMan>801080002200010002000000400080008000801022010000</SyncMan>
-							<SyncMan>001102002400010003000000000000000200001124010000</SyncMan>
-							<SyncMan>801106002000010004000000000000000600801120010000</SyncMan>
-							<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
-							<Fmmu>0000000000000000801100010100000002000000000000000000000000000000</Fmmu>
-							<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
-							<BootStrapData>0010f400f410f400</BootStrapData>
-							<DcMode>53796e6368726f6e0000000000000000534d2d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</DcMode>
-							<DcMode>4443000000000000000000000000000044432d53796e6368726f6e000000000000000000000000000000000000000000000000000000000000000000000020030100000000000000000000000000000000000000000000000000000000000000</DcMode>
-							<DcMode>4443494e00000000000000000000000044432d53796e6368726f6e2028696e7075742062617365642900000000000000000000000000000000000000000020030100000000000000000001000000000000000000000000000000000000000000</DcMode>
-							<Pdo Name="RMB Status" Index="#x1a00" Flags="#x0010" SyncMan="3">
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Overrange" Index="#x6000" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Data invalid" Index="#x6000" Sub="#x04">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000002}">ARRAY [0..1] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Error" Index="#x6000" Sub="#x07">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__Calibration in progress" Index="#x6000" Sub="#x08">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__Steady state" Index="#x6000" Sub="#x09">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000004}">ARRAY [0..3] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__Sync error" Index="#x6000" Sub="#x0e">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Status__">
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry Name="Status__TxPDO Toggle" Index="#x6000" Sub="#x10">
-									<Type>BIT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Value (INT32)" Index="#x1a01" Flags="#x0010" SyncMan="3">
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Value" Index="#x6000" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Value (Real)" Index="#x1a02" Flags="#x0010">
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Value (Real)" Index="#x6000" Sub="#x12">
-									<Type>REAL</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Timestamp" Index="#x1a03" Flags="#x0010">
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<Entry Name="Timestamp" Index="#x6000" Sub="#x13">
-									<Type>ULINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Standard Channel 1" Index="#x1a04" Flags="#x0010">
-								<ExcludePdo>#x1a05</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Underrange" Index="#x6010" Sub="#x01">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Overrange" Index="#x6010" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000004}">ARRAY [0..3] OF BIT</Type>
-								</Entry>
-								<Entry Name="Error" Index="#x6010" Sub="#x07">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000007}">ARRAY [0..6] OF BIT</Type>
-								</Entry>
-								<Entry Name="TxPDO Toggle" Index="#x6010" Sub="#x10">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Value" Index="#x6010" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Compact Channel 1" Index="#x1a05" Flags="#x0010">
-								<ExcludePdo>#x1a04</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Value" Index="#x6010" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Standard Channel 2" Index="#x1a06" Flags="#x0010">
-								<ExcludePdo>#x1a07</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Underrange" Index="#x6020" Sub="#x01">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Overrange" Index="#x6020" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000004}">ARRAY [0..3] OF BIT</Type>
-								</Entry>
-								<Entry Name="Error" Index="#x6020" Sub="#x07">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000001}">ARRAY [0..0] OF BIT</Type>
-								</Entry>
-								<Entry>
-									<Type GUID="{18071995-0000-0000-0000-002000000007}">ARRAY [0..6] OF BIT</Type>
-								</Entry>
-								<Entry Name="TxPDO Toggle" Index="#x6020" Sub="#x10">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Value" Index="#x6020" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="AI Compact Channel 2" Index="#x1a07" Flags="#x0010">
-								<ExcludePdo>#x1a06</ExcludePdo>
-								<ExcludePdo>#x1a00</ExcludePdo>
-								<ExcludePdo>#x1a01</ExcludePdo>
-								<ExcludePdo>#x1a02</ExcludePdo>
-								<ExcludePdo>#x1a03</ExcludePdo>
-								<Entry Name="Value" Index="#x6020" Sub="#x11">
-									<Type>DINT</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Control" Index="#x1600" InOut="1" Flags="#x0010" SyncMan="2">
-								<Entry Name="Ctrl__Start calibration" Index="#x7000" Sub="#x01">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Disable calibration" Index="#x7000" Sub="#x02">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Input freeze" Index="#x7000" Sub="#x03">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Sample mode" Index="#x7000" Sub="#x04">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__Tara" Index="#x7000" Sub="#x05">
-									<Type>BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__">
-									<Type GUID="{18071995-0000-0000-0000-002000000003}">ARRAY [0..2] OF BIT</Type>
-								</Entry>
-								<Entry Name="Ctrl__">
-									<Type GUID="{18071995-0000-0000-0000-002000000008}">ARRAY [0..0] OF BYTE</Type>
-								</Entry>
-							</Pdo>
-							<Pdo Name="RMB Filter frequency" Index="#x1601" InOut="1" Flags="#x0010">
-								<Entry Name="Filter frequency" Index="#x7000" Sub="#x11">
-									<Type>UINT</Type>
-								</Entry>
-							</Pdo>
-							<CoeProfile ProfileNo="24253321"/>
-							<CoeProfile ProfileNo="19665801"/>
-							<CoeProfile ProfileNo="19665801"/>
-						</EtherCAT>
+					<Box Id="28" BoxType="9099">
+						<Name>Term 28 (EL9011)</Name>
+						<ImageId>1005</ImageId>
+						<EtherCAT CycleMBoxPollingTime="0" VendorId="#x00000002" ProductCode="#x23333050" InfoDataState="false" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="EL9011 End Terminal" Desc="EL9011" PortABoxInfo="#x01000007"/>
 					</Box>
 				</Box>
 				<Box Id="12" BoxType="9099" BoxFlags="#x00000020">
 					<Name>UW_1_Axis (AX5106-0000-0203)</Name>
-					<ImageId>1004</ImageId>
+					<ImageId>1006</ImageId>
 					<Xml>
 						<AX5XXXDriveTool>
 							<AxisSettings>
@@ -3725,8 +3388,8 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						<DcMode>446353796e633132350000000000000053796e63206379636c652074696d653a20313235c2b57300000000000000000048e80100a861000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>446353796e6336322e3500000000000053796e63206379636c652074696d653a2036322e35c2b573000000000000000024f400000000000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<MBoxUserCmdData>02000500100000000d000000000000000000000000000000000000000000000003400a8000000000ff1f0000000000004665617475726520666c61677300</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a00000015000000000000000000000000000000000000000000000003400100000000001027546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a000000170000000000000000000000000000000000000000000000034002000000000010275473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a0000001500000000000000000000000000000000000000000000000340010000000000401f546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a0000001700000000000000000000000000000000000000000000000340020000000000401f5473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000000e000000000000000000000000000000000000000000000003402000000000000b004f7065726174696f6e206d6f646500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a000000140000000000000000000000000000000000000000000000034030810000000001004c6f67676572206d657373616765206c6576656c00</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000001800000000000000000000000000000000000000000000000340d087000000000300436f6e6669677572656420736166657479206f7074696f6e00</MBoxUserCmdData>
@@ -3791,68 +3454,9 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						</Pdo>
 					</EtherCAT>
 				</Box>
-				<Box Id="1" Disabled="true" BoxType="9099" BoxFlags="#x00000020">
-					<Name>Box 1 (Unidrive M300 RFC-A)</Name>
-					<ImageId>1005</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0609" MboxDataLinkLayer="true" CycleMBoxPolling="true" CoeType="47" EoeType="3" VendorId="#x000000f9" ProductCode="#x01020503" RevisionNo="#x01030502" InfoDataAddr="true" CheckRevisionNoType="2" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="Unidrive M300 RFC-A" Desc="Unidrive M300 RFC-A" PortABoxInfo="#x0100000c">
-						<SyncMan>001000012600010001000000000000000001001026010000</SyncMan>
-						<SyncMan>001100012200010002000000000000000001001122010000</SyncMan>
-						<SyncMan>001204006400010003000000000000000000001264010000</SyncMan>
-						<SyncMan>801304002000010004000000000000000000801320010000</SyncMan>
-						<SyncMan>001500002400000003000000000000000000001524010000</SyncMan>
-						<SyncMan>001900002000000004000000000000000000001920010000</SyncMan>
-						<Fmmu>0000000000000000001200020100000001000000020000000200000000000000</Fmmu>
-						<Fmmu>0000000000000000801300010100000002000000020000000300000000000000</Fmmu>
-						<Fmmu>0000000000000000001500020000000001000000020000000400000000000000</Fmmu>
-						<Fmmu>0000000000000000001900010000000002000000020000000500000000000000</Fmmu>
-						<SwitchPortData>0100000000000000000000000000000000000000426f785f315f5f556e6964726976650000000000000000000000000000000000000000000000000000000000</SwitchPortData>
-						<Pdo Name="Transmit PDO Mapping 1" Index="#x1a00" Flags="#x0000">
-							<Entry Name="Status word" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO Mapping 2" Index="#x1a01" Flags="#x0000">
-							<Entry Name="Status word" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation display" Index="#x6061">
-								<Type>SINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Transmit PDO Mapping 6" Index="#x1a05" Flags="#x0000" SyncMan="3">
-							<Entry Name="Status word" Index="#x6041">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="vl velocity actual value" Index="#x6044">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO Mapping 1" Index="#x1600" InOut="1" Flags="#x0000">
-							<Entry Name="Control word" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO Mapping 2" Index="#x1601" InOut="1" Flags="#x0000">
-							<Entry Name="Control word" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="Modes of operation" Index="#x6060">
-								<Type>SINT</Type>
-							</Entry>
-						</Pdo>
-						<Pdo Name="Receive PDO Mapping 6" Index="#x1605" InOut="1" Flags="#x0000" SyncMan="2">
-							<Entry Name="Control word" Index="#x6040">
-								<Type>UINT</Type>
-							</Entry>
-							<Entry Name="vl target velocity" Index="#x6042">
-								<Type>INT</Type>
-							</Entry>
-						</Pdo>
-					</EtherCAT>
-				</Box>
-				<Box Id="15" BoxType="9099" BoxFlags="#x00000020">
-					<Name>Drive 15 (AX5106-0000-0203)</Name>
-					<ImageId>1004</ImageId>
+				<Box Id="1" BoxType="9099" BoxFlags="#x00000020">
+					<Name>Drive 1 (AX5106-0000-0203)</Name>
+					<ImageId>1006</ImageId>
 					<Xml>
 						<AX5XXXDriveTool>
 							<AxisSettings>
@@ -4202,10 +3806,11 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						<DcMode>446353796e633132350000000000000053796e63206379636c652074696d653a20313235c2b57300000000000000000048e80100a861000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>446353796e6336322e3500000000000053796e63206379636c652074696d653a2036322e35c2b573000000000000000024f400000000000000000000ffff30070000000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<MBoxUserCmdData>02000500100000000d000000000000000000000000000000000000000000000003400a8000000000ff1f0000000000004665617475726520666c61677300</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a00000015000000000000000000000000000000000000000000000003400100000000001027546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a000000170000000000000000000000000000000000000000000000034002000000000010275473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a0000001500000000000000000000000000000000000000000000000340010000000000401f546e637963202d204e43206379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a0000001700000000000000000000000000000000000000000000000340020000000000401f5473637963202d20436f6d6d206379636c652074696d6500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000000e000000000000000000000000000000000000000000000003402000000000000b004f7065726174696f6e206d6f646500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a000000140000000000000000000000000000000000000000000000034030810000000001004c6f67676572206d657373616765206c6576656c00</MBoxUserCmdData>
+						<MBoxUserCmdData>020005000a0000001800000000000000000000000000000000000000000000000340d087000000000300436f6e6669677572656420736166657479206f7074696f6e00</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000001400000000000000000000000000000000000000000000000340c98000000000a00f4e6f6d696e616c206d61696e20766f6c7461676500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000002500000000000000000000000000000000000000000000000340ca800000000064004d61696e20766f6c7461676520706f73697469766520746f6c6572616e63652072616e676500</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000002500000000000000000000000000000000000000000000000340cb800000000064004d61696e20766f6c74616765206e6567617469766520746f6c6572616e63652072616e676500</MBoxUserCmdData>
@@ -4241,7 +3846,6 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						<MBoxUserCmdData>020005000a0000002600000000000000000000000000000000000000000000000340ff8100000000960056656c6f636974792066696c746572206c6f7720706173732074696d6520636f6e7374616e7400</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000c0000001f000000000000000000000000000000000000000000000003406400000000006607000056656c6f63697479206c6f6f702070726f706f7274696f6e616c206761696e00</MBoxUserCmdData>
 						<MBoxUserCmdData>020005000a0000002200000000000000000000000000000000000000000000000340650000000000500056656c6f63697479206c6f6f7020696e74656772616c20616374696f6e2074696d6500</MBoxUserCmdData>
-						<MBoxUserCmdData>020005000a0000001800000000000000000000000000000000000000000000000340d087000000000300436f6e6669677572656420736166657479206f7074696f6e00</MBoxUserCmdData>
 						<MBoxUserCmdData>02000500480000002800000003000000000000000000000000000000000000000340a580000000003c003c000100010064000000f401b80b0000000000000000f401f401f401f40104000500e1009600b80b84030000000000000000000000000000000000000000436f6d6d75746174696f6e206f66667365742063616c6962726174696f6e20706172616d6574657200</MBoxUserCmdData>
 						<Pdo Name="AT" Index="#x0010" Flags="#x0001" SyncMan="3">
 							<Entry Name="Drive status word" Index="#x0087" Flags="#x00000800">
@@ -4264,13 +3868,13 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						</Pdo>
 					</EtherCAT>
 				</Box>
-				<Box Id="7" BoxType="9099" BoxFlags="#x00000020">
-					<Name>Output Axis (Elmo Drive )</Name>
-					<ImageId>1006</ImageId>
-					<EtherCAT SlaveType="2" PdiType="#x0c05" CycleMBoxPolling="true" CoeType="15" EoeType="1" FoeType="1" VendorId="#x0000009a" ProductCode="#x00030924" RevisionNo="#x00010420" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" DdTime0420="10000" EnableWdDivider0400="true" EnableWdTime0410="true" EnableWdTime0420="true" PortPhys="17" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="Gold EtherCAT GCON Drive Rev:0x00010420" Desc="Elmo Drive " PortABoxInfo="#x0100000f">
+				<Box Id="27" BoxType="9099" BoxFlags="#x00000020">
+					<Name>Drive 27 (Elmo Drive )</Name>
+					<ImageId>1007</ImageId>
+					<EtherCAT SlaveType="2" PdiType="#x0c05" CycleMBoxPolling="true" CoeType="15" EoeType="1" FoeType="1" VendorId="#x0000009a" ProductCode="#x00030925" RevisionNo="#x00010420" InfoDataAddr="true" InfoDataSoeDS401="true" InfoDataDcTimes="true" DdTime0420="10000" EnableWdDivider0400="true" EnableWdTime0410="true" EnableWdTime0420="true" PortPhys="17" IdentificationAdo="308" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="Gold EtherCAT GCON Drive ID Selector Rev:0x00010420" Desc="Elmo Drive " PortABoxInfo="#x01000001">
 						<SyncMan>00188c0026000100010000008c008c008c00001826010000</SyncMan>
 						<SyncMan>00198c0022000100020000008c008c008c00001922010000</SyncMan>
-						<SyncMan>00110a006400010003000000000020002000001164010000</SyncMan>
+						<SyncMan>00110e006400010003000000000020002000001164010000</SyncMan>
 						<SyncMan>80110a002000010004000000000020002000801120010000</SyncMan>
 						<Fmmu>0000000000000000001100020100000001000000000000000000000000000000</Fmmu>
 						<Fmmu>0000000000000000801100010100000002000000000000000000000000000000</Fmmu>
@@ -4281,7 +3885,7 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 						<DcMode>44432053796e63000000000000000000444320666f722073796e6368726f6e697a6174696f6e00000000000000000000000000000000000000000000000000030100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<DcMode>4443204f666600000000000000000000444320756e757365640000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000</DcMode>
 						<MBoxUserCmdData>02000300090000000700000003000000000000000000000000000000000000002060600001000000084f70206d6f646500</MBoxUserCmdData>
-						<MBoxUserCmdData>02000300090000000a000000030000000000000000000000000000000000000020c26001010000000a4379636c652074696d6500</MBoxUserCmdData>
+						<MBoxUserCmdData>02000300090000000a000000030000000000000000000000000000000000000020c2600101000000024379636c652074696d6500</MBoxUserCmdData>
 						<Pdo Name="Inputs" Index="#x1a00" Flags="#x0010" SyncMan="3">
 							<ExcludePdo>#x1a01</ExcludePdo>
 							<ExcludePdo>#x1a02</ExcludePdo>
@@ -4728,7 +4332,7 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 								<Type>DINT</Type>
 							</Entry>
 						</Pdo>
-						<Pdo Name="Outputs" Index="#x1617" InOut="1" Flags="#x0010">
+						<Pdo Name="Outputs" Index="#x1617" InOut="1" Flags="#x0010" SyncMan="2">
 							<Entry Name="Velocity Offset" Index="#x60b1">
 								<Type>DINT</Type>
 							</Entry>
@@ -4818,28 +4422,54 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 		</Variants>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500851000403}" Id="#x02030030"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0120-500873000403}" Id="#x02030070"/>
 		<MappingInfo Identifier="{00000000-2002-0850-0020-500810000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{08502001-0010-0304-0020-500810000403}" Id="#x02030020" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502002-0010-0500-0020-500830000403}" Id="#x02030040" Watchdog="04000000040000000400000004000000"/>
-		<OwnerA Name="TIPC^Untitled1^Untitled1 Instance">
-			<OwnerB Name="TIID^Device 1 (EtherCAT)^Box 1 (Unidrive M300 RFC-A)">
-				<Link VarA="PlcTask Inputs^GVL.RwInverter.HWlink.ActualSpeed" VarB="Transmit PDO Mapping 6^vl velocity actual value"/>
-				<Link VarA="PlcTask Inputs^GVL.RwInverter.HWlink.StatusWord" VarB="Transmit PDO Mapping 6^Status word"/>
-				<Link VarA="PlcTask Outputs^GVL.RwInverter.HWlink.ControlWord" VarB="Receive PDO Mapping 6^Control word"/>
-				<Link VarA="PlcTask Outputs^GVL.RwInverter.HWlink.SetSpeed" VarB="Receive PDO Mapping 6^vl target velocity"/>
+		<MappingInfo Identifier="{00000000-0040-0304-2100-040344000403}" Id="#x02030050"/>
+		<MappingInfo Identifier="{00000000-0040-0304-3000-040344000403}" Id="#x02030080"/>
+		<MappingInfo Identifier="{00000000-0050-0304-3000-040351000403}" Id="#x02030020"/>
+		<MappingInfo Identifier="{00000000-0060-0304-2100-040362000403}" Id="#x02030030"/>
+		<MappingInfo Identifier="{08502001-0060-0304-0020-500860000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
+		<MappingInfo Identifier="{08502002-0010-0500-0020-500821000403}" Id="#x02030060" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502002-0010-0500-0020-500830000403}" Id="#x02030090" Watchdog="04000000040000000400000004000000"/>
+		<OwnerA Name="TINC^NC-Task 1 SAF^Axes^OutAxis">
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Drive 27 (Elmo Drive )">
+				<Link VarA="Drive^Inputs^In^nDcOutputTime" VarB="InfoData^DcOutputShift"/>
+				<Link VarA="Drive^Inputs^In^nState1" VarB="Inputs^Status word"/>
+				<Link VarA="Drive^Inputs^In^nState2" VarB="Inputs^Status word" Size="8" OffsB="8"/>
+				<Link VarA="Drive^Inputs^In^nState4" VarB="WcState^InputToggle" Size="1" OffsA="1"/>
+				<Link VarA="Drive^Inputs^In^nState4" VarB="WcState^WcState"/>
+				<Link VarA="Drive^Outputs^Out^nCtrl1" VarB="Outputs^Control word"/>
+				<Link VarA="Drive^Outputs^Out^nCtrl2" VarB="Outputs^Control word" Size="8" OffsB="8"/>
+				<Link VarA="Drive^Outputs^Out^nDataOut1" VarB="Outputs^Target Position"/>
+				<Link VarA="Drive^Outputs^Out^nDataOut2" VarB="Outputs_1^Velocity Offset"/>
+				<Link VarA="Enc^Inputs^In^nDataIn1" VarB="Inputs^Position actual value"/>
+				<Link VarA="Enc^Inputs^In^nDcInputTime" VarB="InfoData^DcInputShift"/>
+				<Link VarA="Enc^Inputs^In^nState4" VarB="WcState^InputToggle" Size="1" OffsA="1"/>
+				<Link VarA="Enc^Inputs^In^nState4" VarB="WcState^WcState"/>
 			</OwnerB>
+		</OwnerA>
+		<OwnerA Name="TIPC^Untitled1^Untitled1 Instance">
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 3 (EL1859)">
 				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.E_StopPressedRaw" VarB="Channel 1^GVL.gMachineCtrl.IO.In.E_StopPressedRaw"/>
+				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.Buzzer" VarB="Channel 15^Output"/>
+				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.ExternalNipMotor" VarB="Channel 14^Output"/>
+				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.Output_GripperClose" VarB="Channel 12^Output"/>
+				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.Output_GripperOpen" VarB="Channel 13^Output"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 4 (EL1859)">
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.GripperEndPosition" VarB="Channel 8^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.GripperStartPosition" VarB="Channel 7^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.HomeOutAxis" VarB="Channel 3^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.HomeOutAxisLimit" VarB="Channel 4^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.UW_1_DancerEmpetyRaw" VarB="Channel 5^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.UW_1_DancerFullRaw" VarB="Channel 1^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.UW_2_DancerEmpetyRaw" VarB="Channel 6^Input"/>
+				<Link VarA="PlcTask Inputs^GVL.gMachineCtrl.IO.In.UW_2_DancerFullRaw" VarB="Channel 2^Input"/>
 				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.GripperOpen" VarB="Channel 13^Output"/>
 				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.GripperPistonPosition" VarB="Channel 14^Output"/>
 				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.GripperRetract" VarB="Channel 12^Output"/>
 				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.HeaterOn" VarB="Channel 15^Output"/>
 				<Link VarA="PlcTask Outputs^GVL.gMachineCtrl.IO.Out.PressDown" VarB="Channel 9^Output"/>
-				<Link VarA="Task2ms Inputs^GVL.gMachineCtrl.IO.In.UW_1_DancerFull" VarB="Channel 1^Input"/>
-				<Link VarA="Task2ms Inputs^GVL.gMachineCtrl.IO.In.UW_2_DancerFull" VarB="Channel 2^Input"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1100)^Term 5 (EL3004)">
 				<Link VarA="Task2ms Inputs^GVL.gMachineCtrl.IO.In.UW_1_Diameter" VarB="AI Standard Channel 2^Value"/>

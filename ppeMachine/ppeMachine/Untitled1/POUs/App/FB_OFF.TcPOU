@@ -261,6 +261,12 @@ Ctrl_ref.IO.Out.HeaterOn := FALSE;
 gMachineCtrl.IO.Out.GripperRetract:=FALSE;
 gMachineCtrl.IO.Out.GripperOpen:=FALSE;
 
+gMachineCtrl.IO.Out.ExternalNipMotor:=FALSE;
+
+gMachineCtrl.IO.Out.Output_GripperClose:=FALSE;
+
+gMachineCtrl.IO.Out.Buzzer	:=FALSE;
+
 Meth_Rest_IO:=TRUE;
 ]]></ST>
       </Implementation>
@@ -461,6 +467,12 @@ END_CASE]]></ST>
       <LineId Id="5" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="20" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="8" Count="0" />
       <LineId Id="15" Count="0" />

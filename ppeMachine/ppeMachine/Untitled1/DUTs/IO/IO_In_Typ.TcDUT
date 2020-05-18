@@ -13,14 +13,26 @@ STRUCT
 	UW_1_LoacCell AT %I* 	: DINT;
 	UW_2_LoacCell AT %I* 	: DINT;	
 	
-	UW_1_DancerFull AT %I* 	: BOOL;
-	UW_2_DancerFull AT %I* 	: BOOL;
+	UW_1_DancerFull  	: BOOL;
+	UW_2_DancerFull  	: BOOL;
+	
+	UW_1_DancerFullRaw AT %I* 	: BOOL;
+	UW_2_DancerFullRaw AT %I* 	: BOOL;	
 	
 	UW_1_DancerPosition AT %I* 	: INT;
 	UW_2_DancerPosition AT %I* 	: INT;
 
 	HomeOutAxis	 AT %I* 	: BOOL;
+	HomeOutAxisLimit	 AT %I* 	: BOOL;
 	
+	GripperStartPosition	 AT %I* 	: BOOL;
+	GripperEndPosition	 AT %I* 	: BOOL;
+	
+	UW_1_DancerEmpetyRaw AT %I* 	: BOOL;
+	UW_2_DancerEmpetyRaw AT %I* 	: BOOL;
+	
+	UW_1_DancerEmpety AT %I* 	: BOOL;
+	UW_2_DancerEmpety AT %I* 	: BOOL;	
 	
 END_STRUCT
 END_TYPE

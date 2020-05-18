@@ -1396,9 +1396,24 @@ External Setpoint Generation:
 					<Parameter Igrp="#x700b" Ioffs="#x105" Value="1.02400649589962"/>
 					<Parameter Igrp="#x700b" Ioffs="#x10" Value="256"/>
 				</Parameters>
-				<IoMapping IoDivider="3" IoModulo="0">
+				<IoMapping IoDivider="3" IoModulo="0" Type="3001">
 					<Links>
 						<OwnerA Name="__THIS__">
+							<OwnerB Name="TIID^Device 1 (EtherCAT)^UW_1_Axis (AX5106-0000-0203)">
+								<Link VarA="Drive^Inputs^In^nDataIn1" VarB="AT^Following distance"/>
+								<Link VarA="Drive^Inputs^In^nDataIn3[0]" VarB="AT^Torque feedback value"/>
+								<Link VarA="Drive^Inputs^In^nDcOutputTime" VarB="InfoData^DcOutputShift"/>
+								<Link VarA="Drive^Inputs^In^nState1" VarB="AT^Drive status word" Size="8" OffsB="8"/>
+								<Link VarA="Drive^Inputs^In^nState2" VarB="AT^Drive status word"/>
+								<Link VarA="Drive^Inputs^In^nState4" VarB="WcState^InputToggle" Size="1" OffsA="1"/>
+								<Link VarA="Drive^Inputs^In^nState4" VarB="WcState^WcState"/>
+								<Link VarA="Drive^Outputs^Out^nCtrl1" VarB="MDT^Master control word" Size="8" OffsB="8"/>
+								<Link VarA="Drive^Outputs^Out^nDataOut1" VarB="MDT^Position command value"/>
+								<Link VarA="Enc^Inputs^In^nDataIn1" VarB="AT^Position feedback 1 value"/>
+								<Link VarA="Enc^Inputs^In^nDcInputTime" VarB="InfoData^DcInputShift"/>
+								<Link VarA="Enc^Inputs^In^nState4" VarB="WcState^InputToggle" Size="1" OffsA="1"/>
+								<Link VarA="Enc^Inputs^In^nState4" VarB="WcState^WcState"/>
+							</OwnerB>
 							<OwnerB Name="TIPC^Untitled1^Untitled1 Instance">
 								<Link VarA="Inputs^FromPlc" VarB="Task2ms Outputs^AxesList.gWebAxes.UW_1.Ref.PlcToNc"/>
 								<Link VarA="Outputs^ToPlc" VarB="Task2ms Inputs^AxesList.gWebAxes.UW_1.Ref.NcToPlc"/>
@@ -1423,8 +1438,8 @@ External Setpoint Generation:
 			<TargetPosControl Enable="false"/>
 			<OtherSettings ErrorReactionMode="1" ErrorReactionDelay="5" AllowMotionCmdToSlave="true"/>
 		</AxisPara>
-		<Encoder Name="Enc" EncType="1">
-			<EncPara ScaleFactorNumerator="35121.9512195122" ScaleFactorDenominator="1048576" Inverse="true"/>
+		<Encoder Name="Enc" EncType="8">
+			<EncPara ScaleFactorNumerator="35121.9512195122" ScaleFactorDenominator="1048576" Inverse="true" MaxCount="#xffffffff"/>
 			<Vars VarGrpType="1">
 				<Name>Inputs</Name>
 				<Var>
@@ -1481,9 +1496,9 @@ External Setpoint Generation:
 				</Var>
 			</Vars>
 		</Encoder>
-		<Drive Name="Drive" DrvType="5">
-			<DrvPara Inverse="true">
-				<Analog VeloReferenz="2446829.26829268" TorqueSetpointScale="10" ScaleFactorActTorque="0.1"/>
+		<Drive Name="Drive" DrvType="9">
+			<DrvPara Inverse="true" MaxCount="#xffffffff" DriveControlDWord="#x00000100">
+				<Analog VeloReferenz="2446829.26829268" VeloScale="1.02400649589962" TorqueSetpointScale="10" ScaleFactorActTorque="0.1"/>
 				<TimeComp TaskDelayCycles="1"/>
 			</DrvPara>
 			<Vars VarGrpType="1">
@@ -1524,22 +1539,6 @@ External Setpoint Generation:
 					<SubVar TypeFormatIndex="2">
 						<Name>nDataOut2</Name>
 					</SubVar>
-					<SubVar>
-						<Name>nCtrl2</Name>
-						<Comment><![CDATA[Digital Outputs Setpoint Generator:
-0x41 (0100 0001) = Minus (0x42 for inverse motor polarity)
-0x42 (0100 0010) = Plus (0x41 for inverse motor polarity)
-0x80 (1000 0000) = Stop
-]]></Comment>
-					</SubVar>
-					<SubVar>
-						<Name>nCtrl3</Name>
-						<Comment><![CDATA[Digital Outputs (Setpoint Generator + Position Controller):
-0x41 (0100 0001) = Minus (0x42 for inverse motor polarity)
-0x42 (0100 0010) = Plus (0x41 for inverse motor polarity)
-0x80 (1000 0000) = Stop
-]]></Comment>
-					</SubVar>
 					<SubVar TypeFormatIndex="2">
 						<Name>nDataOut3</Name>
 					</SubVar>
@@ -1579,4 +1578,23 @@ External Setpoint Generation:
 			</Var>
 		</Vars>
 	</Axis>
+	<Mappings>
+		<OwnerA>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^UW_1_Axis (AX5106-0000-0203)">
+				<Link VarA="Drive^Inputs^In^nDataIn1" VarB="AT^Following distance"/>
+				<Link VarA="Drive^Inputs^In^nDataIn3[0]" VarB="AT^Torque feedback value"/>
+				<Link VarA="Drive^Inputs^In^nDcOutputTime" VarB="InfoData^DcOutputShift"/>
+				<Link VarA="Drive^Inputs^In^nState1" VarB="AT^Drive status word" Size="8" OffsB="8"/>
+				<Link VarA="Drive^Inputs^In^nState2" VarB="AT^Drive status word" Size="8"/>
+				<Link VarA="Drive^Inputs^In^nState4" VarB="WcState^InputToggle" Size="1" OffsA="1"/>
+				<Link VarA="Drive^Inputs^In^nState4" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="Drive^Outputs^Out^nCtrl1" VarB="MDT^Master control word" Size="8" OffsB="8"/>
+				<Link VarA="Drive^Outputs^Out^nDataOut1" VarB="MDT^Position command value"/>
+				<Link VarA="Enc^Inputs^In^nDataIn1" VarB="AT^Position feedback 1 value"/>
+				<Link VarA="Enc^Inputs^In^nDcInputTime" VarB="InfoData^DcInputShift"/>
+				<Link VarA="Enc^Inputs^In^nState4" VarB="WcState^InputToggle" Size="1" OffsA="1"/>
+				<Link VarA="Enc^Inputs^In^nState4" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
 </TcSmItem>

@@ -5,9 +5,15 @@
 STRUCT
 	HeaterOn  		 			AT %Q* 	: BOOL;
 	GripperOpen 	 			AT %Q* 	: BOOL;
+	Output_GripperClose 	 			AT %Q* 	: BOOL;
+	Output_GripperOpen 	 			AT %Q* 	: BOOL;
 	GripperRetract 	 			AT %Q* 	: BOOL;
 	GripperPistonPosition 		AT %Q* 	: BOOL;
 	PressDown			 	 AT %Q* 	: BOOL;
+	
+	ExternalNipMotor			 	 AT %Q* 	: BOOL;
+	
+	Buzzer			 	 AT %Q* 	: BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

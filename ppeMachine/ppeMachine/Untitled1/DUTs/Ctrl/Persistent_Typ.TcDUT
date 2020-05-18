@@ -10,6 +10,7 @@ STRUCT
 	TimeGripperHomePosition: DINT := 7000;
 	//TimeGripperMoveDelay: DINT := 3500;
 	TimeGripperOpen: DINT := 3000;
+	TimeOutputGripperClose: DINT := 3000;
 	TimeGripperRetract: DINT := 4000;
 	TimeHotWeldPressDown: DINT := 5000;
 	TimerHotWeldingOn: DINT := 6000;

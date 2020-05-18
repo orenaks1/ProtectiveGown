@@ -96,13 +96,38 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"918"</v>
+              <v n="TextDefault">"Empty"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"479"</v>
               <v n="TextDefault">"Enable Dancer"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"425"</v>
+              <v n="TextDefault">"End Position"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"553"</v>
+              <v n="TextDefault">"EndPosition"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"650"</v>
+              <v n="TextDefault">"External Nip"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"119"</v>
               <v n="TextDefault">"Forward"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"185"</v>
+              <v n="TextDefault">"Full"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -156,6 +181,11 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"744"</v>
+              <v n="TextDefault">"Home"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"757"</v>
               <v n="TextDefault">"Hot Welding"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -203,6 +233,11 @@
             <o>
               <v n="TextID">"332"</v>
               <v n="TextDefault">"Jog Both +"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"714"</v>
+              <v n="TextDefault">"Limit"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -256,6 +291,16 @@
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
+              <v n="TextID">"246"</v>
+              <v n="TextDefault">"Output"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"476"</v>
+              <v n="TextDefault">"Output gripper"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
               <v n="TextID">"667"</v>
               <v n="TextDefault">"Press Down"</v>
               <l n="LanguageTexts" t="ArrayList" />
@@ -278,6 +323,11 @@
             <o>
               <v n="TextID">"8"</v>
               <v n="TextDefault">"Press Valve"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"980"</v>
+              <v n="TextDefault">"Restart"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>
@@ -308,6 +358,11 @@
             <o>
               <v n="TextID">"800"</v>
               <v n="TextDefault">"Start"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"772"</v>
+              <v n="TextDefault">"Start Position"</v>
               <l n="LanguageTexts" t="ArrayList" />
             </o>
             <o>

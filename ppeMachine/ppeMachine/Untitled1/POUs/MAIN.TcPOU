@@ -125,7 +125,12 @@ gMachineCtrl.Parameters.UW_1_Param.kpMove:=1;
 gMachineCtrl.Parameters.UW_1_Param.TNMove:=T#0MS;
 
 gMachineCtrl.Parameters.UW_2_Param.kpMove:=1;
-gMachineCtrl.Parameters.UW_2_Param.TNMove:=T#0MS;]]></ST>
+gMachineCtrl.Parameters.UW_2_Param.TNMove:=T#0MS;
+
+//Output
+gMachineCtrl.Parameters.OutGripperEndPosition :=1800;//mm
+gMachineCtrl.Parameters.OutGripperHomeVelocity:=75;//mm
+gMachineCtrl.Parameters.OutGripperProcessVelocity:=1000;//mm]]></ST>
       </Implementation>
     </Action>
     <Action Name="ACT_IO" Id="{2a18bd5c-a292-4da3-a0fd-3fbf174fcec3}">
@@ -140,7 +145,14 @@ gMachineCtrl.IO.In.SeconderyPressFeedbak(
 	SimFlag:= gMachineCtrl.Simulation);
 	
 gMachineCtrl.IO.In.E_StopPressed := NOT(gMachineCtrl.IO.In.E_StopPressedRaw);
-	]]></ST>
+
+gMachineCtrl.IO.In.UW_1_DancerFull :=NOT( gMachineCtrl.IO.In.UW_1_DancerFullRaw);
+gMachineCtrl.IO.In.UW_2_DancerFull :=NOT( gMachineCtrl.IO.In.UW_2_DancerFullRaw);	
+
+gMachineCtrl.IO.In.UW_1_DancerEmpety :=NOT( gMachineCtrl.IO.In.UW_1_DancerEmpetyRaw);
+gMachineCtrl.IO.In.UW_2_DancerEmpety :=NOT( gMachineCtrl.IO.In.UW_2_DancerEmpetyRaw);	
+
+gMachineCtrl.IO.Out.Output_GripperOpen:= NOT (gMachineCtrl.IO.Out.Output_GripperClose);]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="MAIN">
@@ -218,11 +230,21 @@ gMachineCtrl.IO.In.E_StopPressed := NOT(gMachineCtrl.IO.In.E_StopPressedRaw);
       <LineId Id="23" Count="0" />
       <LineId Id="27" Count="4" />
       <LineId Id="26" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="1" />
     </LineIds>
     <LineIds Name="MAIN.ACT_IO">
       <LineId Id="2" Count="6" />
       <LineId Id="1" Count="0" />
-      <LineId Id="9" Count="2" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

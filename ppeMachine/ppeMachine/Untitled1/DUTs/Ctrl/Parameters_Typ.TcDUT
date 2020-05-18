@@ -17,6 +17,12 @@ STRUCT
 	MotorVelocity :INT;
 	DistanceToMove:UINT;
 	
+	
+	OutGripperEndPosition:LREAL;
+	OutGripperHomeVelocity:LREAL;
+	OutGripperProcessVelocity:LREAL;
+	
+	
 	UW_1_Param	: UnwinderParameters_Typ;
 	UW_2_Param	: UnwinderParameters_Typ;
 	

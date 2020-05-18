@@ -34,6 +34,8 @@ VAR
 	onOffScaling : INT := 1000;
 	WinderScaling : INT := 1000;
 	IOScaling : INT := 1000;
+	OutputScaling : INT := 1000;	
+	SettingsScaling : INT := 1000;	
 	EstopScalling	: INT := 1000;
 	
 	//INIT
@@ -150,7 +152,7 @@ ELSE
 	TimerGripperopenColor:=FALSE;
 END_IF
 
-IF FB_Machine_Run.StepNo = MACHINE_MOTOR_ON THEN
+IF FB_Machine_Run.StepNo = MACHINE_OUT_GRIPPER_END_POSITION OR FB_Machine_Run.StepNo = MACHINE_OUT_GRIPPER_START_POSITION THEN
 	StateMotorOnColor:=TRUE;
 ELSE
 	StateMotorOnColor:=FALSE;

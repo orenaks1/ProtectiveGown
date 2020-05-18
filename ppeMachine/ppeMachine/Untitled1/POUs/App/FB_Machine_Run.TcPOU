@@ -64,34 +64,26 @@ END_VAR]]></Declaration>
 					THIS^.Monitoring.StepMessage	:= 'Machine WAIT position';
 					THIS^.Delay(IN:=FALSE);
 				ELSIF Meth_gripperEndPosition(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_COLD_CUT_VALVE_OPEN;
+					THIS^.StepNo	:= 	MACHINE_OUT_GRIPPER_START_POSITION;
 				END_IF					
-				
-			MACHINE_COLD_CUT_VALVE_OPEN:
+			
+			MACHINE_OUT_GRIPPER_START_POSITION:
 				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Cold cut valve open';
-					THIS^.Delay(IN:=FALSE);
-				ELSIF Meth_ColdCutValveOpen(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_WELD_VALVE_OPEN;
-				END_IF	
-
-			MACHINE_WELD_VALVE_OPEN://and gripper open
+					THIS^.Monitoring.StepMessage	:= 'Output Grippers to start position';
+					Meth_OutGripperStartPos(FALSE) ;
+				ELSIF Meth_OutGripperStartPos(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_OUT_GRIPPER_CLAMP;
+				END_IF				
+			
+			MACHINE_OUT_GRIPPER_CLAMP:
 				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Hot weld valve open press Down';
+					THIS^.Monitoring.StepMessage	:= 'Machine grippers clamp';
 					THIS^.Delay(IN:=FALSE);
-				ELSIF Meth_HotWeldValveOpen(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_HEATER_ON;
-				END_IF					
-				
-			MACHINE_HEATER_ON://
-				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Heater ON';
-					THIS^.Delay(IN:=FALSE);
-				ELSIF Meth_HeaterON(TRUE) THEN
+				ELSIF Meth_OutGripperClamp(TRUE) THEN
 					THIS^.StepNo	:= 	MACHINE_GRIPPER_OPEN;
-				END_IF					
-				
-				
+				END_IF	
+			
+
 			MACHINE_GRIPPER_OPEN:
 				IF THIS^.StepOneShotTrig THEN
 					THIS^.Monitoring.StepMessage	:= 'Gripper Open';
@@ -116,18 +108,10 @@ END_VAR]]></Declaration>
 					THIS^.Delay(IN:=FALSE);
 					
 				ELSIF Meth_gripperStartPosition(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_HEATER_OFF;
-				END_IF					
-				
-				
-			MACHINE_HEATER_OFF://gripper retract
-				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Heater Off';
-					THIS^.Delay(IN:=FALSE);
-				ELSIF Meth_HeaterOff(TRUE) THEN
 					THIS^.StepNo	:= 	MACHINE_GRIPPER_EXCTRACT;
-				END_IF					
-				
+				END_IF	
+	
+			
 			MACHINE_GRIPPER_EXCTRACT:
 			IF THIS^.StepOneShotTrig THEN
 				THIS^.Monitoring.StepMessage	:= 'Gripper Extract';
@@ -141,18 +125,56 @@ END_VAR]]></Declaration>
 					THIS^.Monitoring.StepMessage	:= 'Gripper Close';
 					THIS^.Delay(IN:=FALSE);
 				ELSIF Meth_gripperClose(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_COLD_CUT_VALVE_OPEN;
+				END_IF	
+	
+			MACHINE_COLD_CUT_VALVE_OPEN:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Cold cut valve open';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_ColdCutValveOpen(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_WELD_VALVE_OPEN;
+				END_IF	
+
+			MACHINE_WELD_VALVE_OPEN://and gripper open
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Hot weld valve open press Down';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HotWeldValveOpen(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_HEATER_ON;
+				END_IF					
+				
+			MACHINE_HEATER_ON://
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Heater ON';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HeaterON(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_HEATER_OFF;
+				END_IF								
+				
+			MACHINE_HEATER_OFF://gripper retract
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Heater Off';
+					THIS^.Delay(IN:=FALSE);
+				ELSIF Meth_HeaterOff(TRUE) THEN
 					THIS^.StepNo	:= 	MACHINE_VALVE_CLOSE;
 				END_IF					
-					
+										
 			MACHINE_VALVE_CLOSE:
 				IF THIS^.StepOneShotTrig THEN
 					THIS^.Monitoring.StepMessage	:= 'Close valves';
 					THIS^.Delay(IN:=FALSE);
 				ELSIF Meth_HeaterValvesClose(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_DONE;
+					THIS^.StepNo	:= 	MACHINE_OUT_GRIPPER_END_POSITION;
 				END_IF					
 				
-								
+			MACHINE_OUT_GRIPPER_END_POSITION:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Output Grippers to start position';
+					Meth_OutGripperEndPos(FALSE) ;
+				ELSIF Meth_OutGripperEndPos(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_DONE;
+				END_IF								
 				
 			MACHINE_DONE:
 				IF THIS^.StepOneShotTrig THEN
@@ -163,23 +185,8 @@ END_VAR]]></Declaration>
 			
 				
 			//UnUsed	
-			MACHINE_GRIPPER_RETRACT_WEB:
-				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Gripper retract With web';
-					THIS^.Delay(IN:=FALSE);
-					
-				ELSIF Meth_gripperRetract(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_GRIPPER_END_POSITION;
-				END_IF				
-				
-			MACHINE_MOTOR_ON:
-				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Start RW';
-					FB_RW_Ctrl_ref.Start			:= TRUE;
-					THIS^.Delay(IN:=FALSE);
-				ELSIF Meth_MororON(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_DONE;
-				END_IF					
+			
+								
 		END_CASE
 	
 	ELSE
@@ -214,6 +221,7 @@ END_VAR]]></Declaration>
 	
 ]]></ST>
     </Implementation>
+    <Folder Name="Output" Id="{dac0a439-9dfa-42c6-a811-39bb8546ae29}" />
     <Method Name="Meth_ColdCutValveOpen" Id="{38048cc7-a9cb-4ee7-b874-5ec149a94069}">
       <Declaration><![CDATA[METHOD PRIVATE Meth_ColdCutValveOpen : BOOL
 VAR_INPUT
@@ -230,7 +238,9 @@ END_VAR
 	THIS^.Parameter.TimeOut					:= T#5S;
 
 
-											
+	
+	gMachineCtrl.IO.Out.Buzzer	:=TRUE;
+										
 	THIS^.Delay.IN:=TRUE;
 	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeColdCutPressDown);// Ctrl_ref.Parameters.TimerPressDown1);
 	IF THIS^.Delay.Q THEN
@@ -336,6 +346,8 @@ END_VAR
 	THIS^.Parameter.TimeOut					:= T#5S;
 
 	gMachineCtrl.IO.Out.GripperPistonPosition:=TRUE;
+	
+	gMachineCtrl.IO.Out.ExternalNipMotor:=TRUE;
 		
 	//gMachineCtrl.Parameters.UW_1_Param.kp := gMachineCtrl.Parameters.UW_1_Param.kpMove;
 	////gMachineCtrl.Parameters.UW_1_Param.TN := gMachineCtrl.Parameters.UW_1_Param.TNMove;
@@ -355,7 +367,7 @@ END_VAR
 	//gMachineCtrl.Parameters.UW_2_Param.kp := 0.1;
 	//gMachineCtrl.Parameters.UW_2_Param.TN := T#0MS;			
 	
-	
+	gMachineCtrl.IO.Out.ExternalNipMotor:=FALSE;
 		
 	END_IF		
 ]]></ST>
@@ -559,6 +571,7 @@ END_VAR
 	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeHotWeldPressDown);// Ctrl_ref.Parameters.TimerPressDown1);
 	IF THIS^.Delay.Q THEN
 		Meth_HotWeldValveOpen	:= TRUE;
+		gMachineCtrl.IO.Out.Buzzer	:=FALSE;
 	END_IF		
 ]]></ST>
       </Implementation>
@@ -596,6 +609,140 @@ END_VAR
 		Meth_MororON	:= TRUE;
 	END_IF		
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_OutGripperClamp" Id="{711cba81-d1b0-4884-8164-cc610faa3464}" FolderPath="Output\">
+      <Declaration><![CDATA[METHOD Meth_OutGripperClamp : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+	THIS^.Monitoring.StepMessage			:= 'Output Gripper Close';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	gMachineCtrl.IO.Out.Output_GripperClose:=TRUE;
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeOutputGripperClose);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_OutGripperClamp	:= TRUE;
+		
+		//gMachineCtrl.Parameters.UW_1_Param.EnableTension:=TRUE;
+		//gMachineCtrl.Parameters.UW_2_Param.EnableTension:=TRUE;
+		
+	END_IF	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_OutGripperEndPos" Id="{2c9b30d7-a32c-4725-b860-4530713ad592}" FolderPath="Output\">
+      <Declaration><![CDATA[METHOD Meth_OutGripperEndPos : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+VAR_INST
+	ExecuteTrig: 	Trigger;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+
+
+IF ExecuteTrig.EDGEPOS(Execute) THEN
+	Meth_OutGripperEndPos:=	FALSE;
+	THIS^.SubStepNo:= 	1;	
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	Meth_OutGripperEndPos:=	FALSE;
+END_IF
+
+CASE THIS^.SubStepNo OF
+	(* Power ON*)
+	1:
+		THIS^.Monitoring.StepMessage	:= 'Move output gripper to end';								
+		gWebAxes.Output.Crtl.Basic_axis.Input.Command.MoveAbsolute		:= TRUE;
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Velocity		:= 500;//mm/sec
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Position		:= gMachineCtrl.Parameters.OutgripperEndPosition;//mm
+		
+		THIS^.SubStepNo:= 2;		
+	
+	2:	
+		THIS^.Monitoring.StepMessage:= 'Wait output gripper end';
+		
+		IF gWebAxes.Output.Crtl.Basic_axis.Output.monitor.ActPosition > (gMachineCtrl.Parameters.OutgripperEndPosition-200) THEN
+			gMachineCtrl.IO.Out.Output_GripperClose:=FALSE;
+		END_IF
+							
+		IF gWebAxes.Output.Crtl.Basic_axis.Output.Status.MC_MoveAbsolut.Done THEN
+			THIS^.SubStepNo	:= 3 ;
+		END_IF
+		
+	3:	
+		THIS^.Monitoring.StepMessage	:= 'Move output gripper to end';								
+		gWebAxes.Output.Crtl.Basic_axis.Input.Command.MoveAbsolute		:= TRUE;
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Velocity		:= 100;//mm/sec
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Position		:= gMachineCtrl.Parameters.OutgripperEndPosition+200;//mm
+		
+		THIS^.SubStepNo:= 4;	
+				
+	4:	
+		THIS^.Monitoring.StepMessage:= 'Wait output gripper end';
+							
+		IF gWebAxes.Output.Crtl.Basic_axis.Output.Status.MC_MoveAbsolut.Done THEN
+			THIS^.SubStepNo	:= 100 ;
+			Meth_OutGripperEndPos:=	TRUE;
+		END_IF							
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_OutGripperStartPos" Id="{d72cd012-3474-48ca-8377-114a9a5f491b}" FolderPath="Output\">
+      <Declaration><![CDATA[METHOD Meth_OutGripperStartPos : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+VAR_INST
+	ExecuteTrig: 	Trigger;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+
+
+IF ExecuteTrig.EDGEPOS(Execute) THEN
+	Meth_OutGripperStartPos:=	FALSE;
+	THIS^.SubStepNo:= 	1;	
+END_IF
+
+IF ExecuteTrig.EDGENEG(Execute) THEN
+	Meth_OutGripperStartPos:=	FALSE;
+END_IF
+
+CASE THIS^.SubStepNo OF
+	(* Power ON*)
+	1:
+		THIS^.Monitoring.StepMessage	:= 'Move output gripper to home';								
+		gWebAxes.Output.Crtl.Basic_axis.Input.Command.MoveAbsolute		:= TRUE;
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Velocity		:= 500;//mm/sec
+		gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Position		:= 0;
+		
+		THIS^.SubStepNo:= 2;		
+	
+	2:	
+		THIS^.Monitoring.StepMessage:= 'Wait output gripper home';
+									
+		IF gWebAxes.Output.Crtl.Basic_axis.Output.Status.MC_MoveAbsolut.Done THEN
+			THIS^.SubStepNo	:= 3 ;
+			Meth_OutGripperStartPos	:= TRUE;
+		END_IF
+		
+
+							
+END_CASE]]></ST>
       </Implementation>
     </Method>
     <Method Name="Meth_Rest_IO" Id="{959d1cc9-2dae-4247-ae06-4d56dd20472c}">
@@ -654,34 +801,39 @@ END_VAR
       <LineId Id="378" Count="1" />
       <LineId Id="372" Count="0" />
       <LineId Id="361" Count="0" />
+      <LineId Id="546" Count="0" />
+      <LineId Id="549" Count="4" />
+      <LineId Id="548" Count="0" />
+      <LineId Id="547" Count="0" />
+      <LineId Id="556" Count="5" />
+      <LineId Id="545" Count="0" />
+      <LineId Id="554" Count="0" />
+      <LineId Id="563" Count="0" />
+      <LineId Id="565" Count="24" />
+      <LineId Id="564" Count="0" />
+      <LineId Id="562" Count="0" />
+      <LineId Id="555" Count="0" />
+      <LineId Id="592" Count="13" />
+      <LineId Id="591" Count="0" />
+      <LineId Id="590" Count="0" />
       <LineId Id="188" Count="6" />
       <LineId Id="226" Count="0" />
       <LineId Id="228" Count="5" />
       <LineId Id="195" Count="0" />
       <LineId Id="227" Count="0" />
       <LineId Id="236" Count="5" />
-      <LineId Id="234" Count="1" />
-      <LineId Id="455" Count="0" />
-      <LineId Id="459" Count="3" />
-      <LineId Id="464" Count="10" />
-      <LineId Id="456" Count="2" />
-      <LineId Id="478" Count="6" />
-      <LineId Id="475" Count="2" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="477" Count="0" />
       <LineId Id="244" Count="5" />
       <LineId Id="242" Count="1" />
-      <LineId Id="505" Count="13" />
-      <LineId Id="504" Count="0" />
-      <LineId Id="380" Count="0" />
       <LineId Id="498" Count="5" />
       <LineId Id="381" Count="0" />
-      <LineId Id="250" Count="1" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="606" Count="5" />
+      <LineId Id="251" Count="0" />
       <LineId Id="259" Count="0" />
       <LineId Id="196" Count="6" />
-      <LineId Id="442" Count="1" />
-      <LineId Id="447" Count="6" />
-      <LineId Id="444" Count="1" />
-      <LineId Id="491" Count="6" />
-      <LineId Id="446" Count="0" />
+      <LineId Id="442" Count="3" />
       <LineId Id="203" Count="13" />
       <LineId Id="272" Count="5" />
       <LineId Id="269" Count="2" />
@@ -689,7 +841,10 @@ END_VAR
       <LineId Id="82" Count="0" />
     </LineIds>
     <LineIds Name="FB_Machine_Run.Meth_ColdCutValveOpen">
-      <LineId Id="34" Count="10" />
+      <LineId Id="34" Count="9" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="44" Count="0" />
       <LineId Id="48" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
@@ -724,7 +879,9 @@ END_VAR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Machine_Run.Meth_gripperEndPosition">
-      <LineId Id="34" Count="9" />
+      <LineId Id="34" Count="8" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="43" Count="0" />
       <LineId Id="62" Count="1" />
       <LineId Id="66" Count="0" />
       <LineId Id="61" Count="0" />
@@ -809,6 +966,7 @@ END_VAR
       <LineId Id="48" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
+      <LineId Id="53" Count="0" />
       <LineId Id="47" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
@@ -821,6 +979,38 @@ END_VAR
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_OutGripperClamp">
+      <LineId Id="6" Count="17" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_OutGripperEndPos">
+      <LineId Id="6" Count="17" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="24" Count="6" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="58" Count="4" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="71" Count="3" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_OutGripperStartPos">
+      <LineId Id="11" Count="17" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="31" Count="6" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="57" Count="1" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Machine_Run.Meth_Rest_IO">
