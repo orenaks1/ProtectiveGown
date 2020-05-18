@@ -10,6 +10,8 @@ STRUCT
 	GripperRetract 	 			AT %Q* 	: BOOL;
 	GripperPistonPosition 		AT %Q* 	: BOOL;
 	PressDown			 	 AT %Q* 	: BOOL;
+	ColdCutPistonDown			 	 AT %Q* 	: BOOL;
+	KniveCut			 	 AT %Q* 	: BOOL;
 	
 	ExternalNipMotor			 	 AT %Q* 	: BOOL;
 	

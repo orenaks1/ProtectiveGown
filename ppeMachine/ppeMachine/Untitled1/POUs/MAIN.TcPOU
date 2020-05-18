@@ -10,6 +10,8 @@ uw1_Toque AT %I* 	: INT;
 uw1_Position AT %I* 	: DINT;
 TriggerOff:Trigger;
 TriggerEM_Button:Trigger;
+
+BuzzerTimer:TON;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -23,8 +25,24 @@ ACT_Emergency();
 
 ACT_IO();
 
-ACT_fbCall();]]></ST>
+ACT_fbCall();
+
+ACT_Buzzer();]]></ST>
     </Implementation>
+    <Action Name="ACT_Buzzer" Id="{4bf6097f-e923-4125-95dc-53522e2ff567}">
+      <Implementation>
+        <ST><![CDATA[
+BuzzerTimer.IN:= gMachineCtrl.IO.Out.PressDown OR gMachineCtrl.IO.Out.ColdCutPistonDown;
+BuzzerTimer.PT:= T#3S;
+BuzzerTimer();
+IF gMachineCtrl.IO.Out.PressDown
+AND  BuzzerTimer.Q = FALSE THEN
+	gMachineCtrl.IO.Out.Buzzer := TRUE;
+ELSE
+	gMachineCtrl.IO.Out.Buzzer := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="ACT_Emergency" Id="{f209a312-0d75-4adb-886d-eb1e7339d1b2}">
       <Implementation>
         <ST><![CDATA[
@@ -165,6 +183,17 @@ gMachineCtrl.IO.Out.Output_GripperOpen:= NOT (gMachineCtrl.IO.Out.Output_Gripper
       <LineId Id="12" Count="0" />
       <LineId Id="8" Count="0" />
       <LineId Id="2" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.ACT_Buzzer">
+      <LineId Id="2" Count="0" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="3" Count="2" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.ACT_Emergency">
       <LineId Id="2" Count="0" />

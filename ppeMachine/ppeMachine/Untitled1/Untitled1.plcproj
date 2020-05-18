@@ -1311,6 +1311,9 @@
     <Content Include="POUs\Lib\Motion\Info\HomeAbsSwitchModes.png">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="VISUs\Img\CRP4848_gantry_004.svg">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="VISUs\Img\emergency-stop-button-icon-364856.png">
       <SubType>Content</SubType>
     </Content>

@@ -55,10 +55,20 @@ END_VAR]]></Declaration>
 					THIS^.Monitoring.StepMessage	:= 'Wait Dancer full';
 					THIS^.Delay(IN:=FALSE);
 				ELSIF Meth_WaitDancerFull(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_GRIPPER_END_POSITION;
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_RETRACT;
 				END_IF					
 								
-										
+	
+			MACHINE_GRIPPER_RETRACT:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Gripper retract';
+					THIS^.Delay(IN:=FALSE);
+					
+				ELSIF Meth_gripperRetract(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_GRIPPER_END_POSITION;
+				END_IF	
+
+									
 			MACHINE_GRIPPER_END_POSITION:
 				IF THIS^.StepOneShotTrig THEN
 					THIS^.Monitoring.StepMessage	:= 'Machine WAIT position';
@@ -74,7 +84,8 @@ END_VAR]]></Declaration>
 				ELSIF Meth_OutGripperStartPos(TRUE) THEN
 					THIS^.StepNo	:= 	MACHINE_OUT_GRIPPER_CLAMP;
 				END_IF				
-			
+							
+				
 			MACHINE_OUT_GRIPPER_CLAMP:
 				IF THIS^.StepOneShotTrig THEN
 					THIS^.Monitoring.StepMessage	:= 'Machine grippers clamp';
@@ -89,18 +100,9 @@ END_VAR]]></Declaration>
 					THIS^.Monitoring.StepMessage	:= 'Gripper Open';
 					THIS^.Delay(IN:=FALSE);
 				ELSIF Meth_gripperOpen(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_GRIPPER_RETRACT;
-				END_IF					
-				
-			MACHINE_GRIPPER_RETRACT:
-				IF THIS^.StepOneShotTrig THEN
-					THIS^.Monitoring.StepMessage	:= 'Gripper retract';
-					THIS^.Delay(IN:=FALSE);
-					
-				ELSIF Meth_gripperRetract(TRUE) THEN
 					THIS^.StepNo	:= 	MACHINE_GRIPPER_START_POSITION;
 				END_IF					
-				
+						
 				
 			MACHINE_GRIPPER_START_POSITION:
 				IF THIS^.StepOneShotTrig THEN
@@ -157,9 +159,18 @@ END_VAR]]></Declaration>
 					THIS^.Monitoring.StepMessage	:= 'Heater Off';
 					THIS^.Delay(IN:=FALSE);
 				ELSIF Meth_HeaterOff(TRUE) THEN
-					THIS^.StepNo	:= 	MACHINE_VALVE_CLOSE;
+					THIS^.StepNo	:= 	MACHINE_CUT_WEB;
 				END_IF					
-										
+						
+			MACHINE_CUT_WEB:
+				IF THIS^.StepOneShotTrig THEN
+					THIS^.Monitoring.StepMessage	:= 'Close valves';
+					THIS^.Delay(IN:=FALSE);
+					gMachineCtrl.IO.Out.KniveCut:=NOT(gMachineCtrl.IO.Out.KniveCut);
+				ELSIF Meth_CutWeb(TRUE) THEN
+					THIS^.StepNo	:= 	MACHINE_VALVE_CLOSE;
+				END_IF		
+				
 			MACHINE_VALVE_CLOSE:
 				IF THIS^.StepOneShotTrig THEN
 					THIS^.Monitoring.StepMessage	:= 'Close valves';
@@ -246,6 +257,33 @@ END_VAR
 	IF THIS^.Delay.Q THEN
 		Meth_ColdCutValveOpen	:= TRUE;
 		gMachineCtrl.IO.Out.GripperOpen:=TRUE;
+	END_IF		
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Meth_CutWeb" Id="{211628b9-63a3-4bcc-ac4e-3e809fb7de14}">
+      <Declaration><![CDATA[METHOD Meth_CutWeb : BOOL
+VAR_INPUT
+	Execute: 	BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	THIS^.Monitoring.StepMessage			:= 'Cut Web';
+	THIS^.Monitoring.Error_Text				:= ' Fail';
+	//THIS^.CMD.Deacivate_Sequence_Time_Out	:= TRUE;	// Disable time out to the all sequence
+	THIS^.CMD.DeactivateStepTimeOut			:= TRUE;	// Disable time out to the actual step
+	THIS^.Parameter.TimeOut					:= T#5S;
+
+	
+											
+	THIS^.Delay.IN:=TRUE;
+	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimeKniveVut);// Ctrl_ref.Parameters.TimerPressDown1);
+	IF THIS^.Delay.Q THEN
+		Meth_CutWeb	:= TRUE;
+		
+		//gMachineCtrl.Parameters.UW_1_Param.EnableTension:=TRUE;
+		//gMachineCtrl.Parameters.UW_2_Param.EnableTension:=TRUE;
+		
 	END_IF		
 ]]></ST>
       </Implementation>
@@ -516,7 +554,7 @@ END_VAR
 	//Ctrl_ref.IO.Out.HeaterOn := TRUE;
 	FB_HeaterProtection.Excute:=TRUE;
 			
-							
+	gMachineCtrl.IO.Out.ColdCutPistonDown:=TRUE;						
 //	THIS^.Delay.IN:=TRUE;
 //	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimerHotWeldingOn);// Ctrl_ref.Parameters.TimerPressDown1);
 //	IF THIS^.Delay.Q THEN
@@ -541,7 +579,7 @@ END_VAR
 	THIS^.Parameter.TimeOut					:= T#5S;
 
 	gMachineCtrl.IO.Out.PressDown:=FALSE;
-											
+	gMachineCtrl.IO.Out.ColdCutPistonDown:=FALSE;										
 	THIS^.Delay.IN:=TRUE;
 	THIS^.Delay.PT :=DINT_TO_TIME( Persist.PersistentStruct.TimerPressUp);// Ctrl_ref.Parameters.TimerPressDown1);
 	IF THIS^.Delay.Q THEN
@@ -797,6 +835,9 @@ END_VAR
       <LineId Id="436" Count="5" />
       <LineId Id="433" Count="1" />
       <LineId Id="332" Count="0" />
+      <LineId Id="657" Count="6" />
+      <LineId Id="655" Count="1" />
+      <LineId Id="654" Count="0" />
       <LineId Id="373" Count="3" />
       <LineId Id="378" Count="1" />
       <LineId Id="372" Count="0" />
@@ -805,11 +846,13 @@ END_VAR
       <LineId Id="549" Count="4" />
       <LineId Id="548" Count="0" />
       <LineId Id="547" Count="0" />
+      <LineId Id="646" Count="0" />
       <LineId Id="556" Count="5" />
       <LineId Id="545" Count="0" />
       <LineId Id="554" Count="0" />
       <LineId Id="563" Count="0" />
-      <LineId Id="565" Count="24" />
+      <LineId Id="565" Count="7" />
+      <LineId Id="582" Count="7" />
       <LineId Id="564" Count="0" />
       <LineId Id="562" Count="0" />
       <LineId Id="555" Count="0" />
@@ -826,6 +869,11 @@ END_VAR
       <LineId Id="477" Count="0" />
       <LineId Id="244" Count="5" />
       <LineId Id="242" Count="1" />
+      <LineId Id="639" Count="3" />
+      <LineId Id="664" Count="0" />
+      <LineId Id="643" Count="1" />
+      <LineId Id="638" Count="0" />
+      <LineId Id="637" Count="0" />
       <LineId Id="498" Count="5" />
       <LineId Id="381" Count="0" />
       <LineId Id="250" Count="0" />
@@ -850,6 +898,10 @@ END_VAR
       <LineId Id="45" Count="0" />
       <LineId Id="53" Count="0" />
       <LineId Id="47" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Machine_Run.Meth_CutWeb">
+      <LineId Id="6" Count="16" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Machine_Run.Meth_Done">

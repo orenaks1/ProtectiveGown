@@ -17,6 +17,8 @@ STRUCT
 	TimerHotWeldingOff: DINT := 2000;
 	TimerPressUp: DINT := 4000;
 	
+	TimeKniveVut: DINT := 3000;
+	
 	TimerMotorOn: DINT := 3000;
 END_STRUCT
 END_TYPE
