@@ -387,6 +387,10 @@ END_VAR
 	
 	gMachineCtrl.IO.Out.ExternalNipMotor:=TRUE;
 		
+	gWebAxes.Output.Crtl.Basic_axis.Input.Command.MoveAbsolute		:= TRUE;
+	gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Velocity		:= 500;//mm/sec
+	gWebAxes.Output.Crtl.Basic_axis.Input.Parameter.Position		:= 0;
+	
 	//gMachineCtrl.Parameters.UW_1_Param.kp := gMachineCtrl.Parameters.UW_1_Param.kpMove;
 	////gMachineCtrl.Parameters.UW_1_Param.TN := gMachineCtrl.Parameters.UW_1_Param.TNMove;
 	//.Parameters.UW_2_Param.kp := gMachineCtrl.Parameters.UW_2_Param.kpMove;
@@ -934,6 +938,8 @@ END_VAR
       <LineId Id="34" Count="8" />
       <LineId Id="84" Count="1" />
       <LineId Id="43" Count="0" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="90" Count="1" />
       <LineId Id="62" Count="1" />
       <LineId Id="66" Count="0" />
       <LineId Id="61" Count="0" />

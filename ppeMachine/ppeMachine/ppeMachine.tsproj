@@ -1704,10 +1704,6 @@ External Setpoint Generation:
 							<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
 						</Var>
 						<Var>
-							<Name>GVL.gMachineCtrl.IO.In.UW_1_Diameter</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
 							<Name>GVL.gMachineCtrl.IO.In.UW_2_Diameter</Name>
 							<Type>INT</Type>
 						</Var>
@@ -1725,6 +1721,10 @@ External Setpoint Generation:
 						</Var>
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.In.UW_2_DancerPosition</Name>
+							<Type>INT</Type>
+						</Var>
+						<Var>
+							<Name>GVL.gMachineCtrl.IO.In.UW_1_Diameter</Name>
 							<Type>INT</Type>
 						</Var>
 					</Vars>
@@ -1772,26 +1772,6 @@ External Setpoint Generation:
 						<Var>
 							<Name>AxesList.gWebAxes.Output.Crtl.Basic_axis.Output.monitor.ActExternEncodPos</Name>
 							<Type>UDINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.StatusWord</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.ActualSpeed</Name>
-							<Type>INT</Type>
-						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.InfoData.State</Name>
-							<Type>UINT</Type>
-						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.InfoData.AdsAdr</Name>
-							<Type GUID="{18071995-0000-0000-0000-000000000042}">AMSADDR</Type>
-						</Var>
-						<Var>
-							<Name>GVL.RwInverter.HWlink.stWcState</Name>
-							<Type GUID="{DC6AC025-CDE2-A3AC-75E4-2374AA8A4DA5}">ST_WcState</Type>
 						</Var>
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.In.PrimeryPressFeedback.hw_value</Name>
@@ -1853,17 +1833,29 @@ External Setpoint Generation:
 							<Name>GVL.gMachineCtrl.IO.EncoderRW.Status.SetCounterDone</Name>
 							<Type>BOOL</Type>
 						</Var>
-					</Vars>
-					<Vars VarGrpType="2">
-						<Name>PlcTask Outputs</Name>
 						<Var>
-							<Name>GVL.RwInverter.HWlink.ControlWord</Name>
+							<Name>GVL.RwInverter.HWlink.StatusWord</Name>
 							<Type>UINT</Type>
 						</Var>
 						<Var>
-							<Name>GVL.RwInverter.HWlink.SetSpeed</Name>
+							<Name>GVL.RwInverter.HWlink.ActualSpeed</Name>
 							<Type>INT</Type>
 						</Var>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.InfoData.State</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.InfoData.AdsAdr</Name>
+							<Type GUID="{18071995-0000-0000-0000-000000000042}">AMSADDR</Type>
+						</Var>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.stWcState</Name>
+							<Type GUID="{DC6AC025-CDE2-A3AC-75E4-2374AA8A4DA5}">ST_WcState</Type>
+						</Var>
+					</Vars>
+					<Vars VarGrpType="2">
+						<Name>PlcTask Outputs</Name>
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.Out.HeaterOn</Name>
 							<Type>BOOL</Type>
@@ -1915,6 +1907,14 @@ External Setpoint Generation:
 						<Var>
 							<Name>GVL.gMachineCtrl.IO.EncoderRW.Ctrl.SetCounterValue</Name>
 							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.ControlWord</Name>
+							<Type>UINT</Type>
+						</Var>
+						<Var>
+							<Name>GVL.RwInverter.HWlink.SetSpeed</Name>
+							<Type>INT</Type>
 						</Var>
 					</Vars>
 					<UnrestoredVarLinks ImportTime="2020-05-18T13:49:50">
@@ -4439,12 +4439,9 @@ Bit1: Value bigger/equal Limit2]]></Comment>
 	<Mappings>
 		<MappingInfo Identifier="{00000000-2001-0850-0120-500873000403}" Id="#x02030050"/>
 		<MappingInfo Identifier="{00000000-2002-0850-0020-500810000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{00000000-0040-0304-2100-040344000403}" Id="#x02030070"/>
 		<MappingInfo Identifier="{00000000-0040-0304-3000-040344000403}" Id="#x02030060"/>
-		<MappingInfo Identifier="{00000000-0050-0304-3000-040351000403}" Id="#x02030020"/>
-		<MappingInfo Identifier="{00000000-0060-0304-2100-040362000403}" Id="#x02030030"/>
-		<MappingInfo Identifier="{08502001-0060-0304-0020-500860000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502002-0010-0500-0020-500821000403}" Id="#x02030090" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{00000000-0060-0304-3000-040362000403}" Id="#x02030030"/>
+		<MappingInfo Identifier="{08502001-0050-0304-0020-500850000403}" Id="#x02030020" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502002-0010-0500-0020-500830000403}" Id="#x02030080" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TINC^NC-Task 1 SAF^Axes^OutAxis">
 			<OwnerB Name="TIID^Device 1 (EtherCAT)^Drive 27 (Elmo Drive )">
